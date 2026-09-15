@@ -9,6 +9,7 @@ class AudioEngine {
     this.buffers = new Map()
     this.bgmSource = null
     this.bgmName = null
+    this.sfxSources = new Set()
     this.muted = true
     this.unlocked = false
   }
@@ -75,6 +76,17 @@ class AudioEngine {
     }
   }
 
+  stopAllSFXAndVoices() {
+    for (const source of this.sfxSources) {
+      try {
+        source.stop()
+      } catch {
+        // already stopped
+      }
+    }
+    this.sfxSources.clear()
+  }
+
   async play(name, { loop = false, bus = 'sfx' } = {}) {
     if (!this.unlocked) {
       await this.unlock()
@@ -89,6 +101,14 @@ class AudioEngine {
     source.buffer = buffer
     source.loop = loop
     source.connect(bus === 'bgm' ? this.bgmGain : this.sfxGain)
+
+    if (bus !== 'bgm') {
+      this.sfxSources.add(source)
+      source.onended = () => {
+        this.sfxSources.delete(source)
+      }
+    }
+
     source.start()
     return source
   }
@@ -111,10 +131,12 @@ class AudioEngine {
   }
 
   playSfx(name) {
+    this.stopAllSFXAndVoices()
     return this.play(name, { bus: 'sfx' })
   }
 
   playVoice(name) {
+    this.stopAllSFXAndVoices()
     return this.play(name, { bus: 'sfx' })
   }
 

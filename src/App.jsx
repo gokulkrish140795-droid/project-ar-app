@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import EnchantedCanvas from './components/EnchantedCanvas'
 import Screen1Gateway from './components/Screen1Gateway'
 import audioEngine from './utils/audioEngine'
 
@@ -42,11 +43,13 @@ export default function App() {
         position: 'relative',
       }}
     >
+      <EnchantedCanvas lumosOn={lumosOn} />
+
       <button
         type="button"
         onClick={toggleLumos}
         aria-pressed={lumosOn}
-        aria-label={lumosOn ? 'Nox, mute audio' : 'Lumos, unmute audio'}
+        aria-label={lumosOn ? 'Nox, mute audio and dim candles' : 'Lumos, unmute audio and brighten candles'}
         style={{
           position: 'fixed',
           top: 18,
@@ -81,6 +84,8 @@ export default function App() {
       {screen !== 'gateway' && (
         <div
           style={{
+            position: 'relative',
+            zIndex: 2,
             minHeight: '100vh',
             display: 'flex',
             alignItems: 'center',

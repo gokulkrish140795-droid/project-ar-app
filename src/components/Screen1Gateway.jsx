@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import audioEngine from '../utils/audioEngine'
 
 const GOLD = '#D4AF37'
-const PARCHMENT = '#F4E8C1'
-const VELVET = '#0F0A1C'
+const INK = '#3B2414'
 
 const BUBBLE_LINES = {
   intro:
@@ -39,11 +38,67 @@ function randomTrapPosition(stage, button, avoid) {
   return { x, y }
 }
 
+function ScrollworkFrame({ children }) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        padding: '18px 20px 16px',
+        marginTop: 16,
+      }}
+    >
+      <svg
+        viewBox="0 0 360 140"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+        }}
+      >
+        <path
+          d="M18 28 C40 8, 80 12, 110 22 S170 6, 180 10 S250 28, 342 22"
+          fill="none"
+          stroke={GOLD}
+          strokeWidth="1.4"
+        />
+        <path
+          d="M18 112 C50 128, 90 118, 140 124 S230 132, 342 116"
+          fill="none"
+          stroke={GOLD}
+          strokeWidth="1.4"
+        />
+        <path
+          d="M12 40 C6 70, 8 90, 16 110"
+          fill="none"
+          stroke={GOLD}
+          strokeWidth="1.2"
+        />
+        <path
+          d="M348 40 C354 70, 352 90, 344 110"
+          fill="none"
+          stroke={GOLD}
+          strokeWidth="1.2"
+        />
+        <circle cx="18" cy="28" r="3" fill={GOLD} />
+        <circle cx="342" cy="22" r="3" fill={GOLD} />
+        <circle cx="18" cy="112" r="3" fill={GOLD} />
+        <circle cx="342" cy="116" r="3" fill={GOLD} />
+      </svg>
+      {children}
+    </div>
+  )
+}
+
 export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
   const stageRef = useRef(null)
   const yesRef = useRef(null)
   const noRef = useRef(null)
   const trapLockRef = useRef(0)
+  const voiceDelayRef = useRef(0)
   const [bubble, setBubble] = useState(BUBBLE_LINES.intro)
   const [noPos, setNoPos] = useState(null)
   const [trapping, setTrapping] = useState(false)
@@ -60,12 +115,24 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     return () => window.clearTimeout(idleTimer)
   }, [accepted, bubble])
 
+  useEffect(() => {
+    return () => window.clearTimeout(voiceDelayRef.current)
+  }, [])
+
   const ensureAudio = async () => {
     if (onEnsureAudio) {
       await onEnsureAudio()
     } else {
       await audioEngine.unlock()
     }
+  }
+
+  const playSwishThenVoice = (voiceName) => {
+    window.clearTimeout(voiceDelayRef.current)
+    audioEngine.playSfx('sfx_wand_swish')
+    voiceDelayRef.current = window.setTimeout(() => {
+      audioEngine.playVoice(voiceName)
+    }, 240)
   }
 
   const teleportNo = async () => {
@@ -80,8 +147,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     trapLockRef.current = now
 
     await ensureAudio()
-    audioEngine.playSfx('sfx_wand_swish')
-    audioEngine.playVoice('voice_no_nice_try')
+    playSwishThenVoice('voice_no_nice_try')
     setBubble(BUBBLE_LINES.trap)
     setTrapping(true)
 
@@ -115,8 +181,11 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     }
 
     await ensureAudio()
+    window.clearTimeout(voiceDelayRef.current)
     audioEngine.playSfx('sfx_spell_quest')
-    audioEngine.playVoice('voice_tap_yay')
+    voiceDelayRef.current = window.setTimeout(() => {
+      audioEngine.playVoice('voice_tap_yay')
+    }, 240)
     setAccepted(true)
     setBubble(BUBBLE_LINES.ready)
 
@@ -132,13 +201,13 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
       ref={stageRef}
       style={{
         position: 'relative',
+        zIndex: 2,
         width: '100%',
         height: '100%',
         minHeight: '100vh',
         overflow: 'hidden',
-        background:
-          'radial-gradient(ellipse at 50% 20%, #1c1433 0%, #0F0A1C 62%)',
-        color: PARCHMENT,
+        background: 'transparent',
+        color: INK,
         fontFamily: 'Georgia, "Times New Roman", serif',
       }}
     >
@@ -157,6 +226,10 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
             40% { filter: blur(6px); opacity: 0.35; }
             100% { filter: blur(0); opacity: 1; }
           }
+          @keyframes sealPulse {
+            0%, 100% { transform: translateX(-50%) rotate(-8deg) scale(1); }
+            50% { transform: translateX(-50%) rotate(-6deg) scale(1.04); }
+          }
         `}
       </style>
 
@@ -167,132 +240,183 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
           height: '100%',
           minHeight: '100vh',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '72px 20px 40px',
+          padding: '72px 16px 36px',
           pointerEvents: 'none',
         }}
       >
         <div
           style={{
-            width: 118,
-            height: 118,
-            borderRadius: '50%',
-            border: `2px solid ${GOLD}`,
-            background:
-              'linear-gradient(160deg, #2a1d4a 0%, #120c22 70%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 58,
-            animation: 'mageGlow 2.8s ease-in-out infinite',
-          }}
-          aria-hidden="true"
-        >
-          🧙
-        </div>
-
-        <p
-          style={{
-            marginTop: 10,
-            letterSpacing: 3,
-            fontSize: 12,
-            color: GOLD,
-            textTransform: 'uppercase',
-          }}
-        >
-          Gokul-Mage
-        </p>
-
-        <div
-          key={bubble}
-          style={{
             pointerEvents: 'auto',
-            marginTop: 22,
-            maxWidth: 420,
-            width: '100%',
-            background: 'rgba(15, 10, 28, 0.88)',
-            border: `1px solid ${GOLD}`,
-            borderRadius: 18,
-            padding: '18px 22px',
             position: 'relative',
-            animation: 'bubbleIn 0.45s ease',
-            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.45)',
+            width: 'min(520px, 100%)',
+            padding: 14,
+            borderRadius: 8,
+            background:
+              'linear-gradient(160deg, #5a341d 0%, #2b160c 42%, #1a0c08 100%)',
+            boxShadow:
+              '0 24px 60px rgba(0, 0, 0, 0.55), inset 0 0 0 2px #8a5a32, inset 0 0 28px rgba(0, 0, 0, 0.55)',
           }}
         >
           <div
             style={{
-              position: 'absolute',
-              top: -10,
-              left: '50%',
-              width: 18,
-              height: 18,
-              background: VELVET,
-              borderTop: `1px solid ${GOLD}`,
-              borderLeft: `1px solid ${GOLD}`,
-              transform: 'translateX(-50%) rotate(45deg)',
-            }}
-          />
-          <p
-            style={{
-              margin: 0,
-              lineHeight: 1.55,
-              fontSize: 18,
-              color: PARCHMENT,
-              textAlign: 'center',
+              borderRadius: 4,
+              padding: '28px 26px 54px',
+              background: `
+                radial-gradient(ellipse at 18% 12%, rgba(255, 248, 220, 0.35), transparent 46%),
+                repeating-linear-gradient(
+                  0deg,
+                  rgba(90, 50, 20, 0.05) 0px,
+                  rgba(90, 50, 20, 0.05) 1px,
+                  transparent 1px,
+                  transparent 7px
+                ),
+                linear-gradient(180deg, #f6e6c2 0%, #e4c892 48%, #c9a66a 100%)
+              `,
+              boxShadow:
+                'inset 0 0 40px rgba(70, 30, 8, 0.35), inset 0 0 0 1px rgba(90, 48, 16, 0.45)',
             }}
           >
-            {bubble}
-          </p>
-        </div>
-
-        <div
-          style={{
-            marginTop: 36,
-            display: 'flex',
-            gap: 16,
-            alignItems: 'center',
-            pointerEvents: 'auto',
-          }}
-        >
-          <button
-            ref={yesRef}
-            type="button"
-            onClick={handleAccept}
-            disabled={accepted}
-            style={{
-              minWidth: 132,
-              padding: '12px 22px',
-              borderRadius: 999,
-              border: `1px solid ${GOLD}`,
-              background: GOLD,
-              color: VELVET,
-              fontFamily: 'inherit',
-              fontWeight: 700,
-              letterSpacing: 1,
-              cursor: accepted ? 'default' : 'pointer',
-              boxShadow: '0 0 18px rgba(212, 175, 55, 0.4)',
-            }}
-          >
-            YES
-          </button>
-
-          {!noPos && !accepted && (
-            <button
-              ref={noRef}
-              type="button"
-              onMouseEnter={teleportNo}
-              onFocus={teleportNo}
-              onPointerDown={(event) => {
-                event.preventDefault()
-                teleportNo()
+            <div
+              style={{
+                width: 96,
+                height: 96,
+                margin: '0 auto',
+                borderRadius: '50%',
+                border: `2px solid ${GOLD}`,
+                background: 'linear-gradient(160deg, #2a1d4a 0%, #120c22 70%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 48,
+                animation: 'mageGlow 2.8s ease-in-out infinite',
               }}
-              style={trapButtonStyle(trapping)}
+              aria-hidden="true"
             >
-              NO
-            </button>
-          )}
+              🧙
+            </div>
+
+            <p
+              style={{
+                marginTop: 10,
+                letterSpacing: 3,
+                fontSize: 11,
+                color: '#7a4b12',
+                textAlign: 'center',
+                textTransform: 'uppercase',
+              }}
+            >
+              Gokul-Mage
+            </p>
+
+            <ScrollworkFrame>
+              <div
+                key={bubble}
+                style={{
+                  position: 'relative',
+                  zIndex: 1,
+                  background: 'rgba(255, 248, 230, 0.55)',
+                  border: `1px solid ${GOLD}`,
+                  borderRadius: 10,
+                  padding: '14px 16px',
+                  animation: 'bubbleIn 0.45s ease',
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    lineHeight: 1.55,
+                    fontSize: 17,
+                    color: INK,
+                    textAlign: 'center',
+                  }}
+                >
+                  {bubble}
+                </p>
+              </div>
+            </ScrollworkFrame>
+
+            <div
+              style={{
+                marginTop: 22,
+                display: 'flex',
+                gap: 16,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <button
+                ref={yesRef}
+                type="button"
+                onClick={handleAccept}
+                disabled={accepted}
+                style={{
+                  minWidth: 124,
+                  padding: '11px 20px',
+                  borderRadius: 4,
+                  border: `1px solid ${GOLD}`,
+                  background: GOLD,
+                  color: '#1a0c08',
+                  fontFamily: 'inherit',
+                  fontWeight: 700,
+                  letterSpacing: 1.4,
+                  cursor: accepted ? 'default' : 'pointer',
+                  boxShadow: '0 0 16px rgba(212, 175, 55, 0.35)',
+                }}
+              >
+                YES
+              </button>
+
+              {!noPos && !accepted && (
+                <button
+                  ref={noRef}
+                  type="button"
+                  onMouseEnter={teleportNo}
+                  onFocus={teleportNo}
+                  onPointerDown={(event) => {
+                    event.preventDefault()
+                    teleportNo()
+                  }}
+                  style={trapButtonStyle(trapping)}
+                >
+                  NO
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              left: '50%',
+              bottom: -18,
+              width: 72,
+              height: 72,
+              borderRadius: '50%',
+              background:
+                'radial-gradient(circle at 35% 30%, #e45a5a 0%, #9b1520 46%, #5c0b12 100%)',
+              boxShadow:
+                '0 8px 16px rgba(0, 0, 0, 0.4), inset 0 0 0 3px rgba(160, 20, 28, 0.8)',
+              animation: 'sealPulse 4.5s ease-in-out infinite',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <span
+              style={{
+                color: GOLD,
+                fontWeight: 700,
+                fontSize: 22,
+                letterSpacing: 1,
+                textShadow: '0 1px 0 #5c0b12',
+              }}
+            >
+              30
+            </span>
+          </div>
         </div>
       </div>
 
@@ -326,15 +450,15 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
 
 function trapButtonStyle(trapping) {
   return {
-    minWidth: 132,
-    padding: '12px 22px',
-    borderRadius: 999,
-    border: '1px solid rgba(244, 232, 193, 0.45)',
-    background: 'rgba(20, 14, 38, 0.75)',
-    color: PARCHMENT,
+    minWidth: 124,
+    padding: '11px 20px',
+    borderRadius: 4,
+    border: '1px solid rgba(59, 36, 20, 0.45)',
+    background: 'rgba(248, 236, 208, 0.78)',
+    color: INK,
     fontFamily: 'Georgia, "Times New Roman", serif',
     fontWeight: 700,
-    letterSpacing: 1,
+    letterSpacing: 1.4,
     cursor: 'pointer',
     opacity: trapping ? 0.85 : 1,
   }
