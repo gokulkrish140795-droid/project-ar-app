@@ -9,8 +9,10 @@ const BUBBLE_LINES = {
     'Hold, traveler. I am Gokul-Mage. Before the Birthday Vault opens... are you truly ready?',
   trap: 'Nice try. The Disillusionment Charm holds. That "NO" was never really there.',
   idle: 'Hmm... the stars grow impatient. Cast Lumos, then choose wisely.',
-  ready: 'Yay! The wand chooses you. The quest begins...',
+  ready: 'The Floo Network stirs. Hold fast...',
 }
+
+const DECKLE = 'polygon(1% 3%, 4% 0%, 9% 2%, 14% 0%, 19% 3%, 24% 1%, 30% 3%, 36% 0%, 42% 2%, 48% 0%, 54% 3%, 61% 1%, 67% 3%, 73% 0%, 79% 2%, 85% 0%, 91% 3%, 96% 1%, 99% 4%, 100% 10%, 98% 16%, 100% 23%, 98% 31%, 100% 39%, 98% 47%, 100% 56%, 98% 65%, 100% 73%, 98% 81%, 100% 88%, 97% 94%, 99% 98%, 94% 100%, 88% 97%, 81% 100%, 74% 98%, 67% 100%, 60% 97%, 53% 100%, 46% 98%, 39% 100%, 32% 97%, 25% 100%, 18% 98%, 11% 100%, 5% 97%, 0% 99%, 2% 92%, 0% 84%, 2% 76%, 0% 68%, 2% 59%, 0% 51%, 2% 42%, 0% 34%, 2% 25%, 0% 17%, 2% 9%)'
 
 function randomTrapPosition(stage, button, avoid) {
   const pad = 18
@@ -43,8 +45,8 @@ function ScrollworkFrame({ children }) {
     <div
       style={{
         position: 'relative',
-        padding: '18px 20px 16px',
-        marginTop: 16,
+        padding: '14px 14px 12px',
+        marginTop: 10,
       }}
     >
       <svg
@@ -129,6 +131,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
 
   const playSwishThenVoice = (voiceName) => {
     window.clearTimeout(voiceDelayRef.current)
+    audioEngine.stopAllSFXAndVoices()
     audioEngine.playSfx('sfx_wand_swish')
     voiceDelayRef.current = window.setTimeout(() => {
       audioEngine.playVoice(voiceName)
@@ -146,6 +149,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     }
     trapLockRef.current = now
 
+    audioEngine.stopAllSFXAndVoices()
     await ensureAudio()
     playSwishThenVoice('voice_no_nice_try')
     setBubble(BUBBLE_LINES.trap)
@@ -182,6 +186,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
 
     await ensureAudio()
     window.clearTimeout(voiceDelayRef.current)
+    audioEngine.stopAllSFXAndVoices()
     audioEngine.playSfx('sfx_spell_quest')
     voiceDelayRef.current = window.setTimeout(() => {
       audioEngine.playVoice('voice_tap_yay')
@@ -189,11 +194,9 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     setAccepted(true)
     setBubble(BUBBLE_LINES.ready)
 
-    window.setTimeout(() => {
-      if (onComplete) {
-        onComplete()
-      }
-    }, 1200)
+    if (onComplete) {
+      onComplete()
+    }
   }
 
   return (
@@ -242,7 +245,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '72px 16px 36px',
+          padding: '88px 16px 28px',
           pointerEvents: 'none',
         }}
       >
@@ -250,19 +253,57 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
           style={{
             pointerEvents: 'auto',
             position: 'relative',
-            width: 'min(520px, 100%)',
-            padding: 14,
-            borderRadius: 8,
-            background:
-              'linear-gradient(160deg, #5a341d 0%, #2b160c 42%, #1a0c08 100%)',
-            boxShadow:
-              '0 24px 60px rgba(0, 0, 0, 0.55), inset 0 0 0 2px #8a5a32, inset 0 0 28px rgba(0, 0, 0, 0.55)',
+            width: 'min(400px, 100%)',
+            maxWidth: 400,
           }}
         >
           <div
+            aria-hidden="true"
             style={{
-              borderRadius: 4,
-              padding: '28px 26px 54px',
+              position: 'absolute',
+              left: '50%',
+              top: -18,
+              zIndex: 4,
+              width: 68,
+              height: 68,
+              borderRadius: '50%',
+              background:
+                'radial-gradient(circle at 32% 28%, #f07a7a 0%, #c41e2a 38%, #9b1520 62%, #5c0b12 100%)',
+              boxShadow:
+                '0 10px 18px rgba(0, 0, 0, 0.45), inset 0 3px 6px rgba(255, 180, 180, 0.35), inset 0 0 0 3px rgba(140, 18, 24, 0.85)',
+              animation: 'sealPulse 4.5s ease-in-out infinite',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <span
+              style={{
+                color: GOLD,
+                fontWeight: 700,
+                fontSize: 21,
+                letterSpacing: 1,
+                textShadow: '0 2px 0 #5c0b12, 0 0 8px rgba(212, 175, 55, 0.45)',
+              }}
+            >
+              30
+            </span>
+          </div>
+
+          <div
+            style={{
+              padding: 11,
+              background:
+                'linear-gradient(160deg, #5a341d 0%, #2b160c 42%, #1a0c08 100%)',
+              boxShadow:
+                '0 24px 60px rgba(0, 0, 0, 0.55), inset 0 0 0 2px #8a5a32, inset 0 0 28px rgba(0, 0, 0, 0.55)',
+              clipPath: DECKLE,
+            }}
+          >
+          <div
+            style={{
+              clipPath: DECKLE,
+              padding: '36px 18px 18px',
               background: `
                 radial-gradient(ellipse at 18% 12%, rgba(255, 248, 220, 0.35), transparent 46%),
                 repeating-linear-gradient(
@@ -280,8 +321,8 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
           >
             <div
               style={{
-                width: 96,
-                height: 96,
+                width: 72,
+                height: 72,
                 margin: '0 auto',
                 borderRadius: '50%',
                 border: `2px solid ${GOLD}`,
@@ -289,7 +330,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 48,
+                fontSize: 36,
                 animation: 'mageGlow 2.8s ease-in-out infinite',
               }}
               aria-hidden="true"
@@ -299,9 +340,9 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
 
             <p
               style={{
-                marginTop: 10,
+                marginTop: 8,
                 letterSpacing: 3,
-                fontSize: 11,
+                fontSize: 10,
                 color: '#7a4b12',
                 textAlign: 'center',
                 textTransform: 'uppercase',
@@ -319,15 +360,15 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                   background: 'rgba(255, 248, 230, 0.55)',
                   border: `1px solid ${GOLD}`,
                   borderRadius: 10,
-                  padding: '14px 16px',
+                  padding: '12px 12px',
                   animation: 'bubbleIn 0.45s ease',
                 }}
               >
                 <p
                   style={{
                     margin: 0,
-                    lineHeight: 1.55,
-                    fontSize: 17,
+                    lineHeight: 1.5,
+                    fontSize: 15,
                     color: INK,
                     textAlign: 'center',
                   }}
@@ -339,11 +380,11 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
 
             <div
               style={{
-                marginTop: 22,
+                marginTop: 16,
                 display: 'flex',
-                gap: 16,
+                flexDirection: 'column',
+                gap: 10,
                 alignItems: 'center',
-                justifyContent: 'center',
               }}
             >
               <button
@@ -352,20 +393,22 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                 onClick={handleAccept}
                 disabled={accepted}
                 style={{
-                  minWidth: 124,
-                  padding: '11px 20px',
+                  width: '100%',
+                  padding: '11px 12px',
                   borderRadius: 4,
                   border: `1px solid ${GOLD}`,
                   background: GOLD,
                   color: '#1a0c08',
                   fontFamily: 'inherit',
                   fontWeight: 700,
-                  letterSpacing: 1.4,
+                  letterSpacing: 0.6,
+                  fontSize: 12,
+                  lineHeight: 1.3,
                   cursor: accepted ? 'default' : 'pointer',
                   boxShadow: '0 0 16px rgba(212, 175, 55, 0.35)',
                 }}
               >
-                YES
+                I ACCEPT THE WIZARDING QUEST
               </button>
 
               {!noPos && !accepted && (
@@ -385,37 +428,6 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
               )}
             </div>
           </div>
-
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              left: '50%',
-              bottom: -18,
-              width: 72,
-              height: 72,
-              borderRadius: '50%',
-              background:
-                'radial-gradient(circle at 35% 30%, #e45a5a 0%, #9b1520 46%, #5c0b12 100%)',
-              boxShadow:
-                '0 8px 16px rgba(0, 0, 0, 0.4), inset 0 0 0 3px rgba(160, 20, 28, 0.8)',
-              animation: 'sealPulse 4.5s ease-in-out infinite',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <span
-              style={{
-                color: GOLD,
-                fontWeight: 700,
-                fontSize: 22,
-                letterSpacing: 1,
-                textShadow: '0 1px 0 #5c0b12',
-              }}
-            >
-              30
-            </span>
           </div>
         </div>
       </div>
@@ -450,8 +462,8 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
 
 function trapButtonStyle(trapping) {
   return {
-    minWidth: 124,
-    padding: '11px 20px',
+    minWidth: 108,
+    padding: '9px 18px',
     borderRadius: 4,
     border: '1px solid rgba(59, 36, 20, 0.45)',
     background: 'rgba(248, 236, 208, 0.78)',

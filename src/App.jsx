@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import EnchantedCanvas from './components/EnchantedCanvas'
 import Screen1Gateway from './components/Screen1Gateway'
+import ScreenVideoMontage from './components/ScreenVideoMontage'
 import audioEngine from './utils/audioEngine'
 
 const GOLD = '#D4AF37'
@@ -8,8 +9,9 @@ const PARCHMENT = '#F4E8C1'
 const VELVET = '#0F0A1C'
 
 export default function App() {
-  const [screen, setScreen] = useState('gateway')
+  const [currentScreen, setCurrentScreen] = useState('gateway')
   const [lumosOn, setLumosOn] = useState(false)
+  const [flooActive, setFlooActive] = useState(false)
 
   const ensureAudio = useCallback(async () => {
     await audioEngine.unlock()
@@ -34,6 +36,18 @@ export default function App() {
     setLumosOn(false)
   }
 
+  const handleAcceptQuest = () => {
+    if (flooActive || currentScreen !== 'gateway') {
+      return
+    }
+
+    setFlooActive(true)
+    window.setTimeout(() => {
+      setCurrentScreen('video_montage')
+      setFlooActive(false)
+    }, 1600)
+  }
+
   return (
     <div
       style={{
@@ -43,7 +57,7 @@ export default function App() {
         position: 'relative',
       }}
     >
-      <EnchantedCanvas lumosOn={lumosOn} />
+      <EnchantedCanvas lumosOn={lumosOn} flooActive={flooActive} />
 
       <button
         type="button"
@@ -74,31 +88,14 @@ export default function App() {
         {lumosOn ? 'LUMOS' : 'NOX'}
       </button>
 
-      {screen === 'gateway' && (
+      {currentScreen === 'gateway' && (
         <Screen1Gateway
           onEnsureAudio={ensureAudio}
-          onComplete={() => setScreen('prank')}
+          onComplete={handleAcceptQuest}
         />
       )}
 
-      {screen !== 'gateway' && (
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 2,
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            padding: 24,
-          }}
-        >
-          <p style={{ color: GOLD, fontSize: 22, fontFamily: 'Georgia, serif' }}>
-            The Marauder&apos;s Map awaits...
-          </p>
-        </div>
-      )}
+      {currentScreen === 'video_montage' && <ScreenVideoMontage />}
     </div>
   )
 }
