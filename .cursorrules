@@ -18,3 +18,4 @@ You are the Lead Developer for "Project AR", an interactive 3D WebAR Birthday Qu
 2. Use inline styles or modular CSS for components. Maintain dark velvet wizarding theme (#0F0A1C background, #D4AF37 gold accents, #F4E8C1 text).
 3. Ensure absolute syntactic cleanliness in React JSX (multi-line, proper closing tags, zero unescaped characters).
 4. Keep screens cleanly modular in src/components/.
+
