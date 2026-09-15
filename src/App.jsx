@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import EnchantedCanvas from './components/EnchantedCanvas'
 import Screen1Gateway from './components/Screen1Gateway'
+import Screen2Prank from './components/Screen2Prank'
 import ScreenVideoMontage from './components/ScreenVideoMontage'
 import audioEngine from './utils/audioEngine'
 
@@ -43,9 +44,16 @@ export default function App() {
 
     setFlooActive(true)
     window.setTimeout(() => {
-      setCurrentScreen('video_montage')
+      setCurrentScreen('prank')
       setFlooActive(false)
     }, 1600)
+  }
+
+  const handleKiss = () => {
+    if (currentScreen !== 'prank') {
+      return
+    }
+    setCurrentScreen('video_montage')
   }
 
   return (
@@ -63,7 +71,7 @@ export default function App() {
         type="button"
         onClick={toggleLumos}
         aria-pressed={lumosOn}
-        aria-label={lumosOn ? 'Nox, mute audio and dim candles' : 'Lumos, unmute audio and brighten candles'}
+        aria-label={lumosOn ? 'Nox Audio' : 'Lumos Audio'}
         style={{
           position: 'fixed',
           top: 18,
@@ -78,20 +86,27 @@ export default function App() {
           background: lumosOn ? 'rgba(212, 175, 55, 0.18)' : 'rgba(15, 10, 28, 0.82)',
           color: GOLD,
           fontFamily: 'Georgia, "Times New Roman", serif',
-          letterSpacing: 2,
+          letterSpacing: 1.2,
           fontSize: 12,
           cursor: 'pointer',
           boxShadow: lumosOn ? '0 0 18px rgba(212, 175, 55, 0.55)' : 'none',
+          backdropFilter: 'blur(10px)',
         }}
       >
-        <span aria-hidden="true">{lumosOn ? '✨' : '🕯️'}</span>
-        {lumosOn ? 'LUMOS' : 'NOX'}
+        {lumosOn ? '🔔 Lumos Audio' : '🔇 Nox Audio'}
       </button>
 
       {currentScreen === 'gateway' && (
         <Screen1Gateway
           onEnsureAudio={ensureAudio}
           onComplete={handleAcceptQuest}
+        />
+      )}
+
+      {currentScreen === 'prank' && (
+        <Screen2Prank
+          onEnsureAudio={ensureAudio}
+          onKiss={handleKiss}
         />
       )}
 

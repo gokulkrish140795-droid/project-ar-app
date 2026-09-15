@@ -36,6 +36,8 @@ function createEnvelopes(width, height) {
     phase: Math.random() * Math.PI * 2,
     drift: 0.25 + Math.random() * 0.55,
     amp: 10 + Math.random() * 16,
+    vx: 0.18 + Math.random() * 0.32,
+    vy: -0.14 - Math.random() * 0.28,
   }))
 }
 
@@ -238,7 +240,7 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
 
       const halo = 38 + candle.z * 28
       const aura = ctx.createRadialGradient(0, -candle.waxH - 8, 2, 0, -candle.waxH, halo)
-      aura.addColorStop(0, `rgba(255, 196, 90, ${0.34 * light * flame})`)
+      aura.addColorStop(0, `rgba(255, 215, 0, ${0.8 * light * flame})`)
       aura.addColorStop(0.45, `rgba(255, 140, 40, ${0.12 * light})`)
       aura.addColorStop(1, 'rgba(255, 160, 40, 0)')
       ctx.fillStyle = aura
@@ -267,6 +269,16 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
 
     const drawEnvelope = (env, time) => {
       env.yaw += env.spin
+      env.x += env.vx * env.z
+      env.y += env.vy * env.z
+      if (env.y < -40) {
+        env.y = window.innerHeight + 30
+        env.x = window.innerWidth * Math.random()
+      }
+      if (env.x > window.innerWidth + 40) {
+        env.x = -30
+      }
+
       const floatY = env.y + Math.sin(time * 0.0009 * env.drift + env.phase) * env.amp
       const scale = 0.5 + env.z * 0.7
       const skew = Math.sin(env.yaw) * 0.38
@@ -281,7 +293,11 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
       ctx.fillStyle = `rgba(0, 0, 0, ${0.18 * env.z})`
       ctx.fillRect(-w / 2 + 5, -h / 2 + 7, w, h)
 
-      ctx.fillStyle = `rgba(236, 214, 164, ${alpha})`
+      const parchment = ctx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2)
+      parchment.addColorStop(0, `rgba(245, 230, 200, ${alpha})`)
+      parchment.addColorStop(0.5, `rgba(236, 214, 164, ${alpha})`)
+      parchment.addColorStop(1, `rgba(214, 180, 118, ${alpha})`)
+      ctx.fillStyle = parchment
       ctx.strokeStyle = `rgba(122, 78, 32, ${alpha})`
       ctx.lineWidth = 1
       ctx.fillRect(-w / 2, -h / 2, w, h)
@@ -296,7 +312,7 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
       ctx.fill()
       ctx.stroke()
 
-      const sealR = 6.2 * scale
+      const sealR = 6.8 * scale
       const seal = ctx.createRadialGradient(-1.5, -1.5, 1, 0, 0, sealR)
       seal.addColorStop(0, '#e45d5d')
       seal.addColorStop(0.55, '#9b1520')
@@ -308,6 +324,11 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
       ctx.strokeStyle = '#D4AF37'
       ctx.lineWidth = 0.9
       ctx.stroke()
+      ctx.fillStyle = '#D4AF37'
+      ctx.font = `${Math.max(6, 7 * scale)}px Georgia, serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('30', 0, -1)
       ctx.restore()
     }
 
@@ -382,13 +403,14 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
           ctx.fill()
         }
       }
-      const vortex = ctx.createRadialGradient(cx, cy, 8, cx, cy, 160)
-      vortex.addColorStop(0, 'rgba(180, 255, 210, 0.28)')
-      vortex.addColorStop(0.4, 'rgba(40, 140, 90, 0.16)')
+      const vortex = ctx.createRadialGradient(cx, cy, 8, cx, cy, 220)
+      vortex.addColorStop(0, 'rgba(180, 255, 210, 0.38)')
+      vortex.addColorStop(0.28, 'rgba(212, 175, 55, 0.22)')
+      vortex.addColorStop(0.55, 'rgba(40, 140, 90, 0.16)')
       vortex.addColorStop(1, 'rgba(15, 10, 28, 0)')
       ctx.fillStyle = vortex
       ctx.beginPath()
-      ctx.arc(cx, cy, 160, 0, Math.PI * 2)
+      ctx.arc(cx, cy, 220, 0, Math.PI * 2)
       ctx.fill()
     }
 

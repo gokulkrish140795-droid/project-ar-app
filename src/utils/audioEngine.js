@@ -87,9 +87,20 @@ class AudioEngine {
     this.sfxSources.clear()
   }
 
-  async play(name, { loop = false, bus = 'sfx' } = {}) {
+  trackSfx(source) {
+    this.sfxSources.add(source)
+    source.onended = () => {
+      this.sfxSources.delete(source)
+    }
+  }
+
+  async play(name, { loop = false, bus = 'sfx', stack = false, playbackRate = 1 } = {}) {
     if (!this.unlocked) {
       await this.unlock()
+    }
+
+    if (bus !== 'bgm' && !stack) {
+      this.stopAllSFXAndVoices()
     }
 
     const buffer = await this.load(name)
@@ -100,13 +111,11 @@ class AudioEngine {
     const source = this.ctx.createBufferSource()
     source.buffer = buffer
     source.loop = loop
+    source.playbackRate.value = playbackRate
     source.connect(bus === 'bgm' ? this.bgmGain : this.sfxGain)
 
     if (bus !== 'bgm') {
-      this.sfxSources.add(source)
-      source.onended = () => {
-        this.sfxSources.delete(source)
-      }
+      this.trackSfx(source)
     }
 
     source.start()
@@ -131,13 +140,49 @@ class AudioEngine {
   }
 
   playSfx(name) {
-    this.stopAllSFXAndVoices()
-    return this.play(name, { bus: 'sfx' })
+    return this.play(name, { bus: 'sfx', stack: false })
   }
 
-  playVoice(name) {
+  playVoice(name, options = {}) {
+    return this.play(name, { bus: 'sfx', stack: false, ...options })
+  }
+
+  playLayered(names) {
     this.stopAllSFXAndVoices()
-    return this.play(name, { bus: 'sfx' })
+    return Promise.all(
+      names.map((entry) => {
+        const clip = typeof entry === 'string' ? { name: entry } : entry
+        return this.play(clip.name, {
+          bus: 'sfx',
+          stack: true,
+          playbackRate: clip.playbackRate || 1,
+        })
+      })
+    )
+  }
+
+  playChipmunkGiggle() {
+    if (!this.ctx) {
+      return
+    }
+
+    const now = this.ctx.currentTime
+    const notes = [880, 988, 1175, 1319, 1568]
+
+    notes.forEach((freq, index) => {
+      const osc = this.ctx.createOscillator()
+      const gain = this.ctx.createGain()
+      osc.type = 'triangle'
+      osc.frequency.value = freq
+      gain.gain.setValueAtTime(0.0001, now)
+      gain.gain.exponentialRampToValueAtTime(0.12, now + 0.02 + index * 0.05)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18 + index * 0.05)
+      osc.connect(gain)
+      gain.connect(this.sfxGain)
+      osc.start(now + index * 0.05)
+      osc.stop(now + 0.22 + index * 0.05)
+      this.trackSfx(osc)
+    })
   }
 
   setMuted(muted) {
