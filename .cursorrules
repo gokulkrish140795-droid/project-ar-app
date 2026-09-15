@@ -1,21 +1,178 @@
-# PROJECT AR: MASTER CURSOR RULES & ENGINE SPECIFICATION
+# PROJECT AR: MASTER PRODUCTION BLUEPRINT & SYSTEM SPECIFICATION (FINAL LOCKED VERSIO)
+========================================================================================
+Project Title: Project AR: Aishwarya’s 30th Birthday Scrapbook Quest ✨
+Theme: "The Search for a Stray Heart"
+Target Audience: Aishwarya (Aishu) - 30th Birthday Celebration
+Visual Identity: Enchanted Hogwarts Great Hall meets Soft Blush/Gold Linen Scrapbook
+Narrator Engine: 3D Figurine Avatar "Gokul-Mage" (using `/public/avatar.png` - `mini_me_diamond_stud_master_3d.png`)
 
-You are the Lead Developer for "Project AR", an interactive 3D WebAR Birthday Quest application built with React, Vite, Three.js/Canvas 2D, and WebAudio API.
+This master specification is the absolute single source of truth for Project AR. It details every single screen, dialogue line, UI component, audio rule, state transition, and game mechanic required for Grok and Cursor to construct the React application.
 
-## PROJECT ARCHITECTURE
-- Framework: React (Vite)
-- Background Engine: src/components/EnchantedCanvas.jsx (Interactive Lumos 3D Stardust & Golden Snitch spawner)
-- Audio Engine: src/utils/audioEngine.js (Centralized WebAudio controller)
-- Screen Progression: State machine in src/App.jsx (gateway -> prank -> map -> vault)
+---
 
-## AUDIO ASSET MATRIX (public/audio/)
-- Background Music: bgm_intro.mp3, bgm_act1.mp3, bgm_act2.mp3, bgm_act3.mp3
-- Sound Effects: sfx_wand_swish.mp3, sfx_spell_quest.mp3, sfx_revelio_bell.mp3, sfx_tile_clack.mp3, sfx_vault_alohomora.mp3, sfx_crystal_touch.mp3, sfx_snitch_wings.mp3, sfx_potion_bubble.mp3, sfx_parchment_rustle.mp3
-- Gokul-Mage Voice Clips: voice_tap_yay.mp3, voice_no_nice_try.mp3, voice_kiss_giggle.mp3, voice_idle_hmm.mp3
+## 📱 1. MASTER APP STATE MACHINE & NAVIGATION FLOW (`src/App.jsx`)
 
-## CODING RULES
-1. ALWAYS import and use audioEngine from ../utils/audioEngine for sound interactions.
-2. Use inline styles or modular CSS for components. Maintain dark velvet wizarding theme (#0F0A1C background, #D4AF37 gold accents, #F4E8C1 text).
-3. Ensure absolute syntactic cleanliness in React JSX (multi-line, proper closing tags, zero unescaped characters).
-4. Keep screens cleanly modular in src/components/.
+The React application operates under a strict, linear state machine driven by `currentScreen`:
 
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            PROJECT AR STATE FLOW                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ 1. 'gateway'       ➔ Screen 1: Lumos Gateway (Aged Parchment Scroll)          │
+│ 2. 'prank'         ➔ Screen 2: 99% Sweetness Overload Prank (Mini-Me Kiss)   │
+│ 3. 'video_montage' ➔ Screen 3: Intro Romantic Video Teaser (YouTube Player)  │
+│ 4. 'ar_scanner'    ➔ Chapter 1, 2, 3 Scavenger Hunt & AR Letter Tracking     │
+│ 5. 'workbench'     ➔ Skeuomorphic Anagram Workbenches (Steps 10, 20, 30)      │
+│ 6. 'grand_vault'   ➔ Final Birthday Vault Unlocked!                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Global Header Controls (Rendered on All Screens):
+* **Lumos / Nox Audio Toggle Button (Top-Right):**
+  - Renders a translucent gold glassmorphism badge: `{isMuted ? '🔇 Nox Audio' : '🔔 Lumos Audio'}`
+  - Toggling unlocks browser WebAudio context, starts/loops `bgm_intro.mp3`, and dynamically adjusts background lighting (bright golden radiance in Lumos, dim ember glow in Nox).
+
+---
+
+## 🏰 2. GREAT HALL BACKGROUND ENGINE (`src/components/EnchantedCanvas.jsx`)
+
+An interactive, high-performance HTML5 Canvas rendered behind all screen overlays.
+
+### Visual Elements:
+1. **15+ 3D Floating Hogwarts Acceptance Envelopes:**
+   - Envelopes styled with parchment gradients (`#F5E6C8`) and miniature crimson wax seals.
+   - Gently drift, sway, and rise diagonally across the midnight purple sky (`#0F0A1C`).
+2. **20 Multi-Depth Parallax Floating Candles:**
+   - Vertical wax candles drifting at varying speeds and scale depths.
+   - Topped with pulsating golden flame halos (`rgba(255, 215, 0, 0.8)`) that flicker dynamically.
+3. **Floating Ancient Gold Runes & Swirling Stardust:**
+   - Glowing ancient wizarding runes (`ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ`) and shimmering gold dust drifting upward.
+4. **Ultra-Sparkly Diamond-Gold Wand Spark Trail:**
+   - Tracks user mouse movement or mobile touchscreen drags.
+   - Emits a bursting trail of **diamond-white core sparks**, **golden starbursts**, and **trailing ember dust** that fade out gracefully.
+5. **Floo Network Particle Swirl Trigger:**
+   - Exposes a trigger function that fires an **emerald-green & gold vortex particle explosion** across the entire canvas when transitioning from Screen 1 to Screen 2.
+
+---
+
+## 📜 3. SCREEN 1: THE LUMOS GATEWAY (`src/components/Screen1Gateway.jsx`)
+
+### Aesthetics & Layout:
+* **Container:** Compact aged parchment scroll (`max-width: 400px`, centered on screen) with burnt leather borders, corner scrollwork filigree, and deckled edge drop-shadows.
+* **Header Seal:** A 3D Crimson Wax Seal with a stamped gold **"30"** birthday emblem anchored at the top-center of the scroll.
+* **Avatar Badge:** Displays Gokul-Mage's 3D avatar artwork using the local asset path `/avatar.png` (`mini_me_diamond_stud_master_3d.png`) inside a gold circular medallion.
+
+### Exact Agreed Wording & Text Content:
+* **Header Seal Subtitle:** `✨ HOGWARTS SECRET PROTOCOL 0510 ✨`
+* **Main Title:** `THE SEARCH FOR A STRAY HEART`
+* **Gokul-Mage Speech Bubble (Gold Scrollwork Frame):**
+  > 💬 **Gokul-Mage:** *"Aishwarya! Gokul-Mage lost a piece of Gokul's heart in our home! Help me find it! 💖"*
+* **Quest Proclamation Text:**
+  > *"Thirty years of magic, and today begins your greatest quest yet! Follow Gokul-Mage’s clues around our home, find the 27 physical photo cards, and unlock your birthday vault!"*
+
+### Interactive Action Buttons:
+1. **`I ACCEPT THE WIZARDING QUEST ✨` (Primary YES Button):**
+   - Styled with a solid gold background (`#D4AF37`), dark purple bold text (`#0F0A1C`), and a glowing gold aura box-shadow.
+   - **Click Action:** Plays `sfx_spell_quest.mp3` and `voice_tap_yay.mp3`, fires the emerald Floo Network particle swirl on `EnchantedCanvas`, and advances `currentScreen` to `'prank'`.
+2. **`No, thanks 😜` (Disillusionment Trap Button):**
+   - Styled as a subtle, translucent outline button.
+   - **Trap Behavior:** On `onMouseEnter`, `onFocus`, or `onTouchStart`, the button instantly teleports to a random relative coordinate across the viewport so Aishu can never click it!
+   - **Audio Failsafe:** Executes `audioEngine.stopAllSFXAndVoices()` immediately before playing `sfx_wand_swish.mp3` and `voice_no_nice_try.mp3`.
+   - **Fleeing Speech Bubble:** Spawns a floating cartoon popup over the button:  
+     > *"Hey! No skipping your own birthday surprise! Try again! 😜"*
+
+---
+
+## 😜 4. SCREEN 2: THE 99% SWEETNESS OVERLOAD PRANK (`src/components/Screen2Prank.jsx`)
+
+### Mechanics & Progression:
+1. **The Fast Loading Bar:**
+   - Renders a glowing wizarding magic meter at the center of the screen.
+   - The bar fills rapidly: `10%... 45%... 72%... 88%...` and **freezes abruptly at 99%**.
+2. **Mini-Me Glass-Press Physics:**
+   - Gokul-Mage avatar (`/avatar.png`) animates to the front, flattening his hands against the inside glass pane of her phone screen.
+3. **Coral-Pink Warning Pop-up:**
+   > *"✨ OH NO! SWEETNESS OVERLOAD! ✨ The Wellington wind must have blown away our connection! 💨 But wait... my heart-meters show this phone is being held by a girl with TWO university degrees! 🎓🎓 Your brilliant brain and breathtaking beauty have completely melted my little birthday servers! 💘 Quick, tap my face to give me a kiss and fix the system!"*
+4. **Interactive Face-Kiss Trigger:**
+   - Aishu must physically tap Mini-Me's face on her phone screen.
+   - **Reward & WebAudio Unlock:** Satisfies mobile browser autoplay security rules, triggers a golden heart confetti explosion across the screen, plays a high-pitched chipmunk giggle, plays `voice_tap_yay.mp3`, and smoothly transitions `currentScreen` to `'video_montage'`.
+
+---
+
+## 🎥 5. SCREEN 3: INTRO ROMANTIC VIDEO MONTAGE (`src/components/ScreenVideoMontage.jsx`)
+
+* **Content:** Embedded YouTube Unlisted Video Player containing family and friends' wishes, sentimental memories, and the AI-animated voice-cloned tribute from her late uncle.
+* **Controls:** Once the video finishes (or she taps **"Continue Quest"**), advances `currentScreen` to `'ar_scanner'` to begin Chapter 1 of the Scavenger Hunt.
+
+---
+
+## 🔊 6. AUDIO ENGINE SPECIFICATION (`src/utils/audioEngine.js`)
+
+A central WebAudio management utility used across all components.
+
+```javascript
+// Master Audio Helper Rules
+1. stopAllSFXAndVoices() MUST run prior to playing any new voice line or sound effect.
+2. Missing audio files in /public/audio/*.mp3 MUST fail quietly without crashing React console.
+3. Audio keys mapping:
+   - bgm_intro: 'audio/bgm_intro.mp3' (Loops smoothly in background)
+   - sfx_wand_swish: 'audio/sfx_wand_swish.mp3'
+   - sfx_spell_quest: 'audio/sfx_spell_quest.mp3'
+   - voice_no_nice_try: 'audio/voice_no_nice_try.mp3'
+   - voice_tap_yay: 'audio/voice_tap_yay.mp3'
+```
+
+---
+
+## 🗝️ 7. THREE-CHAPTER SCAVENGER HUNT & ANAGRAM MATRIX
+
+### Chapter 1: Cozy Comforts (Steps 1–10)
+* **Theme:** Everyday routines, home warmth, and cozy comforts.
+* **Milestone 10 Target Anagram:** `MICROWAVECUPBOARD` (17 Letters)
+* **Locations:** Mirror, Sofa, Computer Table, Curtain, Pooja Drawer, Cutlery Drawer, Teddy Bear, Closet, Dining Chair, Microwave Cupboard.
+
+### Chapter 2: The Detective Investigation (Steps 11–20)
+* **Theme:** Detective mystery with Mini-Me wearing a Sherlock Holmes hat.
+* **Milestone 20 Target Anagram:** `GOLDJEWELRYPOUCH` (16 Letters)
+* **Locations:** Fridge, Sofa Cover Layer, Bathroom Cabinet, Dyson Airwrap Box, Board Game, Shoe, Wedding Photo Frame, Beauty Cabinet, Plant Shelf, Gold Jewelry Pouch.
+
+### Chapter 3: The Epic Grand Finale (Steps 21–30)
+* **Theme:** Mysterious, romantic, high-stakes finale with Mini-Me in aviator sunglasses.
+* **Target Grand Vault Password:** `UNDERSTAIRS` (11 Letters: U, N, D, E, R, S, T, A, I, R, S)
+* **Step-by-Step Card-to-Letter Mapping:**
+  - Card 21 (Step 21): **U - B** *(Target: U | Dummy: B)* -> Location: Subwoofer
+  - Card 22 (Step 22): **N - G** *(Target: N | Dummy: G)* -> Location: Blue Spring Photo Frame
+  - Card 23 (Step 23): **D - J** *(Target: D | Dummy: J)* -> Location: Uncle's Photo Frame
+  - Card 24 (Step 24): **E - W** *(Target: E | Dummy: W)* -> Location: Laundry Cabinet Shelf
+  - Card 25 (Step 25): **R - R - M** *(Target: R, R | Dummy: M)* -> Location: Bedside Table Drawer
+  - Card 26 (Step 26): **S - S - O** *(Target: S, S | Dummy: O)* -> Location: Balcony Door Frame
+  - Card 27 (Step 27): **T - C** *(Target: T | Dummy: C)* -> Location: Kitchen Island
+  - Card 28 (Step 28): **A - V** *(Target: A | Dummy: V)* -> Location: Bookshelf Top
+  - Card 29 (Step 29): **I - H** *(Target: I | Dummy: H)* -> Location: Ginger's Food Area
+  - Step 30: **Grand Anagram Workbench** -> 20 floating wooden blocks on desk. Drag 9 decoys (B, G, J, W, M, O, C, V, H) into the Dust Bunny Trash Can to reveal the 11 target letters and spell `UNDERSTAIRS`.
+
+---
+
+## 📂 8. REQUIRED FILE & DIRECTORY STRUCTURE FOR CURSOR
+
+```
+project-ar-app/
+├── public/
+│   ├── avatar.png                    <-- mini_me_diamond_stud_master_3d.png
+│   └── audio/                        <-- MP3 voice & SFX files
+├── src/
+│   ├── components/
+│   │   ├── EnchantedCanvas.jsx      <-- Great Hall 3D floating letters, candles, spark trail
+│   │   ├── Screen1Gateway.jsx       <-- Aged parchment scroll, Crimson wax seal, Gokul-Mage quote
+│   │   ├── Screen2Prank.jsx         <-- 99% Sweetness Overload freeze & Kiss interaction
+│   │   └── ScreenVideoMontage.jsx   <-- Intro Romantic Video Teaser
+│   ├── utils/
+│   │   └── audioEngine.js           <-- WebAudio manager with stopAllSFXAndVoices()
+│   ├── App.jsx                       <-- State machine (gateway -> prank -> video_montage -> ar)
+│   └── main.jsx
+├── .cursorrules                      <-- Reference to this Master Blueprint
+└── package.json
+```
+
+========================================================================================
+END OF MASTER PRODUCTION BLUEPRINT
