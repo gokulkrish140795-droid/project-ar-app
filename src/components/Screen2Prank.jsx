@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import confetti from 'canvas-confetti'
 import audioEngine from '../utils/audioEngine'
-import GingerCatCompanion from './GingerCatCompanion'
-import MiniMeAvatar from './MiniMeAvatar'
+import GingerCat3D from './GingerCat3D'
+import MiniMeAvatar3D from './MiniMeAvatar3D'
 
 const GOLD = '#D4AF37'
 const PARCHMENT = '#F4E8C1'
@@ -20,9 +20,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
     let step = 0
 
     const tick = () => {
-      if (cancelled) {
-        return
-      }
+      if (cancelled) return
       setProgress(STEPS[step])
       step += 1
       if (step >= STEPS.length) {
@@ -68,16 +66,11 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
   }
 
   const handleKiss = async () => {
-    if (kissed || !frozen) {
-      return
-    }
+    if (kissed || !frozen) return
 
     setKissed(true)
-    if (onEnsureAudio) {
-      await onEnsureAudio()
-    } else {
-      await audioEngine.unlock()
-    }
+    if (onEnsureAudio) await onEnsureAudio()
+    else await audioEngine.unlock()
 
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playChipmunkGiggle()
@@ -87,9 +80,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
     fireHearts()
 
     window.setTimeout(() => {
-      if (onKiss) {
-        onKiss()
-      }
+      if (onKiss) onKiss()
     }, 1200)
   }
 
@@ -110,20 +101,20 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
     >
       <style>
         {`
-          @keyframes glassPress {
+          @keyframes glassPress3d {
             0% { transform: translateY(18px) scale(0.92); filter: blur(2px); }
             70% { transform: translateY(0) scale(1.04); }
             100% { transform: translateY(2px) scale(1); }
           }
-          @keyframes meterGlow {
+          @keyframes meterGlow3d {
             0%, 100% { box-shadow: 0 0 12px rgba(212, 175, 55, 0.35); }
             50% { box-shadow: 0 0 22px rgba(255, 111, 145, 0.55); }
           }
-          @keyframes popupIn {
+          @keyframes popupIn3d {
             from { opacity: 0; transform: translateY(16px) scale(0.96); }
             to { opacity: 1; transform: translateY(0) scale(1); }
           }
-          @keyframes freezeBlink {
+          @keyframes freezeBlink3d {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.45; }
           }
@@ -150,7 +141,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
             border: `1px solid ${GOLD}`,
             borderRadius: 999,
             background: 'rgba(15, 10, 28, 0.72)',
-            animation: 'meterGlow 1.8s ease-in-out infinite',
+            animation: 'meterGlow3d 1.8s ease-in-out infinite',
           }}
         >
           <div
@@ -179,7 +170,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
             margin: '8px 0 0',
             fontSize: 20,
             color: frozen ? CORAL : GOLD,
-            animation: frozen ? 'freezeBlink 0.9s ease-in-out infinite' : 'none',
+            animation: frozen ? 'freezeBlink3d 0.9s ease-in-out infinite' : 'none',
           }}
         >
           {progress}%{frozen ? ' — FROZEN' : ''}
@@ -190,12 +181,12 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
         style={{
           marginTop: 18,
           position: 'relative',
-          width: 280,
-          height: 220,
+          width: 300,
+          height: 240,
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'center',
-          animation: frozen ? 'glassPress 0.85s ease forwards' : 'none',
+          animation: frozen ? 'glassPress3d 0.85s ease forwards' : 'none',
         }}
       >
         <div
@@ -211,15 +202,15 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
             pointerEvents: 'none',
           }}
         />
-        <MiniMeAvatar
-          size={128}
+        <MiniMeAvatar3D
+          size={150}
           pose="glass"
           onFaceTap={handleKiss}
           disabled={!frozen || kissed}
           ariaLabel="Tap Gokul-Mage's face to give a kiss"
         />
-        <div style={{ marginLeft: -8, marginBottom: 8 }}>
-          <GingerCatCompanion pose="glass" size={96} />
+        <div style={{ marginLeft: -12, marginBottom: 4 }}>
+          <GingerCat3D pose="glass" size={120} />
         </div>
       </div>
 
@@ -233,19 +224,16 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
             background: 'linear-gradient(180deg, #FF8FAB 0%, #FF6F91 55%, #E85A7a 100%)',
             color: '#3B1020',
             boxShadow: '0 16px 40px rgba(255, 111, 145, 0.35)',
-            animation: 'popupIn 0.45s ease',
+            animation: 'popupIn3d 0.45s ease',
             textAlign: 'center',
           }}
         >
-          <p
-            style={{
-              margin: 0,
-              fontSize: 13,
-              lineHeight: 1.5,
-              fontWeight: 600,
-            }}
-          >
-            ✨ OH NO! SWEETNESS OVERLOAD! ✨ The Wellington wind must have blown away our connection! 💨 But wait... my heart-meters show this phone is being held by a girl with TWO university degrees! 🎓🎓 Your brilliant brain and breathtaking beauty have completely melted my little birthday servers! 💘 Quick, tap my face to give me a kiss and fix the system!
+          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, fontWeight: 600 }}>
+            ✨ OH NO! SWEETNESS OVERLOAD! ✨ The Wellington wind must have blown away our
+            connection! 💨 But wait... my heart-meters show this phone is being held by a girl
+            with TWO university degrees! 🎓🎓 Your brilliant brain and breathtaking beauty have
+            completely melted my little birthday servers! 💘 Quick, tap my face to give me a kiss
+            and fix the system!
           </p>
         </div>
       )}

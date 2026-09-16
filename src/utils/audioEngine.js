@@ -139,11 +139,13 @@ class AudioEngine {
     }
   }
 
-  playSfx(name) {
+  async playSfx(name) {
+    await this.unlock()
     return this.play(name, { bus: 'sfx', stack: false })
   }
 
-  playVoice(name, options = {}) {
+  async playVoice(name, options = {}) {
+    await this.unlock()
     return this.play(name, { bus: 'sfx', stack: false, ...options })
   }
 

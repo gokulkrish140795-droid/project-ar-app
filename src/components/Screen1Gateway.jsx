@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import * as THREE from 'three'
 import audioEngine from '../utils/audioEngine'
-import GingerCatCompanion from './GingerCatCompanion'
-import MiniMeAvatar from './MiniMeAvatar'
+import { disposeObject3D, disposeRenderer } from '../utils/threeDispose'
+import GingerCat3D from './GingerCat3D'
+import MiniMeAvatar3D from './MiniMeAvatar3D'
 
 const GOLD = '#D4AF37'
 const INK = '#3B2414'
@@ -29,12 +31,187 @@ function randomTrapPosition(stage, button, avoid) {
       y < avoid.y + avoid.height + 12 &&
       y + button.height + 12 > avoid.y
 
-    if (!overlapsAvoid) {
-      break
-    }
+    if (!overlapsAvoid) break
   }
 
   return { x, y }
+}
+
+/** Closed 3D ribbon scroll + crimson wax seal "30" */
+function ClosedScroll3D({ unrolling, onOpen, width = 320 }) {
+  const mountRef = useRef(null)
+  const unrollingRef = useRef(unrolling)
+  unrollingRef.current = unrolling
+
+  useEffect(() => {
+    const mount = mountRef.current
+    if (!mount) return undefined
+
+    const h = 120
+    const scene = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera(40, width / h, 0.1, 20)
+    camera.position.set(0, 0.15, 2.6)
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+    renderer.setSize(width, h)
+    renderer.setClearColor(0x000000, 0)
+    renderer.outputColorSpace = THREE.SRGBColorSpace
+    mount.appendChild(renderer.domElement)
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7))
+    const key = new THREE.PointLight(0xffe0a8, 1.5, 8)
+    key.position.set(1, 1.2, 2)
+    scene.add(key)
+    const rim = new THREE.PointLight(0xd4af37, 0.6, 6)
+    rim.position.set(-1, 0.4, 1)
+    scene.add(rim)
+
+    const scroll = new THREE.Group()
+    scene.add(scroll)
+
+    const roll = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.28, 0.28, 1.7, 32),
+      new THREE.MeshStandardMaterial({
+        color: 0xc49a56,
+        roughness: 0.65,
+        metalness: 0.08,
+      })
+    )
+    roll.rotation.z = Math.PI / 2
+    scroll.add(roll)
+
+    const endL = new THREE.Mesh(
+      new THREE.TorusGeometry(0.29, 0.04, 10, 24),
+      new THREE.MeshStandardMaterial({ color: 0x8a6030, roughness: 0.7 })
+    )
+    endL.rotation.y = Math.PI / 2
+    endL.position.x = -0.85
+    scroll.add(endL)
+    const endR = endL.clone()
+    endR.position.x = 0.85
+    scroll.add(endR)
+
+    const ribbon = new THREE.Mesh(
+      new THREE.TorusGeometry(0.32, 0.035, 8, 32),
+      new THREE.MeshStandardMaterial({
+        color: 0xd4af37,
+        metalness: 0.85,
+        roughness: 0.3,
+        emissive: 0x3a2e08,
+        emissiveIntensity: 0.35,
+      })
+    )
+    ribbon.rotation.y = Math.PI / 2
+    scroll.add(ribbon)
+
+    const ribbonBand = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.08, 0.7),
+      new THREE.MeshStandardMaterial({
+        color: 0xc9a227,
+        metalness: 0.7,
+        roughness: 0.35,
+      })
+    )
+    ribbonBand.position.z = 0.28
+    scroll.add(ribbonBand)
+
+    const seal = new THREE.Group()
+    seal.position.set(0, 0.02, 0.42)
+    scroll.add(seal)
+
+    const wax = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.22, 0.24, 0.08, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0xc41e2a,
+        roughness: 0.45,
+        metalness: 0.15,
+        emissive: 0x5c0b12,
+        emissiveIntensity: 0.35,
+      })
+    )
+    wax.rotation.x = Math.PI / 2
+    seal.add(wax)
+
+    const digitMat = new THREE.MeshStandardMaterial({
+      color: 0xd4af37,
+      metalness: 0.9,
+      roughness: 0.25,
+      emissive: 0xd4af37,
+      emissiveIntensity: 0.4,
+    })
+    const d3 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.14, 0.03), digitMat)
+    d3.position.set(-0.06, 0, 0.05)
+    seal.add(d3)
+    const d0 = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.018, 8, 16), digitMat)
+    d0.position.set(0.07, 0, 0.05)
+    seal.add(d0)
+
+    const clock = new THREE.Clock()
+    let raf = 0
+    let disposed = false
+    let crackT = -1
+
+    const tick = () => {
+      if (disposed) return
+      const t = clock.getElapsedTime()
+      scroll.rotation.y = Math.sin(t * 0.8) * 0.08
+      scroll.position.y = Math.sin(t * 1.4) * 0.03
+
+      if (unrollingRef.current && crackT < 0) crackT = t
+      if (crackT >= 0) {
+        const u = Math.min(1, (t - crackT) / 0.7)
+        seal.rotation.z = -0.15 + u * 1.2
+        seal.scale.setScalar(Math.max(0.05, 1 - u * 0.95))
+        seal.position.y = 0.02 + u * 0.4
+        wax.material.transparent = true
+        wax.material.opacity = 1 - u
+      } else {
+        seal.scale.setScalar(1 + Math.sin(t * 2.2) * 0.04)
+        seal.rotation.z = -0.12 + Math.sin(t * 1.5) * 0.04
+      }
+
+      renderer.render(scene, camera)
+      raf = window.requestAnimationFrame(tick)
+    }
+    raf = window.requestAnimationFrame(tick)
+
+    return () => {
+      disposed = true
+      window.cancelAnimationFrame(raf)
+      disposeObject3D(scene)
+      disposeRenderer(renderer)
+    }
+  }, [width])
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label="Tap the crimson wax seal to open the scroll"
+      style={{
+        width: '100%',
+        border: 'none',
+        background: 'transparent',
+        cursor: 'pointer',
+        padding: 0,
+      }}
+    >
+      <div ref={mountRef} style={{ width, height: 120, margin: '0 auto' }} />
+      <p
+        style={{
+          margin: '4px 0 0',
+          textAlign: 'center',
+          color: GOLD,
+          fontSize: 11,
+          letterSpacing: 1.2,
+          fontFamily: 'Georgia, "Times New Roman", serif',
+        }}
+      >
+        Tap the wax seal “30”
+      </p>
+    </button>
+  )
 }
 
 export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
@@ -52,20 +229,22 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
   const [showSpeech, setShowSpeech] = useState(false)
   const [playPose, setPlayPose] = useState('idle')
   const [yarnVisible, setYarnVisible] = useState(false)
+  const [scrollWidth, setScrollWidth] = useState(320)
+
+  useEffect(() => {
+    const measure = () => setScrollWidth(Math.min(360, window.innerWidth - 32))
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
 
   const ensureAudio = async () => {
-    if (onEnsureAudio) {
-      await onEnsureAudio()
-    } else {
-      await audioEngine.unlock()
-    }
+    if (onEnsureAudio) await onEnsureAudio()
+    else await audioEngine.unlock()
   }
 
   const openScroll = async () => {
-    if (opened || unrolling) {
-      return
-    }
-
+    if (opened || unrolling) return
     setUnrolling(true)
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
@@ -80,14 +259,10 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
   }
 
   const teleportNo = async () => {
-    if (accepted || !opened) {
-      return
-    }
+    if (accepted || !opened) return
 
     const now = Date.now()
-    if (now - trapLockRef.current < 280) {
-      return
-    }
+    if (now - trapLockRef.current < 280) return
     trapLockRef.current = now
 
     await ensureAudio()
@@ -101,10 +276,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     const stage = stageRef.current?.getBoundingClientRect()
     const noBox = noRef.current?.getBoundingClientRect()
     const yesBox = yesRef.current?.getBoundingClientRect()
-
-    if (!stage || !noBox) {
-      return
-    }
+    if (!stage || !noBox) return
 
     const next = randomTrapPosition(
       { width: stage.width, height: stage.height },
@@ -118,29 +290,20 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
           }
         : null
     )
-
     setNoPos(next)
   }
 
   const handleAccept = async () => {
-    if (accepted || !opened) {
-      return
-    }
-
+    if (accepted || !opened) return
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playLayered(['sfx_spell_quest', 'voice_tap_yay'])
     setAccepted(true)
-
-    if (onComplete) {
-      onComplete()
-    }
+    if (onComplete) onComplete()
   }
 
   useEffect(() => {
-    if (!trapping) {
-      return undefined
-    }
+    if (!trapping) return undefined
     const timer = window.setTimeout(() => {
       trappingRef.current = false
       setTrapping(false)
@@ -149,26 +312,19 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
   }, [trapping, noPos])
 
   useEffect(() => {
-    if (!opened || accepted) {
-      return undefined
-    }
-
+    if (!opened || accepted) return undefined
     let cancelled = false
     const schedule = () => {
       const wait = 12000 + Math.random() * 3000
       return window.setTimeout(() => {
-        if (cancelled || trappingRef.current) {
-          return
-        }
+        if (cancelled || trappingRef.current) return
         const next = PLAY_POSES[Math.floor(Math.random() * PLAY_POSES.length)]
         setPlayPose(next)
         setYarnVisible(next === 'yarn')
         if (next === 'scratch') {
           audioEngine.stopAllSFXAndVoices()
           audioEngine.playSfx('sfx_cat_purr')
-          if (navigator.vibrate) {
-            navigator.vibrate(80)
-          }
+          if (navigator.vibrate) navigator.vibrate(80)
         } else if (next === 'bump') {
           audioEngine.stopAllSFXAndVoices()
           audioEngine.playSfx('sfx_revelio_bell')
@@ -182,7 +338,6 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
         timer = schedule()
       }, wait)
     }
-
     let timer = schedule()
     return () => {
       cancelled = true
@@ -231,12 +386,12 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
           style={{
             position: 'absolute',
             left: '50%',
-            top: -58,
+            top: -78,
             transform: 'translateX(-50%)',
             pointerEvents: 'none',
           }}
         >
-          <GingerCatCompanion pose="sit" size={64} />
+          <GingerCat3D pose="leap" size={72} heartsOnTap={false} />
         </span>
       )}
     </button>
@@ -259,24 +414,15 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     >
       <style>
         {`
-          @keyframes sealPulse {
-            0%, 100% { transform: rotate(-8deg) scale(1); }
-            50% { transform: rotate(-6deg) scale(1.05); }
+          @keyframes unroll3d {
+            from { max-height: 86px; opacity: 0.6; }
+            to { max-height: 720px; opacity: 1; }
           }
-          @keyframes sealCrack {
-            0% { transform: rotate(-8deg) scale(1); }
-            40% { transform: rotate(12deg) scale(1.12); }
-            100% { transform: rotate(18deg) scale(0.2); opacity: 0; }
-          }
-          @keyframes unroll {
-            from { max-height: 86px; }
-            to { max-height: 640px; }
-          }
-          @keyframes yarnArc {
+          @keyframes yarnArc3d {
             0% { transform: translate(0, 0) scale(1); opacity: 1; }
             100% { transform: translate(54px, 28px) scale(0.85); opacity: 0.2; }
           }
-          @keyframes vanishPop {
+          @keyframes vanishPop3d {
             0% { filter: blur(0); opacity: 1; }
             40% { filter: blur(6px); opacity: 0.35; }
             100% { filter: blur(0); opacity: 1; }
@@ -297,75 +443,18 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
       >
         <div style={{ width: 'min(360px, 100%)', maxWidth: 360 }}>
           {!opened && (
-            <button
-              type="button"
-              onClick={openScroll}
-              aria-label="Tap the crimson wax seal to open the scroll"
-              style={{
-                width: '100%',
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                position: 'relative',
-                padding: 0,
-              }}
-            >
-              <div
-                style={{
-                  height: 86,
-                  borderRadius: 42,
-                  background:
-                    'linear-gradient(180deg, rgba(214, 180, 118, 0.88), rgba(196, 154, 86, 0.82))',
-                  boxShadow: '0 18px 36px rgba(0,0,0,0.4), inset 0 0 0 2px rgba(122, 78, 32, 0.45)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <span
-                  style={{
-                    width: '86%',
-                    height: 10,
-                    borderRadius: 999,
-                    background: 'linear-gradient(90deg, #C9A227, #F4E08A, #C9A227)',
-                    boxShadow: '0 0 12px rgba(212, 175, 55, 0.55)',
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  marginLeft: -34,
-                  marginTop: -34,
-                  width: 68,
-                  height: 68,
-                  borderRadius: '50%',
-                  background:
-                    'radial-gradient(circle at 32% 28%, #f07a7a 0%, #c41e2a 38%, #9b1520 62%, #5c0b12 100%)',
-                  boxShadow:
-                    '0 10px 18px rgba(0, 0, 0, 0.45), inset 0 3px 6px rgba(255, 180, 180, 0.35), inset 0 0 0 3px rgba(140, 18, 24, 0.85)',
-                  animation: unrolling ? 'sealCrack 0.7s ease forwards' : 'sealPulse 4.5s ease-in-out infinite',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: GOLD,
-                  fontWeight: 700,
-                  fontSize: 21,
-                  textShadow: '0 2px 0 #5c0b12, 0 0 8px rgba(212, 175, 55, 0.45)',
-                }}
-              >
-                30
-              </div>
-            </button>
+            <ClosedScroll3D
+              unrolling={unrolling}
+              onOpen={openScroll}
+              width={scrollWidth}
+            />
           )}
 
           {opened && (
             <div
               style={{
                 overflow: 'hidden',
-                animation: 'unroll 0.7s ease',
+                animation: 'unroll3d 0.7s ease',
                 maxWidth: 360,
                 borderRadius: 18,
                 background: 'rgba(245, 230, 200, 0.82)',
@@ -424,23 +513,23 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                   justifyContent: 'center',
                   gap: 4,
                   position: 'relative',
-                  minHeight: 120,
+                  minHeight: 140,
                 }}
               >
-                <MiniMeAvatar
-                  size={88}
+                <MiniMeAvatar3D
+                  size={110}
                   speech={speech}
                   showSpeech={showSpeech}
                   pose={miniPose}
                   peek={trapping}
                 />
-                <GingerCatCompanion pose={trapping ? 'leap' : playPose} size={86} />
+                <GingerCat3D pose={trapping ? 'leap' : playPose} size={100} />
                 {yarnVisible && (
                   <span
                     aria-hidden="true"
                     style={{
                       position: 'absolute',
-                      left: 86,
+                      left: 96,
                       top: 18,
                       width: 18,
                       height: 18,
@@ -448,7 +537,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                       background:
                         'radial-gradient(circle at 30% 30%, #FFF3B0, #D4AF37 60%, #8A6A12)',
                       boxShadow: '0 0 10px rgba(212, 175, 55, 0.8)',
-                      animation: 'yarnArc 0.7s ease forwards',
+                      animation: 'yarnArc3d 0.7s ease forwards',
                     }}
                   />
                 )}
@@ -493,13 +582,14 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
         </div>
       </div>
 
-      {noPos && !accepted &&
+      {noPos &&
+        !accepted &&
         trapButton({
           position: 'absolute',
           left: noPos.x,
           top: noPos.y,
           zIndex: 5,
-          animation: trapping ? 'vanishPop 0.35s ease' : 'none',
+          animation: trapping ? 'vanishPop3d 0.35s ease' : 'none',
         })}
     </section>
   )

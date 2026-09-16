@@ -1,0 +1,554 @@
+import { useEffect, useRef } from 'react'
+import * as THREE from 'three'
+import { disposeObject3D, disposeRenderer } from '../utils/threeDispose'
+
+const VELVET = 0x0f0a1c
+const GOLD = 0xd4af37
+const FIREFLY = 0xd2ff78
+const MAX_LUMOS = 160
+
+const FLAME_VERT = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`
+
+const FLAME_FRAG = /* glsl */ `
+  uniform float uTime;
+  uniform float uIntensity;
+  varying vec2 vUv;
+  void main() {
+    vec2 uv = vUv;
+    float flicker = sin(uTime * 14.0 + uv.x * 8.0) * 0.08
+      + sin(uTime * 23.0 + uv.y * 12.0) * 0.05;
+    float shape = 1.0 - smoothstep(0.15, 0.92, length((uv - vec2(0.5, 0.18)) * vec2(1.8, 1.05)));
+    float core = 1.0 - smoothstep(0.0, 0.35, length((uv - vec2(0.5, 0.28)) * vec2(2.4, 1.4)));
+    vec3 col = mix(vec3(1.0, 0.35, 0.05), vec3(1.0, 0.92, 0.45), core + flicker);
+    float alpha = shape * (0.55 + uIntensity * 0.45);
+    gl_FragColor = vec4(col, alpha);
+  }
+`
+
+function createCandle(x, y, z) {
+  const group = new THREE.Group()
+  group.position.set(x, y, z)
+
+  const wax = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.08, 0.1, 0.55, 12),
+    new THREE.MeshStandardMaterial({
+      color: 0xf0d9a8,
+      roughness: 0.75,
+      metalness: 0.05,
+      emissive: 0x3a2a10,
+      emissiveIntensity: 0.15,
+    })
+  )
+  wax.position.y = 0.1
+  group.add(wax)
+
+  const drip = new THREE.Mesh(
+    new THREE.SphereGeometry(0.09, 10, 10),
+    new THREE.MeshStandardMaterial({ color: 0xe8c98a, roughness: 0.8 })
+  )
+  drip.position.y = 0.36
+  drip.scale.set(1, 0.45, 1)
+  group.add(drip)
+
+  const flameMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uIntensity: { value: 0.7 },
+    },
+    vertexShader: FLAME_VERT,
+    fragmentShader: FLAME_FRAG,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide,
+  })
+  const flame = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.42), flameMat)
+  flame.position.y = 0.58
+  group.add(flame)
+
+  const light = new THREE.PointLight(0xffb347, 1.2, 6, 2)
+  light.position.y = 0.55
+  group.add(light)
+
+  group.userData = {
+    flameMat,
+    light,
+    phase: Math.random() * Math.PI * 2,
+    drift: 0.4 + Math.random() * 0.5,
+    amp: 0.08 + Math.random() * 0.06,
+    baseY: y,
+  }
+  return group
+}
+
+function createEnvelope(x, y, z) {
+  const group = new THREE.Group()
+  group.position.set(x, y, z)
+
+  const paper = new THREE.Mesh(
+    new THREE.BoxGeometry(0.55, 0.36, 0.04),
+    new THREE.MeshStandardMaterial({
+      color: 0xf5e6c8,
+      roughness: 0.85,
+      transparent: true,
+      opacity: 0.82,
+    })
+  )
+  group.add(paper)
+
+  const flap = new THREE.Mesh(
+    new THREE.ConeGeometry(0.32, 0.28, 3),
+    new THREE.MeshStandardMaterial({ color: 0xd6b476, roughness: 0.8 })
+  )
+  flap.rotation.z = Math.PI
+  flap.rotation.x = Math.PI / 2
+  flap.position.set(0, 0.08, 0.03)
+  flap.scale.set(1.1, 0.7, 0.2)
+  group.add(flap)
+
+  const seal = new THREE.Mesh(
+    new THREE.CircleGeometry(0.07, 16),
+    new THREE.MeshStandardMaterial({
+      color: 0x9b1520,
+      emissive: 0x4a0a10,
+      emissiveIntensity: 0.4,
+      metalness: 0.2,
+      roughness: 0.5,
+    })
+  )
+  seal.position.z = 0.03
+  group.add(seal)
+
+  group.userData = {
+    spin: (Math.random() > 0.5 ? 1 : -1) * (0.25 + Math.random() * 0.35),
+    phase: Math.random() * Math.PI * 2,
+    drift: 0.3 + Math.random() * 0.4,
+    amp: 0.12 + Math.random() * 0.1,
+    baseY: y,
+    vx: 0.05 + Math.random() * 0.08,
+  }
+  return group
+}
+
+function createSilhouette(kind) {
+  const shape = new THREE.Shape()
+  if (kind === 'owl') {
+    shape.moveTo(0, 0)
+    shape.ellipse(0, 0, 0.22, 0.12, 0, Math.PI * 2, false, 0)
+  } else {
+    shape.moveTo(0, 0)
+    shape.quadraticCurveTo(-0.18, 0.16, -0.36, 0.02)
+    shape.quadraticCurveTo(-0.12, -0.04, 0, 0)
+    shape.quadraticCurveTo(0.18, 0.16, 0.36, 0.02)
+    shape.quadraticCurveTo(0.12, -0.04, 0, 0)
+  }
+
+  const geo = new THREE.ShapeGeometry(shape)
+  const mat = new THREE.MeshBasicMaterial({
+    color: 0x06040c,
+    transparent: true,
+    opacity: 0.72,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  })
+  const mesh = new THREE.Mesh(geo, mat)
+  mesh.userData = {
+    kind,
+    speed: kind === 'owl' ? 0.55 : 0.9 + Math.random() * 0.4,
+    flap: Math.random() * Math.PI * 2,
+    dir: Math.random() > 0.5 ? 1 : -1,
+    baseY: 1.6 + Math.random() * 1.4,
+  }
+  mesh.position.set(mesh.userData.dir > 0 ? -8 : 8, mesh.userData.baseY, -4 - Math.random() * 3)
+  mesh.scale.setScalar(kind === 'owl' ? 1.4 : 0.9)
+  return mesh
+}
+
+function createBroom() {
+  const group = new THREE.Group()
+  const stick = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.03, 0.035, 1.1, 8),
+    new THREE.MeshStandardMaterial({ color: 0x3b2414, roughness: 0.9 })
+  )
+  stick.rotation.z = Math.PI / 2
+  group.add(stick)
+
+  const bristles = new THREE.Mesh(
+    new THREE.ConeGeometry(0.18, 0.45, 10),
+    new THREE.MeshStandardMaterial({ color: 0x1a1208, roughness: 1 })
+  )
+  bristles.rotation.z = -Math.PI / 2
+  bristles.position.x = 0.65
+  group.add(bristles)
+
+  group.userData = { t: 0 }
+  group.position.set(-10, 1.2, -3)
+  group.rotation.z = -0.35
+  return group
+}
+
+function createParticleSystem(count, color, size, spread = 10) {
+  const positions = new Float32Array(count * 3)
+  const phases = new Float32Array(count)
+  for (let i = 0; i < count; i += 1) {
+    positions[i * 3] = (Math.random() - 0.5) * spread
+    positions[i * 3 + 1] = Math.random() * 4.5 - 0.5
+    positions[i * 3 + 2] = (Math.random() - 0.5) * spread * 0.7
+    phases[i] = Math.random() * Math.PI * 2
+  }
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  geo.setAttribute('phase', new THREE.BufferAttribute(phases, 1))
+  const mat = new THREE.PointsMaterial({
+    color,
+    size,
+    transparent: true,
+    opacity: 0.85,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true,
+  })
+  const points = new THREE.Points(geo, mat)
+  points.userData = { phases, count, kind: 'firefly' }
+  return points
+}
+
+function createLumosTrail() {
+  const positions = new Float32Array(MAX_LUMOS * 3)
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  const mat = new THREE.PointsMaterial({
+    color: 0xfff8e0,
+    size: 0.12,
+    transparent: true,
+    opacity: 0.9,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true,
+  })
+  const points = new THREE.Points(geo, mat)
+  points.frustumCulled = false
+  points.userData = {
+    sparks: Array.from({ length: MAX_LUMOS }, () => ({
+      alive: false,
+      life: 0,
+      x: 0,
+      y: 0,
+      z: 0,
+      vx: 0,
+      vy: 0,
+      vz: 0,
+      diamond: false,
+    })),
+    cursor: 0,
+  }
+  return points
+}
+
+export default function EnchantedCanvas3D({ lumosOn = false, flooActive = false }) {
+  const mountRef = useRef(null)
+  const lumosRef = useRef(lumosOn)
+  const flooRef = useRef(flooActive)
+  lumosRef.current = lumosOn
+  flooRef.current = flooActive
+
+  useEffect(() => {
+    const mount = mountRef.current
+    if (!mount) return undefined
+
+    const scene = new THREE.Scene()
+    scene.fog = new THREE.FogExp2(VELVET, 0.045)
+    scene.background = new THREE.Color(VELVET)
+
+    const camera = new THREE.PerspectiveCamera(
+      48,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      80
+    )
+    camera.position.set(0, 1.1, 5.2)
+
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      powerPreference: 'high-performance',
+    })
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.outputColorSpace = THREE.SRGBColorSpace
+    mount.appendChild(renderer.domElement)
+
+    const ambient = new THREE.AmbientLight(0x3a2a55, 0.55)
+    scene.add(ambient)
+    const studioA = new THREE.PointLight(GOLD, 1.4, 18, 2)
+    studioA.position.set(-3.5, 3.2, 2)
+    scene.add(studioA)
+    const studioB = new THREE.PointLight(0x88aaff, 0.55, 16, 2)
+    studioB.position.set(3.8, 2.4, 1.5)
+    scene.add(studioB)
+    const rim = new THREE.PointLight(0xff6f91, 0.35, 12, 2)
+    rim.position.set(0, 0.2, 4)
+    scene.add(rim)
+
+    const hallFloor = new THREE.Mesh(
+      new THREE.CircleGeometry(14, 48),
+      new THREE.MeshStandardMaterial({
+        color: 0x120a1c,
+        roughness: 0.95,
+        metalness: 0.05,
+      })
+    )
+    hallFloor.rotation.x = -Math.PI / 2
+    hallFloor.position.y = -1.6
+    scene.add(hallFloor)
+
+    const candles = [
+      createCandle(-2.4, 0.9, -1.2),
+      createCandle(2.6, 1.15, -1.8),
+      createCandle(1.4, -0.2, 0.4),
+    ]
+    candles.forEach((c) => scene.add(c))
+
+    const envelopes = [
+      createEnvelope(-2.8, 0.2, -0.6),
+      createEnvelope(2.2, 1.6, -2.2),
+    ]
+    envelopes.forEach((e) => scene.add(e))
+
+    const fireflies = createParticleSystem(48, FIREFLY, 0.08, 12)
+    scene.add(fireflies)
+    const stardust = createParticleSystem(90, GOLD, 0.04, 16)
+    stardust.userData.kind = 'stardust'
+    scene.add(stardust)
+
+    const fliers = [createSilhouette('owl'), createSilhouette('bat'), createSilhouette('bat')]
+    fliers.forEach((f) => scene.add(f))
+
+    const broom = createBroom()
+    scene.add(broom)
+
+    const lumos = createLumosTrail()
+    scene.add(lumos)
+
+    // Floo vortex particles
+    const flooCount = 220
+    const flooPos = new Float32Array(flooCount * 3)
+    const flooGeo = new THREE.BufferGeometry()
+    flooGeo.setAttribute('position', new THREE.BufferAttribute(flooPos, 3))
+    const flooMat = new THREE.PointsMaterial({
+      color: 0x50dc78,
+      size: 0.1,
+      transparent: true,
+      opacity: 0.85,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    })
+    const flooPoints = new THREE.Points(flooGeo, flooMat)
+    flooPoints.visible = false
+    flooPoints.userData = {
+      particles: Array.from({ length: flooCount }, () => ({
+        angle: Math.random() * Math.PI * 2,
+        radius: 0.4 + Math.random() * 3.2,
+        speed: 0.04 + Math.random() * 0.06,
+        y: (Math.random() - 0.5) * 2.4,
+        gold: Math.random() > 0.55,
+      })),
+    }
+    scene.add(flooPoints)
+
+    const pointerNDC = new THREE.Vector2(0, 0.2)
+    const raycaster = new THREE.Raycaster()
+    const trailPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -1.2)
+    const hit = new THREE.Vector3()
+    let intensity = lumosRef.current ? 1 : 0.28
+    let raf = 0
+    let disposed = false
+
+    const spawnLumos = (x, y, z, burst = 4) => {
+      const sparks = lumos.userData.sparks
+      for (let i = 0; i < burst; i += 1) {
+        const idx = lumos.userData.cursor % MAX_LUMOS
+        lumos.userData.cursor += 1
+        const s = sparks[idx]
+        s.alive = true
+        s.life = 1
+        s.x = x + (Math.random() - 0.5) * 0.08
+        s.y = y + (Math.random() - 0.5) * 0.08
+        s.z = z + (Math.random() - 0.5) * 0.08
+        s.vx = (Math.random() - 0.5) * 0.02
+        s.vy = 0.01 + Math.random() * 0.03
+        s.vz = (Math.random() - 0.5) * 0.02
+        s.diamond = Math.random() > 0.4
+      }
+    }
+
+    const onPointer = (event) => {
+      const touch = event.touches ? event.touches[0] : event
+      if (!touch) return
+      pointerNDC.x = (touch.clientX / window.innerWidth) * 2 - 1
+      pointerNDC.y = -(touch.clientY / window.innerHeight) * 2 + 1
+      raycaster.setFromCamera(pointerNDC, camera)
+      if (raycaster.ray.intersectPlane(trailPlane, hit)) {
+        spawnLumos(hit.x, hit.y, hit.z, lumosRef.current ? 8 : 4)
+      }
+    }
+
+    const onResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight
+      camera.updateProjectionMatrix()
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+      renderer.setSize(window.innerWidth, window.innerHeight)
+    }
+
+    const clock = new THREE.Clock()
+
+    const tick = () => {
+      if (disposed) return
+      const t = clock.getElapsedTime()
+      const target = lumosRef.current ? 1 : 0.28
+      intensity += (target - intensity) * 0.05
+
+      studioA.intensity = 0.7 + intensity * 1.1
+      ambient.intensity = 0.35 + intensity * 0.35
+
+      for (const candle of candles) {
+        const { phase, drift, amp, baseY, flameMat, light } = candle.userData
+        candle.position.y = baseY + Math.sin(t * drift + phase) * amp
+        flameMat.uniforms.uTime.value = t
+        flameMat.uniforms.uIntensity.value = intensity
+        light.intensity = 0.55 + intensity * 1.1 + Math.sin(t * 12 + phase) * 0.15
+        candle.children[2].lookAt(camera.position)
+      }
+
+      for (const env of envelopes) {
+        const { spin, phase, drift, amp, baseY, vx } = env.userData
+        env.rotation.y += spin * 0.016
+        env.position.y = baseY + Math.sin(t * drift + phase) * amp
+        env.position.x += vx * 0.016
+        if (env.position.x > 5) env.position.x = -5
+      }
+
+      const ffPos = fireflies.geometry.attributes.position.array
+      const ffPhases = fireflies.userData.phases
+      for (let i = 0; i < fireflies.userData.count; i += 1) {
+        const i3 = i * 3
+        ffPos[i3] += Math.sin(t * 0.7 + ffPhases[i]) * 0.004
+        ffPos[i3 + 1] += Math.cos(t * 0.9 + ffPhases[i] * 1.3) * 0.003
+        ffPos[i3 + 2] += Math.sin(t * 0.5 + ffPhases[i]) * 0.002
+      }
+      fireflies.geometry.attributes.position.needsUpdate = true
+      fireflies.material.opacity = 0.45 + intensity * 0.45
+
+      const sdPos = stardust.geometry.attributes.position.array
+      for (let i = 0; i < stardust.userData.count; i += 1) {
+        sdPos[i * 3 + 1] += 0.004
+        if (sdPos[i * 3 + 1] > 4.2) sdPos[i * 3 + 1] = -1
+      }
+      stardust.geometry.attributes.position.needsUpdate = true
+
+      for (const flier of fliers) {
+        const d = flier.userData
+        d.flap += 0.18
+        flier.position.x += d.dir * d.speed * 0.028
+        flier.position.y = d.baseY + Math.sin(d.flap * 0.5) * 0.15
+        flier.scale.y = (d.kind === 'owl' ? 1.4 : 0.9) * (1 + Math.sin(d.flap) * 0.12)
+        if (d.dir > 0 && flier.position.x > 9) flier.position.x = -9
+        if (d.dir < 0 && flier.position.x < -9) flier.position.x = 9
+      }
+
+      broom.userData.t += 0.016
+      broom.position.x += 0.055
+      broom.position.y = 1.0 + Math.sin(broom.userData.t * 1.4) * 0.35 + broom.userData.t * 0.08
+      broom.position.z = -3 + Math.sin(broom.userData.t * 0.6) * 0.4
+      if (broom.position.x > 10) {
+        broom.position.x = -10
+        broom.userData.t = 0
+      }
+
+      // Lumos sparks
+      const sparks = lumos.userData.sparks
+      const lPos = lumos.geometry.attributes.position.array
+      for (let i = 0; i < MAX_LUMOS; i += 1) {
+        const s = sparks[i]
+        if (!s.alive) {
+          lPos[i * 3 + 1] = -99
+          continue
+        }
+        s.life -= 0.025
+        s.x += s.vx
+        s.y += s.vy
+        s.z += s.vz
+        if (s.life <= 0) {
+          s.alive = false
+          lPos[i * 3 + 1] = -99
+        } else {
+          lPos[i * 3] = s.x
+          lPos[i * 3 + 1] = s.y
+          lPos[i * 3 + 2] = s.z
+        }
+      }
+      lumos.geometry.attributes.position.needsUpdate = true
+      lumos.material.size = 0.08 + intensity * 0.1
+      lumos.material.color.setHex(intensity > 0.6 ? 0xfff8e0 : GOLD)
+
+      // Floo swirl
+      flooPoints.visible = !!flooRef.current
+      if (flooRef.current) {
+        const fp = flooPoints.userData.particles
+        const arr = flooPoints.geometry.attributes.position.array
+        for (let i = 0; i < flooCount; i += 1) {
+          const p = fp[i]
+          p.angle += p.speed
+          p.radius *= 0.992
+          if (p.radius < 0.2) p.radius = 0.5 + Math.random() * 3
+          arr[i * 3] = Math.cos(p.angle) * p.radius
+          arr[i * 3 + 1] = p.y + Math.sin(p.angle * 2) * 0.2
+          arr[i * 3 + 2] = Math.sin(p.angle) * p.radius * 0.55
+        }
+        flooPoints.geometry.attributes.position.needsUpdate = true
+        flooMat.color.setHex(Math.sin(t * 8) > 0 ? 0x50dc78 : GOLD)
+      }
+
+      camera.position.x = Math.sin(t * 0.12) * 0.15
+      camera.lookAt(0, 0.6, 0)
+
+      renderer.render(scene, camera)
+      raf = window.requestAnimationFrame(tick)
+    }
+
+    window.addEventListener('resize', onResize)
+    window.addEventListener('pointermove', onPointer, { passive: true })
+    window.addEventListener('touchmove', onPointer, { passive: true })
+    raf = window.requestAnimationFrame(tick)
+
+    return () => {
+      disposed = true
+      window.cancelAnimationFrame(raf)
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('pointermove', onPointer)
+      window.removeEventListener('touchmove', onPointer)
+      disposeObject3D(scene)
+      disposeRenderer(renderer)
+    }
+  }, [])
+
+  return (
+    <div
+      ref={mountRef}
+      aria-hidden="true"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: 'none',
+        background: '#0F0A1C',
+      }}
+    />
+  )
+}

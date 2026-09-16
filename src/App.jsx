@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import EnchantedCanvas from './components/EnchantedCanvas'
+import EnchantedCanvas3D from './components/EnchantedCanvas3D'
 import Screen1Gateway from './components/Screen1Gateway'
 import Screen2Prank from './components/Screen2Prank'
 import ScreenHunt from './components/ScreenHunt'
@@ -10,6 +10,10 @@ const GOLD = '#D4AF37'
 const PARCHMENT = '#F4E8C1'
 const VELVET = '#0F0A1C'
 
+/**
+ * Master production state machine:
+ * gateway → floo swirl → prank → video_montage → scavenger_hunt
+ */
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('gateway')
   const [lumosOn, setLumosOn] = useState(false)
@@ -39,9 +43,7 @@ export default function App() {
   }
 
   const handleAcceptQuest = () => {
-    if (flooActive || currentScreen !== 'gateway') {
-      return
-    }
+    if (flooActive || currentScreen !== 'gateway') return
 
     setFlooActive(true)
     window.setTimeout(() => {
@@ -51,16 +53,12 @@ export default function App() {
   }
 
   const handleKiss = () => {
-    if (currentScreen !== 'prank') {
-      return
-    }
+    if (currentScreen !== 'prank') return
     setCurrentScreen('video_montage')
   }
 
   const handleContinueHunt = () => {
-    if (currentScreen !== 'video_montage') {
-      return
-    }
+    if (currentScreen !== 'video_montage') return
     setCurrentScreen('scavenger_hunt')
   }
 
@@ -73,7 +71,7 @@ export default function App() {
         position: 'relative',
       }}
     >
-      <EnchantedCanvas lumosOn={lumosOn} flooActive={flooActive} />
+      <EnchantedCanvas3D lumosOn={lumosOn} flooActive={flooActive} />
 
       <button
         type="button"
@@ -105,17 +103,11 @@ export default function App() {
       </button>
 
       {currentScreen === 'gateway' && (
-        <Screen1Gateway
-          onEnsureAudio={ensureAudio}
-          onComplete={handleAcceptQuest}
-        />
+        <Screen1Gateway onEnsureAudio={ensureAudio} onComplete={handleAcceptQuest} />
       )}
 
       {currentScreen === 'prank' && (
-        <Screen2Prank
-          onEnsureAudio={ensureAudio}
-          onKiss={handleKiss}
-        />
+        <Screen2Prank onEnsureAudio={ensureAudio} onKiss={handleKiss} />
       )}
 
       {currentScreen === 'video_montage' && (
