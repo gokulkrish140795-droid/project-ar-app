@@ -1,66 +1,71 @@
 import { useEffect, useRef } from 'react'
 
-const CANDLE_COUNT = 22
-const ENVELOPE_COUNT = 16
-const DUST_COUNT = 120
-const RUNE_COUNT = 18
-const MAX_SPARKS = 170
+const CANDLE_COUNT = 3
+const ENVELOPE_COUNT = 2
+const FIREFLY_COUNT = 28
+const MAX_SPARKS = 140
 const TRAIL_LENGTH = 22
-const RUNES = ['ᚠ', 'ᚢ', 'ᚦ', 'ᚨ', 'ᚱ', 'ᚲ', 'ᚷ', 'ᚹ', 'ᛉ', 'ᛟ', '✧', '☽', '⚡']
 
 function createCandles(width, height) {
-  return Array.from({ length: CANDLE_COUNT }, (_, index) => {
-    const column = index % 11
-    const row = Math.floor(index / 11)
-    return {
-      x: ((column + 0.3) / 11) * width + (Math.random() - 0.5) * 42,
-      y: height * (0.06 + row * 0.28) + Math.random() * height * 0.2,
-      z: 0.35 + Math.random() * 0.85,
-      phase: Math.random() * Math.PI * 2,
-      drift: 0.3 + Math.random() * 0.75,
-      amp: 8 + Math.random() * 18,
-      waxH: 22 + Math.random() * 22,
-      waxW: 4.5 + Math.random() * 3.8,
-      flicker: Math.random(),
-    }
-  })
+  const spots = [
+    [0.16, 0.22],
+    [0.84, 0.18],
+    [0.72, 0.78],
+  ]
+  return spots.slice(0, CANDLE_COUNT).map(([nx, ny], index) => ({
+    x: width * nx,
+    y: height * ny,
+    z: 0.55 + index * 0.12,
+    phase: Math.random() * Math.PI * 2,
+    drift: 0.35 + Math.random() * 0.4,
+    amp: 6 + Math.random() * 8,
+    waxH: 20 + Math.random() * 8,
+    waxW: 5,
+    flicker: Math.random(),
+  }))
 }
 
 function createEnvelopes(width, height) {
-  return Array.from({ length: ENVELOPE_COUNT }, () => ({
-    x: width * (0.08 + Math.random() * 0.84),
-    y: height * (0.08 + Math.random() * 0.78),
-    z: 0.4 + Math.random() * 0.9,
+  return Array.from({ length: ENVELOPE_COUNT }, (_, index) => ({
+    x: width * (index === 0 ? 0.22 : 0.78),
+    y: height * (index === 0 ? 0.68 : 0.34),
+    z: 0.55 + index * 0.2,
     yaw: Math.random() * Math.PI * 2,
-    spin: (Math.random() * 0.0012 + 0.0004) * (Math.random() > 0.5 ? 1 : -1),
+    spin: 0.00045 * (index % 2 === 0 ? 1 : -1),
     phase: Math.random() * Math.PI * 2,
-    drift: 0.25 + Math.random() * 0.55,
-    amp: 10 + Math.random() * 16,
-    vx: 0.18 + Math.random() * 0.32,
-    vy: -0.14 - Math.random() * 0.28,
+    drift: 0.3,
+    amp: 10,
+    vx: 0.08 + index * 0.04,
+    vy: -0.08 - index * 0.03,
   }))
 }
 
-function createDust(width, height) {
-  return Array.from({ length: DUST_COUNT }, () => ({
-    radius: 36 + Math.random() * Math.min(width, height) * 0.46,
-    angle: Math.random() * Math.PI * 2,
-    spin: (Math.random() * 0.0045 + 0.001) * (Math.random() > 0.5 ? 1 : -1),
-    size: 0.55 + Math.random() * 1.9,
-    twinkle: Math.random() * Math.PI * 2,
-    lift: (Math.random() - 0.5) * height * 0.2,
-  }))
-}
-
-function createRunes(width, height) {
-  return Array.from({ length: RUNE_COUNT }, () => ({
-    glyph: RUNES[Math.floor(Math.random() * RUNES.length)],
-    x: width * (0.06 + Math.random() * 0.88),
-    y: height * (0.08 + Math.random() * 0.84),
-    z: 0.3 + Math.random() * 0.7,
-    rot: Math.random() * Math.PI * 2,
-    spin: (Math.random() - 0.5) * 0.008,
+function createFireflies(width, height) {
+  return Array.from({ length: FIREFLY_COUNT }, () => ({
+    x: width * Math.random(),
+    y: height * Math.random(),
+    vx: (Math.random() - 0.5) * 0.35,
+    vy: (Math.random() - 0.5) * 0.28,
     pulse: Math.random() * Math.PI * 2,
+    size: 1.4 + Math.random() * 1.8,
+  }))
+}
+
+function createFliers(width, height) {
+  return [
+    { kind: 'owl', x: -80, y: height * 0.16, vx: 0.55, scale: 1, flap: 0 },
+    { kind: 'bat', x: width + 60, y: height * 0.12, vx: -0.85, scale: 0.7, flap: 1.2 },
+    { kind: 'bat', x: width * 0.4, y: height * 0.08, vx: -0.62, scale: 0.55, flap: 2.4 },
+  ]
+}
+
+function createBubbles(width, height) {
+  return Array.from({ length: 8 }, () => ({
+    x: width * (Math.random() > 0.5 ? 0.08 + Math.random() * 0.12 : 0.8 + Math.random() * 0.12),
+    y: height * (0.55 + Math.random() * 0.4),
+    r: 3 + Math.random() * 6,
+    vy: -0.18 - Math.random() * 0.22,
+    wobble: Math.random() * Math.PI * 2,
   }))
 }
 
@@ -113,8 +118,10 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
     const floo = []
     let candles = []
     let envelopes = []
-    let dust = []
-    let runes = []
+    let fireflies = []
+    let fliers = []
+    let bubbles = []
+    const broom = { x: -120, y: 120, vx: 1.15, vy: 0.32, spin: 0 }
     let intensity = lumosRef.current ? 1 : 0.22
     let frame = 0
     let raf = 0
@@ -128,8 +135,10 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       candles = createCandles(window.innerWidth, window.innerHeight)
       envelopes = createEnvelopes(window.innerWidth, window.innerHeight)
-      dust = createDust(window.innerWidth, window.innerHeight)
-      runes = createRunes(window.innerWidth, window.innerHeight)
+      fireflies = createFireflies(window.innerWidth, window.innerHeight)
+      fliers = createFliers(window.innerWidth, window.innerHeight)
+      bubbles = createBubbles(window.innerWidth, window.innerHeight)
+      broom.y = window.innerHeight * 0.28
     }
 
     const addSparks = (x, y, burst = 4) => {
@@ -185,63 +194,19 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
       ctx.fillRect(0, 0, width, height)
     }
 
-    const drawDust = (width, height, time) => {
-      const cx = width * 0.5
-      const cy = height * 0.42
-      for (const mote of dust) {
-        mote.angle += mote.spin
-        mote.twinkle += 0.04
-        const swirl = Math.sin(time * 0.0003 + mote.angle) * 18
-        const x = cx + Math.cos(mote.angle) * (mote.radius + swirl)
-        const y = cy + Math.sin(mote.angle * 0.85) * (mote.radius * 0.42) + mote.lift
-        const alpha = (0.25 + Math.sin(mote.twinkle) * 0.25) * (0.35 + intensity * 0.65)
-        ctx.fillStyle = `rgba(212, 175, 55, ${alpha})`
-        ctx.beginPath()
-        ctx.arc(x, y, mote.size, 0, Math.PI * 2)
-        ctx.fill()
-      }
-    }
-
-    const drawRunes = (time, far) => {
-      ctx.save()
-      ctx.font = '18px Georgia, serif'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      for (const rune of runes) {
-        const isFar = rune.z < 0.65
-        if (isFar !== far) {
-          continue
-        }
-        rune.rot += rune.spin
-        rune.pulse += 0.03
-        const alpha = (0.18 + Math.sin(rune.pulse) * 0.14) * (0.4 + intensity * 0.6) * rune.z
-        ctx.save()
-        ctx.translate(rune.x, rune.y + Math.sin(time * 0.0008 + rune.pulse) * 6)
-        ctx.rotate(rune.rot)
-        ctx.fillStyle = `rgba(212, 175, 55, ${alpha})`
-        ctx.shadowColor = 'rgba(212, 175, 55, 0.45)'
-        ctx.shadowBlur = 8
-        ctx.fillText(rune.glyph, 0, 0)
-        ctx.restore()
-      }
-      ctx.restore()
-    }
-
     const drawCandle = (candle, time) => {
       candle.flicker += 0.18 + Math.random() * 0.08
       const floatY = candle.y + Math.sin(time * 0.001 * candle.drift + candle.phase) * candle.amp
       const flame = 0.55 + Math.sin(candle.flicker) * 0.25 + Math.random() * 0.08
       const light = (0.18 + intensity * 0.82) * candle.z
-      const scale = 0.55 + candle.z * 0.7
 
       ctx.save()
       ctx.translate(candle.x, floatY)
-      ctx.scale(scale, scale)
 
-      const halo = 38 + candle.z * 28
+      const halo = 34 + candle.z * 18
       const aura = ctx.createRadialGradient(0, -candle.waxH - 8, 2, 0, -candle.waxH, halo)
-      aura.addColorStop(0, `rgba(255, 215, 0, ${0.8 * light * flame})`)
-      aura.addColorStop(0.45, `rgba(255, 140, 40, ${0.12 * light})`)
+      aura.addColorStop(0, `rgba(255, 215, 0, ${0.75 * light * flame})`)
+      aura.addColorStop(0.45, `rgba(255, 140, 40, ${0.1 * light})`)
       aura.addColorStop(1, 'rgba(255, 160, 40, 0)')
       ctx.fillStyle = aura
       ctx.beginPath()
@@ -273,36 +238,27 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
       env.y += env.vy * env.z
       if (env.y < -40) {
         env.y = window.innerHeight + 30
-        env.x = window.innerWidth * Math.random()
+        env.x = window.innerWidth * (0.15 + Math.random() * 0.7)
       }
       if (env.x > window.innerWidth + 40) {
         env.x = -30
       }
 
       const floatY = env.y + Math.sin(time * 0.0009 * env.drift + env.phase) * env.amp
-      const scale = 0.5 + env.z * 0.7
+      const scale = 0.5 + env.z * 0.45
       const skew = Math.sin(env.yaw) * 0.38
-      const w = 50 * scale
-      const h = 34 * scale
-      const alpha = 0.45 + env.z * 0.5
+      const w = 42 * scale
+      const h = 28 * scale
+      const alpha = 0.42 + env.z * 0.35
 
       ctx.save()
       ctx.translate(env.x, floatY)
       ctx.transform(1, 0.08 * Math.cos(env.yaw), skew, 1, 0, 0)
-
-      ctx.fillStyle = `rgba(0, 0, 0, ${0.18 * env.z})`
-      ctx.fillRect(-w / 2 + 5, -h / 2 + 7, w, h)
-
-      const parchment = ctx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2)
-      parchment.addColorStop(0, `rgba(245, 230, 200, ${alpha})`)
-      parchment.addColorStop(0.5, `rgba(236, 214, 164, ${alpha})`)
-      parchment.addColorStop(1, `rgba(214, 180, 118, ${alpha})`)
-      ctx.fillStyle = parchment
+      ctx.fillStyle = `rgba(245, 230, 200, ${alpha})`
       ctx.strokeStyle = `rgba(122, 78, 32, ${alpha})`
       ctx.lineWidth = 1
       ctx.fillRect(-w / 2, -h / 2, w, h)
       ctx.strokeRect(-w / 2, -h / 2, w, h)
-
       ctx.beginPath()
       ctx.moveTo(-w / 2, -h / 2)
       ctx.lineTo(0, -h / 2 + h * 0.46)
@@ -311,39 +267,125 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
       ctx.fillStyle = `rgba(214, 180, 118, ${alpha})`
       ctx.fill()
       ctx.stroke()
-
-      const sealR = 6.8 * scale
-      const seal = ctx.createRadialGradient(-1.5, -1.5, 1, 0, 0, sealR)
-      seal.addColorStop(0, '#e45d5d')
-      seal.addColorStop(0.55, '#9b1520')
-      seal.addColorStop(1, '#5c0b12')
       ctx.beginPath()
-      ctx.arc(0, -1, sealR, 0, Math.PI * 2)
-      ctx.fillStyle = seal
+      ctx.arc(0, -1, 5 * scale, 0, Math.PI * 2)
+      ctx.fillStyle = '#9b1520'
       ctx.fill()
-      ctx.strokeStyle = '#D4AF37'
-      ctx.lineWidth = 0.9
-      ctx.stroke()
-      ctx.fillStyle = '#D4AF37'
-      ctx.font = `${Math.max(6, 7 * scale)}px Georgia, serif`
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText('30', 0, -1)
       ctx.restore()
+    }
+
+    const drawFireflies = (width, height) => {
+      for (const bug of fireflies) {
+        bug.x += bug.vx
+        bug.y += bug.vy
+        bug.pulse += 0.06
+        if (bug.x < -10) bug.x = width + 10
+        if (bug.x > width + 10) bug.x = -10
+        if (bug.y < -10) bug.y = height + 10
+        if (bug.y > height + 10) bug.y = -10
+        const glow = 0.25 + Math.sin(bug.pulse) * 0.25
+        const halo = ctx.createRadialGradient(bug.x, bug.y, 0, bug.x, bug.y, 10)
+        halo.addColorStop(0, `rgba(210, 255, 120, ${0.55 * glow})`)
+        halo.addColorStop(1, 'rgba(180, 255, 90, 0)')
+        ctx.fillStyle = halo
+        ctx.beginPath()
+        ctx.arc(bug.x, bug.y, 10, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = `rgba(230, 255, 150, ${0.7 + glow})`
+        ctx.beginPath()
+        ctx.arc(bug.x, bug.y, bug.size, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
+    const drawFlier = (flier, width) => {
+      flier.x += flier.vx
+      flier.flap += 0.18
+      if (flier.vx > 0 && flier.x > width + 80) {
+        flier.x = -80
+      }
+      if (flier.vx < 0 && flier.x < -80) {
+        flier.x = width + 80
+      }
+
+      const wing = Math.sin(flier.flap) * (flier.kind === 'owl' ? 8 : 12)
+      ctx.save()
+      ctx.translate(flier.x, flier.y + Math.sin(flier.flap * 0.4) * 4)
+      ctx.scale(flier.scale * (flier.vx > 0 ? 1 : -1), flier.scale)
+      ctx.fillStyle = 'rgba(6, 4, 12, 0.72)'
+      if (flier.kind === 'owl') {
+        ctx.beginPath()
+        ctx.ellipse(0, 0, 16, 9, 0, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.beginPath()
+        ctx.ellipse(-8, -2, 14, 5 + wing * 0.15, -0.4, 0, Math.PI * 2)
+        ctx.ellipse(8, -2, 14, 5 + wing * 0.15, 0.4, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.beginPath()
+        ctx.arc(-18, -2, 7, 0, Math.PI * 2)
+        ctx.fill()
+      } else {
+        ctx.beginPath()
+        ctx.ellipse(0, 0, 6, 3, 0, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.beginPath()
+        ctx.moveTo(0, 0)
+        ctx.quadraticCurveTo(-10, -10 - wing, -22, -2)
+        ctx.quadraticCurveTo(-8, 2, 0, 0)
+        ctx.moveTo(0, 0)
+        ctx.quadraticCurveTo(10, -10 - wing, 22, -2)
+        ctx.quadraticCurveTo(8, 2, 0, 0)
+        ctx.fill()
+      }
+      ctx.restore()
+    }
+
+    const drawBroom = (width, height) => {
+      broom.x += broom.vx
+      broom.y += broom.vy
+      broom.spin += 0.01
+      if (broom.x > width + 140 || broom.y > height + 80) {
+        broom.x = -140
+        broom.y = height * (0.18 + Math.random() * 0.3)
+      }
+
+      ctx.save()
+      ctx.translate(broom.x, broom.y)
+      ctx.rotate(0.35 + Math.sin(broom.spin) * 0.05)
+      ctx.fillStyle = 'rgba(8, 5, 16, 0.7)'
+      ctx.fillRect(-36, -2, 48, 4)
+      ctx.beginPath()
+      ctx.moveTo(12, -8)
+      ctx.lineTo(34, -12)
+      ctx.lineTo(36, 12)
+      ctx.lineTo(12, 8)
+      ctx.closePath()
+      ctx.fill()
+      ctx.restore()
+    }
+
+    const drawBubbles = (width, height) => {
+      for (const bubble of bubbles) {
+        bubble.y += bubble.vy
+        bubble.wobble += 0.04
+        bubble.x += Math.sin(bubble.wobble) * 0.25
+        if (bubble.y < height * 0.35) {
+          bubble.y = height * 0.92
+        }
+        ctx.strokeStyle = `rgba(180, 255, 210, ${0.35 + intensity * 0.3})`
+        ctx.fillStyle = `rgba(120, 255, 200, ${0.08 + intensity * 0.08})`
+        ctx.beginPath()
+        ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+      }
     }
 
     const drawTrail = () => {
       const sparkLight = 0.35 + intensity * 0.75
       trail.forEach((point, index) => {
         const t = (index + 1) / trail.length
-        drawSparkle(
-          ctx,
-          point.x,
-          point.y,
-          2.2 + t * 5.5,
-          t * 0.55 * sparkLight,
-          index % 2 === 0
-        )
+        drawSparkle(ctx, point.x, point.y, 2.2 + t * 5.5, t * 0.55 * sparkLight, index % 2 === 0)
       })
     }
 
@@ -357,14 +399,7 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
         if (spark.life <= 0) {
           sparks.splice(i, 1)
         } else {
-          drawSparkle(
-            ctx,
-            spark.x,
-            spark.y,
-            spark.size * spark.life,
-            spark.life * sparkLight,
-            spark.diamond
-          )
+          drawSparkle(ctx, spark.x, spark.y, spark.size * spark.life, spark.life * sparkLight, spark.diamond)
         }
       }
     }
@@ -377,7 +412,6 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
           angle,
           radius,
           speed: 0.04 + Math.random() * 0.05,
-          y: height * 0.5 + (Math.random() - 0.5) * 40,
           life: 1,
           size: 2 + Math.random() * 4,
         })
@@ -421,35 +455,12 @@ export default function EnchantedCanvas({ lumosOn = false, flooActive = false })
       intensity += (target - intensity) * 0.045
 
       drawHall(width, height)
-      drawRunes(time, true)
-      envelopes
-        .slice()
-        .sort((a, b) => a.z - b.z)
-        .forEach((env) => {
-          if (env.z < 0.75) {
-            drawEnvelope(env, time)
-          }
-        })
-      candles
-        .slice()
-        .sort((a, b) => a.z - b.z)
-        .forEach((candle) => {
-          if (candle.z < 0.75) {
-            drawCandle(candle, time)
-          }
-        })
-      drawDust(width, height, time)
-      drawRunes(time, false)
-      envelopes.forEach((env) => {
-        if (env.z >= 0.75) {
-          drawEnvelope(env, time)
-        }
-      })
-      candles.forEach((candle) => {
-        if (candle.z >= 0.75) {
-          drawCandle(candle, time)
-        }
-      })
+      fliers.forEach((flier) => drawFlier(flier, width))
+      drawBroom(width, height)
+      envelopes.forEach((env) => drawEnvelope(env, time))
+      candles.forEach((candle) => drawCandle(candle, time))
+      drawBubbles(width, height)
+      drawFireflies(width, height)
 
       if (frame % 2 === 0) {
         addSparks(pointer.x, pointer.y, lumosRef.current ? 3 : 1)

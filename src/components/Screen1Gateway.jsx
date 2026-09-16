@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import audioEngine from '../utils/audioEngine'
+import GingerCatCompanion from './GingerCatCompanion'
+import MiniMeAvatar from './MiniMeAvatar'
 
 const GOLD = '#D4AF37'
 const INK = '#3B2414'
 const VELVET = '#0F0A1C'
-
-const TRAP_BUBBLE = 'Hey! No skipping your own birthday surprise! Try again! 😜'
-
-const DECKLE =
-  'polygon(1% 3%, 4% 0%, 9% 2%, 14% 0%, 19% 3%, 24% 1%, 30% 3%, 36% 0%, 42% 2%, 48% 0%, 54% 3%, 61% 1%, 67% 3%, 73% 0%, 79% 2%, 85% 0%, 91% 3%, 96% 1%, 99% 4%, 100% 10%, 98% 16%, 100% 23%, 98% 31%, 100% 39%, 98% 47%, 100% 56%, 98% 65%, 100% 73%, 98% 81%, 100% 88%, 97% 94%, 99% 98%, 94% 100%, 88% 97%, 81% 100%, 74% 98%, 67% 100%, 60% 97%, 53% 100%, 46% 98%, 39% 100%, 32% 97%, 25% 100%, 18% 98%, 11% 100%, 5% 97%, 0% 99%, 2% 92%, 0% 84%, 2% 76%, 0% 68%, 2% 59%, 0% 51%, 2% 42%, 0% 34%, 2% 25%, 0% 17%, 2% 9%)'
+const QUEST_QUOTE =
+  '💬 Gokul-Mage: “Aishwarya! Gokul-Mage lost a piece of Gokul\'s heart in our home! Help me find it! 💖”'
+const TRAP_QUOTE = 'Nice try, my love! Ginger and I say only YES works! 😜'
+const PLAY_POSES = ['yarn', 'scratch', 'bump']
 
 function randomTrapPosition(stage, button, avoid) {
   const pad = 18
@@ -36,69 +37,21 @@ function randomTrapPosition(stage, button, avoid) {
   return { x, y }
 }
 
-function ScrollworkFrame({ children }) {
-  return (
-    <div
-      style={{
-        position: 'relative',
-        padding: '14px 14px 12px',
-        marginTop: 8,
-      }}
-    >
-      <svg
-        viewBox="0 0 360 160"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-        }}
-      >
-        <path
-          d="M18 28 C40 8, 80 12, 110 22 S170 6, 180 10 S250 28, 342 22"
-          fill="none"
-          stroke={GOLD}
-          strokeWidth="1.4"
-        />
-        <path
-          d="M18 132 C50 148, 90 138, 140 144 S230 152, 342 136"
-          fill="none"
-          stroke={GOLD}
-          strokeWidth="1.4"
-        />
-        <path
-          d="M12 40 C6 70, 8 90, 16 130"
-          fill="none"
-          stroke={GOLD}
-          strokeWidth="1.2"
-        />
-        <path
-          d="M348 40 C354 70, 352 90, 344 130"
-          fill="none"
-          stroke={GOLD}
-          strokeWidth="1.2"
-        />
-        <circle cx="18" cy="28" r="3" fill={GOLD} />
-        <circle cx="342" cy="22" r="3" fill={GOLD} />
-        <circle cx="18" cy="132" r="3" fill={GOLD} />
-        <circle cx="342" cy="136" r="3" fill={GOLD} />
-      </svg>
-      {children}
-    </div>
-  )
-}
-
 export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
   const stageRef = useRef(null)
   const yesRef = useRef(null)
   const noRef = useRef(null)
   const trapLockRef = useRef(0)
+  const trappingRef = useRef(false)
+  const [opened, setOpened] = useState(false)
+  const [unrolling, setUnrolling] = useState(false)
   const [noPos, setNoPos] = useState(null)
   const [trapping, setTrapping] = useState(false)
   const [accepted, setAccepted] = useState(false)
+  const [speech, setSpeech] = useState(QUEST_QUOTE)
+  const [showSpeech, setShowSpeech] = useState(false)
+  const [playPose, setPlayPose] = useState('idle')
+  const [yarnVisible, setYarnVisible] = useState(false)
 
   const ensureAudio = async () => {
     if (onEnsureAudio) {
@@ -108,8 +61,26 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     }
   }
 
+  const openScroll = async () => {
+    if (opened || unrolling) {
+      return
+    }
+
+    setUnrolling(true)
+    await ensureAudio()
+    audioEngine.stopAllSFXAndVoices()
+    audioEngine.playSfx('sfx_wax_crack')
+
+    window.setTimeout(() => {
+      setOpened(true)
+      setUnrolling(false)
+      setShowSpeech(true)
+      setSpeech(QUEST_QUOTE)
+    }, 720)
+  }
+
   const teleportNo = async () => {
-    if (accepted) {
+    if (accepted || !opened) {
       return
     }
 
@@ -121,8 +92,11 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
 
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
-    audioEngine.playLayered(['sfx_wand_swish', 'voice_no_nice_try'])
+    audioEngine.playLayered(['sfx_wand_swish', 'sfx_cat_meow', 'voice_no_nice_try'])
+    trappingRef.current = true
     setTrapping(true)
+    setSpeech(TRAP_QUOTE)
+    setShowSpeech(true)
 
     const stage = stageRef.current?.getBoundingClientRect()
     const noBox = noRef.current?.getBoundingClientRect()
@@ -149,7 +123,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
   }
 
   const handleAccept = async () => {
-    if (accepted) {
+    if (accepted || !opened) {
       return
     }
 
@@ -167,14 +141,58 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     if (!trapping) {
       return undefined
     }
-    const timer = window.setTimeout(() => setTrapping(false), 900)
+    const timer = window.setTimeout(() => {
+      trappingRef.current = false
+      setTrapping(false)
+    }, 1100)
     return () => window.clearTimeout(timer)
   }, [trapping, noPos])
 
-  const trapButton = (
-    extraStyle,
-    { inFlow = false } = {}
-  ) => (
+  useEffect(() => {
+    if (!opened || accepted) {
+      return undefined
+    }
+
+    let cancelled = false
+    const schedule = () => {
+      const wait = 12000 + Math.random() * 3000
+      return window.setTimeout(() => {
+        if (cancelled || trappingRef.current) {
+          return
+        }
+        const next = PLAY_POSES[Math.floor(Math.random() * PLAY_POSES.length)]
+        setPlayPose(next)
+        setYarnVisible(next === 'yarn')
+        if (next === 'scratch') {
+          audioEngine.stopAllSFXAndVoices()
+          audioEngine.playSfx('sfx_cat_purr')
+          if (navigator.vibrate) {
+            navigator.vibrate(80)
+          }
+        } else if (next === 'bump') {
+          audioEngine.stopAllSFXAndVoices()
+          audioEngine.playSfx('sfx_revelio_bell')
+        }
+        window.setTimeout(() => {
+          if (!cancelled) {
+            setPlayPose('idle')
+            setYarnVisible(false)
+          }
+        }, 1400)
+        timer = schedule()
+      }, wait)
+    }
+
+    let timer = schedule()
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [opened, accepted])
+
+  const miniPose = trapping ? 'idle' : playPose
+
+  const trapButton = (extraStyle = {}) => (
     <button
       ref={noRef}
       type="button"
@@ -191,13 +209,35 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
         teleportNo()
       }}
       style={{
-        ...trapButtonStyle(trapping),
+        position: extraStyle.position || 'relative',
+        minWidth: 140,
+        padding: '9px 18px',
+        borderRadius: 999,
+        border: '1px solid #D4AF37',
+        background: 'linear-gradient(180deg, rgba(212, 175, 55, 0.42), rgba(212, 175, 55, 0.2))',
+        color: '#FFE5A3',
+        fontFamily: 'Georgia, "Times New Roman", serif',
+        fontWeight: 700,
+        letterSpacing: 0.4,
+        cursor: 'pointer',
+        boxShadow: '0 0 16px rgba(212, 175, 55, 0.35)',
+        textShadow: '0 0 8px rgba(255, 229, 163, 0.65)',
         ...extraStyle,
       }}
     >
       No, thanks 😜
-      {!inFlow && trapping && (
-        <span style={fleeBubbleStyle}>{TRAP_BUBBLE}</span>
+      {trapping && extraStyle.position === 'absolute' && (
+        <span
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: -58,
+            transform: 'translateX(-50%)',
+            pointerEvents: 'none',
+          }}
+        >
+          <GingerCatCompanion pose="sit" size={64} />
+        </span>
       )}
     </button>
   )
@@ -219,22 +259,27 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     >
       <style>
         {`
-          @keyframes mageGlow {
-            0%, 100% { box-shadow: 0 0 12px rgba(212, 175, 55, 0.45); }
-            50% { box-shadow: 0 0 28px rgba(212, 175, 55, 0.9); }
+          @keyframes sealPulse {
+            0%, 100% { transform: rotate(-8deg) scale(1); }
+            50% { transform: rotate(-6deg) scale(1.05); }
+          }
+          @keyframes sealCrack {
+            0% { transform: rotate(-8deg) scale(1); }
+            40% { transform: rotate(12deg) scale(1.12); }
+            100% { transform: rotate(18deg) scale(0.2); opacity: 0; }
+          }
+          @keyframes unroll {
+            from { max-height: 86px; }
+            to { max-height: 640px; }
+          }
+          @keyframes yarnArc {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(54px, 28px) scale(0.85); opacity: 0.2; }
           }
           @keyframes vanishPop {
             0% { filter: blur(0); opacity: 1; }
             40% { filter: blur(6px); opacity: 0.35; }
             100% { filter: blur(0); opacity: 1; }
-          }
-          @keyframes sealPulse {
-            0%, 100% { transform: translateX(-50%) rotate(-8deg) scale(1); }
-            50% { transform: translateX(-50%) rotate(-6deg) scale(1.04); }
-          }
-          @keyframes bubblePop {
-            from { opacity: 0; transform: translate(-50%, 6px) scale(0.9); }
-            to { opacity: 1; transform: translate(-50%, 0) scale(1); }
           }
         `}
       </style>
@@ -243,83 +288,90 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
         style={{
           position: 'relative',
           zIndex: 2,
-          height: '100%',
           minHeight: '100vh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: '88px 16px 28px',
-          pointerEvents: 'none',
         }}
       >
-        <div
-          style={{
-            pointerEvents: 'auto',
-            position: 'relative',
-            width: 'min(400px, 100%)',
-            maxWidth: 400,
-          }}
-        >
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: -18,
-              zIndex: 4,
-              width: 68,
-              height: 68,
-              borderRadius: '50%',
-              background:
-                'radial-gradient(circle at 32% 28%, #f07a7a 0%, #c41e2a 38%, #9b1520 62%, #5c0b12 100%)',
-              boxShadow:
-                '0 10px 18px rgba(0, 0, 0, 0.45), inset 0 3px 6px rgba(255, 180, 180, 0.35), inset 0 0 0 3px rgba(140, 18, 24, 0.85)',
-              animation: 'sealPulse 4.5s ease-in-out infinite',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <span
+        <div style={{ width: 'min(360px, 100%)', maxWidth: 360 }}>
+          {!opened && (
+            <button
+              type="button"
+              onClick={openScroll}
+              aria-label="Tap the crimson wax seal to open the scroll"
               style={{
-                color: GOLD,
-                fontWeight: 700,
-                fontSize: 21,
-                letterSpacing: 1,
-                textShadow: '0 2px 0 #5c0b12, 0 0 8px rgba(212, 175, 55, 0.45)',
+                width: '100%',
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                position: 'relative',
+                padding: 0,
               }}
             >
-              30
-            </span>
-          </div>
+              <div
+                style={{
+                  height: 86,
+                  borderRadius: 42,
+                  background:
+                    'linear-gradient(180deg, rgba(214, 180, 118, 0.88), rgba(196, 154, 86, 0.82))',
+                  boxShadow: '0 18px 36px rgba(0,0,0,0.4), inset 0 0 0 2px rgba(122, 78, 32, 0.45)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    width: '86%',
+                    height: 10,
+                    borderRadius: 999,
+                    background: 'linear-gradient(90deg, #C9A227, #F4E08A, #C9A227)',
+                    boxShadow: '0 0 12px rgba(212, 175, 55, 0.55)',
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  marginLeft: -34,
+                  marginTop: -34,
+                  width: 68,
+                  height: 68,
+                  borderRadius: '50%',
+                  background:
+                    'radial-gradient(circle at 32% 28%, #f07a7a 0%, #c41e2a 38%, #9b1520 62%, #5c0b12 100%)',
+                  boxShadow:
+                    '0 10px 18px rgba(0, 0, 0, 0.45), inset 0 3px 6px rgba(255, 180, 180, 0.35), inset 0 0 0 3px rgba(140, 18, 24, 0.85)',
+                  animation: unrolling ? 'sealCrack 0.7s ease forwards' : 'sealPulse 4.5s ease-in-out infinite',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: GOLD,
+                  fontWeight: 700,
+                  fontSize: 21,
+                  textShadow: '0 2px 0 #5c0b12, 0 0 8px rgba(212, 175, 55, 0.45)',
+                }}
+              >
+                30
+              </div>
+            </button>
+          )}
 
-          <div
-            style={{
-              padding: 11,
-              background:
-                'linear-gradient(160deg, #5a341d 0%, #2b160c 42%, #1a0c08 100%)',
-              boxShadow:
-                '0 24px 60px rgba(0, 0, 0, 0.55), inset 0 0 0 2px #8a5a32, inset 0 0 28px rgba(0, 0, 0, 0.55)',
-              clipPath: DECKLE,
-            }}
-          >
+          {opened && (
             <div
               style={{
-                clipPath: DECKLE,
-                padding: '36px 18px 16px',
-                background: `
-                  radial-gradient(ellipse at 18% 12%, rgba(255, 248, 220, 0.35), transparent 46%),
-                  repeating-linear-gradient(
-                    0deg,
-                    rgba(90, 50, 20, 0.05) 0px,
-                    rgba(90, 50, 20, 0.05) 1px,
-                    transparent 1px,
-                    transparent 7px
-                  ),
-                  linear-gradient(180deg, #f6e6c2 0%, #e4c892 48%, #c9a66a 100%)
-                `,
-                boxShadow:
-                  'inset 0 0 40px rgba(70, 30, 8, 0.35), inset 0 0 0 1px rgba(90, 48, 16, 0.45)',
+                overflow: 'hidden',
+                animation: 'unroll 0.7s ease',
+                maxWidth: 360,
+                borderRadius: 18,
+                background: 'rgba(245, 230, 200, 0.82)',
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 18px 40px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(212, 175, 55, 0.45)',
+                padding: '18px 16px 16px',
               }}
             >
               <p
@@ -347,71 +399,64 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
               >
                 THE SEARCH FOR A STRAY HEART
               </h1>
-
-              <div
-                style={{
-                  width: 78,
-                  height: 78,
-                  margin: '12px auto 0',
-                  borderRadius: '50%',
-                  border: `3px solid ${GOLD}`,
-                  background: 'linear-gradient(160deg, #2a1d4a 0%, #120c22 70%)',
-                  overflow: 'hidden',
-                  animation: 'mageGlow 2.8s ease-in-out infinite',
-                }}
-              >
-                <img
-                  src="/avatar.png"
-                  alt="Gokul-Mage"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'center 18%',
-                  }}
-                />
-              </div>
-
-              <ScrollworkFrame>
-                <div
-                  style={{
-                    position: 'relative',
-                    zIndex: 1,
-                    background: 'rgba(255, 248, 230, 0.62)',
-                    border: `1px solid ${GOLD}`,
-                    borderRadius: 10,
-                    padding: '12px 12px',
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: 0,
-                      lineHeight: 1.45,
-                      fontSize: 13,
-                      color: INK,
-                      textAlign: 'center',
-                    }}
-                  >
-                    💬 <strong>Gokul-Mage:</strong> &ldquo;Aishwarya! Gokul-Mage lost a piece of Gokul&apos;s heart in our home! Help me find it! 💖&rdquo;
-                  </p>
-                </div>
-              </ScrollworkFrame>
-
               <p
                 style={{
-                  margin: '8px 4px 0',
-                  fontSize: 12,
+                  margin: '10px 4px 0',
+                  fontSize: 13,
                   lineHeight: 1.5,
                   textAlign: 'center',
-                  color: INK,
+                  background: 'linear-gradient(135deg, #FFF0C2, #D4AF37)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                  filter: 'drop-shadow(0 1px 2px rgba(80, 40, 8, 0.35))',
+                  fontWeight: 700,
                 }}
               >
-                Thirty years of magic, and today begins your greatest quest yet! Follow Gokul-Mage’s clues around our home, find the 27 physical photo cards, and unlock your birthday vault!
+                Thirty years of magic, and today begins your greatest quest yet!
               </p>
 
               <div
                 style={{
-                  marginTop: 14,
+                  marginTop: 16,
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'center',
+                  gap: 4,
+                  position: 'relative',
+                  minHeight: 120,
+                }}
+              >
+                <MiniMeAvatar
+                  size={88}
+                  speech={speech}
+                  showSpeech={showSpeech}
+                  pose={miniPose}
+                  peek={trapping}
+                />
+                <GingerCatCompanion pose={trapping ? 'leap' : playPose} size={86} />
+                {yarnVisible && (
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      left: 86,
+                      top: 18,
+                      width: 18,
+                      height: 18,
+                      borderRadius: '50%',
+                      background:
+                        'radial-gradient(circle at 30% 30%, #FFF3B0, #D4AF37 60%, #8A6A12)',
+                      boxShadow: '0 0 10px rgba(212, 175, 55, 0.8)',
+                      animation: 'yarnArc 0.7s ease forwards',
+                    }}
+                  />
+                )}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 16,
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 10,
@@ -426,7 +471,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                   style={{
                     width: '100%',
                     padding: '11px 12px',
-                    borderRadius: 4,
+                    borderRadius: 999,
                     border: `1px solid ${GOLD}`,
                     background: GOLD,
                     color: VELVET,
@@ -439,13 +484,12 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                     boxShadow: '0 0 18px rgba(212, 175, 55, 0.55)',
                   }}
                 >
-                  I ACCEPT THE WIZARDING QUEST ✨
+                  🪄 I ACCEPT THE WIZARDING QUEST ✨
                 </button>
-
-                {!noPos && !accepted && trapButton({}, { inFlow: true })}
+                {!noPos && !accepted && trapButton()}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -459,40 +503,4 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
         })}
     </section>
   )
-}
-
-function trapButtonStyle(trapping) {
-  return {
-    position: 'relative',
-    minWidth: 128,
-    padding: '9px 18px',
-    borderRadius: 4,
-    border: '1px solid rgba(59, 36, 20, 0.35)',
-    background: 'transparent',
-    color: INK,
-    fontFamily: 'Georgia, "Times New Roman", serif',
-    fontWeight: 700,
-    letterSpacing: 0.4,
-    cursor: 'pointer',
-    opacity: trapping ? 0.85 : 1,
-  }
-}
-
-const fleeBubbleStyle = {
-  position: 'absolute',
-  left: '50%',
-  bottom: 'calc(100% + 8px)',
-  width: 220,
-  transform: 'translateX(-50%)',
-  background: '#fff8e6',
-  color: INK,
-  border: `1px solid ${GOLD}`,
-  borderRadius: 10,
-  padding: '8px 10px',
-  fontSize: 12,
-  lineHeight: 1.35,
-  boxShadow: '0 8px 18px rgba(0,0,0,0.25)',
-  animation: 'bubblePop 0.25s ease',
-  pointerEvents: 'none',
-  zIndex: 6,
 }

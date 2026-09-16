@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import confetti from 'canvas-confetti'
 import audioEngine from '../utils/audioEngine'
+import GingerCatCompanion from './GingerCatCompanion'
+import MiniMeAvatar from './MiniMeAvatar'
 
 const GOLD = '#D4AF37'
 const PARCHMENT = '#F4E8C1'
@@ -11,7 +13,6 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
   const [progress, setProgress] = useState(0)
   const [frozen, setFrozen] = useState(false)
   const [kissed, setKissed] = useState(false)
-  const faceRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
@@ -80,8 +81,9 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
 
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playChipmunkGiggle()
-    audioEngine.play('voice_kiss_giggle', { stack: true, playbackRate: 1.55 })
     audioEngine.play('voice_tap_yay', { stack: true })
+    audioEngine.play('sfx_cat_purr', { stack: true })
+    audioEngine.play('sfx_chipmunk_giggle', { stack: true })
     fireHearts()
 
     window.setTimeout(() => {
@@ -112,10 +114,6 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
             0% { transform: translateY(18px) scale(0.92); filter: blur(2px); }
             70% { transform: translateY(0) scale(1.04); }
             100% { transform: translateY(2px) scale(1); }
-          }
-          @keyframes handPulse {
-            0%, 100% { opacity: 0.55; transform: scale(1); }
-            50% { opacity: 0.9; transform: scale(1.04); }
           }
           @keyframes meterGlow {
             0%, 100% { box-shadow: 0 0 12px rgba(212, 175, 55, 0.35); }
@@ -188,90 +186,42 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
         </p>
       </div>
 
-      <button
-        type="button"
-        ref={faceRef}
-        onClick={handleKiss}
-        disabled={!frozen || kissed}
-        aria-label="Tap Gokul-Mage's face to give a kiss"
+      <div
         style={{
           marginTop: 18,
           position: 'relative',
-          width: 230,
-          height: 280,
-          border: 'none',
-          background: 'transparent',
-          cursor: frozen && !kissed ? 'pointer' : 'default',
+          width: 280,
+          height: 220,
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
           animation: frozen ? 'glassPress 0.85s ease forwards' : 'none',
         }}
       >
         <div
+          aria-hidden="true"
           style={{
             position: 'absolute',
             inset: 0,
             borderRadius: 28,
-            overflow: 'hidden',
-            border: '2px solid rgba(212, 175, 55, 0.65)',
-            boxShadow: '0 0 30px rgba(212, 175, 55, 0.25)',
-            background: 'linear-gradient(180deg, rgba(20,12,40,0.4), rgba(15,10,28,0.1))',
+            border: '2px solid rgba(212, 175, 55, 0.45)',
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 40%, rgba(15,10,28,0.2) 100%)',
+            boxShadow: 'inset 0 0 24px rgba(255,255,255,0.16)',
+            pointerEvents: 'none',
           }}
-        >
-          <img
-            src="/avatar.png"
-            alt="Gokul-Mage pressing against the glass"
-            style={{
-              width: '118%',
-              height: '118%',
-              objectFit: 'cover',
-              objectPosition: 'center 12%',
-              marginLeft: '-9%',
-              marginTop: '-4%',
-            }}
-          />
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background:
-                'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.02) 38%, rgba(15,10,28,0.18) 100%)',
-              boxShadow: 'inset 0 0 24px rgba(255,255,255,0.18)',
-            }}
-          />
-          {frozen && (
-            <>
-              <span
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  left: 28,
-                  bottom: 48,
-                  width: 54,
-                  height: 62,
-                  borderRadius: '45% 45% 40% 40%',
-                  background: 'rgba(244, 232, 193, 0.22)',
-                  border: '1px solid rgba(244, 232, 193, 0.45)',
-                  animation: 'handPulse 1.4s ease-in-out infinite',
-                }}
-              />
-              <span
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  right: 28,
-                  bottom: 48,
-                  width: 54,
-                  height: 62,
-                  borderRadius: '45% 45% 40% 40%',
-                  background: 'rgba(244, 232, 193, 0.22)',
-                  border: '1px solid rgba(244, 232, 193, 0.45)',
-                  animation: 'handPulse 1.4s ease-in-out infinite 0.2s',
-                }}
-              />
-            </>
-          )}
+        />
+        <MiniMeAvatar
+          size={128}
+          pose="glass"
+          onFaceTap={handleKiss}
+          disabled={!frozen || kissed}
+          ariaLabel="Tap Gokul-Mage's face to give a kiss"
+        />
+        <div style={{ marginLeft: -8, marginBottom: 8 }}>
+          <GingerCatCompanion pose="glass" size={96} />
         </div>
-      </button>
+      </div>
 
       {frozen && (
         <div

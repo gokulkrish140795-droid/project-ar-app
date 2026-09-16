@@ -1,178 +1,208 @@
-# PROJECT AR: MASTER PRODUCTION BLUEPRINT & SYSTEM SPECIFICATION (FINAL LOCKED VERSIO)
-========================================================================================
+# .cursorrules — PROJECT AR: COMPLETE MASTER SYSTEM BLUEPRINT & SYSTEM INSTRUCTIONS (V5 - COMPREHENSIVE)
+========================================================================================================
 Project Title: Project AR: Aishwarya’s 30th Birthday Scrapbook Quest ✨
 Theme: "The Search for a Stray Heart"
-Target Audience: Aishwarya (Aishu) - 30th Birthday Celebration
-Visual Identity: Enchanted Hogwarts Great Hall meets Soft Blush/Gold Linen Scrapbook
-Narrator Engine: 3D Figurine Avatar "Gokul-Mage" (using `/public/avatar.png` - `mini_me_diamond_stud_master_3d.png`)
+Visual Identity: Deep Velvet Great Hall Night (#0F0A1C), Aged Parchment Scroll (#F5E6C8), Gold Filigree (#D4AF37), Crimson Wax Seal, Soft Cream & Blush Linen (#FFFBF7).
+Narrator Engine: Living Animated "Mini-Me" Husband Avatar + "Ginger" Orange & White Tabby Cat Companion.
 
-This master specification is the absolute single source of truth for Project AR. It details every single screen, dialogue line, UI component, audio rule, state transition, and game mechanic required for Grok and Cursor to construct the React application.
+This file is the SINGLE COMPREHENSIVE SOURCE OF TRUTH for Cursor AI. It contains all 4 Screens/Phases, exact wording, animations, sound cues, state machine flow, WebAR engine, failsafes, and the full 30-step scavenger hunt card mapping.
 
 ---
 
-## 📱 1. MASTER APP STATE MACHINE & NAVIGATION FLOW (`src/App.jsx`)
+## 🎯 1. MASTER STATE MACHINE & SCREEN SEQUENCE
 
-The React application operates under a strict, linear state machine driven by `currentScreen`:
+The application follows a strictly bound 5-phase sequential state machine (`src/App.jsx`):
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                            PROJECT AR STATE FLOW                             │
-├──────────────────────────────────────────────────────────────────────────────┤
-│ 1. 'gateway'       ➔ Screen 1: Lumos Gateway (Aged Parchment Scroll)          │
-│ 2. 'prank'         ➔ Screen 2: 99% Sweetness Overload Prank (Mini-Me Kiss)   │
-│ 3. 'video_montage' ➔ Screen 3: Intro Romantic Video Teaser (YouTube Player)  │
-│ 4. 'ar_scanner'    ➔ Chapter 1, 2, 3 Scavenger Hunt & AR Letter Tracking     │
-│ 5. 'workbench'     ➔ Skeuomorphic Anagram Workbenches (Steps 10, 20, 30)      │
-│ 6. 'grand_vault'   ➔ Final Birthday Vault Unlocked!                          │
-└──────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        MASTER PRODUCTION STATE FLOW                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PHASE 1: SCREEN 1 — LUMOS GATEWAY & UNBOXING RITUAL                         │
+│  • Closed Ribbon-Tied Scroll with 3D Crimson Wax Seal "30"                  │
+│  • Whimsical Minimal Canvas (Flying Owls/Bats, Fireflies, Broomstick)       │
+│  • Living Mini-Me Avatar + Ginger the Orange & White Tabby Companion        │
+│  • Action: Tap Wax Seal "30" ➔ sfx_wax_crack ➔ Parchment Scroll Unrolls     │
+│  • Action: Tap "I ACCEPT THE WIZARDING QUEST ✨"                            │
+│                                                                             │
+│ PHASE 2: FLOO NETWORK VORTEX TRANSITION (~1.6 seconds)                      │
+│  • Emerald & Gold Particle Swirl Animation                                  │
+│                                                                             │
+│ PHASE 3: SCREEN 2 — 99% SWEETNESS OVERLOAD PRANK                            │
+│  • Loading bar rushes (10% → 45% → 72% → 88% → 99% FROZEN!)                  │
+│  • Mini-Me & Ginger press hands/paws flat against phone screen glass        │
+│  • Coral-Pink Warning Pop-up: "...girl with TWO university degrees! 🎓🎓"   │
+│  • Action: Tap Mini-Me's face ➔ Unlocks WebAudio, plays chipmunk giggle,    │
+│    cat purr (sfx_cat_purr), fires heart confetti, advances state!           │
+│                                                                             │
+│ PHASE 4: SCREEN 3 — INTRO ROMANTIC VIDEO MONTAGE                            │
+│  • Full-screen YouTube Unlisted Video Embed (9:16 vertical)                 │
+│  • Friends' birthday wishes + romantic memory compilation + AI Uncle video  │
+│  • Action: Video ends / "Continue to Quest" ➔ Opens AR Scanner              │
+│                                                                             │
+│ PHASE 5: SCREEN 4 — WEBAR SCAVENGER HUNT & ANAGRAM WORKBENCHES (Steps 1–30) │
+│  • Chapter 1 (Steps 1–10) ➔ Anagram Workbench: MICROWAVECUPBOARD            │
+│  • Chapter 2 (Steps 11–20) ➔ Anagram Workbench: GOLDJEWELRYPOUCH            │
+│  • Chapter 3 (Steps 21–30) ➔ Anagram Workbench: UNDERSTAIRS (Grand Vault)   │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Global Header Controls (Rendered on All Screens):
-* **Lumos / Nox Audio Toggle Button (Top-Right):**
-  - Renders a translucent gold glassmorphism badge: `{isMuted ? '🔇 Nox Audio' : '🔔 Lumos Audio'}`
-  - Toggling unlocks browser WebAudio context, starts/loops `bgm_intro.mp3`, and dynamically adjusts background lighting (bright golden radiance in Lumos, dim ember glow in Nox).
-
 ---
 
-## 🏰 2. GREAT HALL BACKGROUND ENGINE (`src/components/EnchantedCanvas.jsx`)
+## 🎭 2. LIVING COMPANION ENGINE (MINI-ME & GINGER THE CAT)
 
-An interactive, high-performance HTML5 Canvas rendered behind all screen overlays.
-
-### Visual Elements:
-1. **15+ 3D Floating Hogwarts Acceptance Envelopes:**
-   - Envelopes styled with parchment gradients (`#F5E6C8`) and miniature crimson wax seals.
-   - Gently drift, sway, and rise diagonally across the midnight purple sky (`#0F0A1C`).
-2. **20 Multi-Depth Parallax Floating Candles:**
-   - Vertical wax candles drifting at varying speeds and scale depths.
-   - Topped with pulsating golden flame halos (`rgba(255, 215, 0, 0.8)`) that flicker dynamically.
-3. **Floating Ancient Gold Runes & Swirling Stardust:**
-   - Glowing ancient wizarding runes (`ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ`) and shimmering gold dust drifting upward.
-4. **Ultra-Sparkly Diamond-Gold Wand Spark Trail:**
-   - Tracks user mouse movement or mobile touchscreen drags.
-   - Emits a bursting trail of **diamond-white core sparks**, **golden starbursts**, and **trailing ember dust** that fade out gracefully.
-5. **Floo Network Particle Swirl Trigger:**
-   - Exposes a trigger function that fires an **emerald-green & gold vortex particle explosion** across the entire canvas when transitioning from Screen 1 to Screen 2.
-
----
-
-## 📜 3. SCREEN 1: THE LUMOS GATEWAY (`src/components/Screen1Gateway.jsx`)
-
-### Aesthetics & Layout:
-* **Container:** Compact aged parchment scroll (`max-width: 400px`, centered on screen) with burnt leather borders, corner scrollwork filigree, and deckled edge drop-shadows.
-* **Header Seal:** A 3D Crimson Wax Seal with a stamped gold **"30"** birthday emblem anchored at the top-center of the scroll.
-* **Avatar Badge:** Displays Gokul-Mage's 3D avatar artwork using the local asset path `/avatar.png` (`mini_me_diamond_stud_master_3d.png`) inside a gold circular medallion.
-
-### Exact Agreed Wording & Text Content:
-* **Header Seal Subtitle:** `✨ HOGWARTS SECRET PROTOCOL 0510 ✨`
-* **Main Title:** `THE SEARCH FOR A STRAY HEART`
-* **Gokul-Mage Speech Bubble (Gold Scrollwork Frame):**
+### A. Mini-Me Avatar (`src/components/MiniMeAvatar.jsx`)
+* **Visuals:** Stylized 3D cartoon figurine wearing cardigan, gold chain, and diamond stud (asset path: `/public/avatar.png`).
+* **Animations:** Continuous floating bob up and down, subtle breathing scale, glowing diamond stud sparkle.
+* **Mouth-Anchored Speech:** Speech bubbles scale out directly from Mini-Me's cartoon mouth (`transform: scale(0)` ➔ `scale(1)`).
+* **Single Speech Bubble Rule:** Gokul-Mage's quote appears **ONCE ONLY** inside the speech bubble popping out of Mini-Me's mouth:
   > 💬 **Gokul-Mage:** *"Aishwarya! Gokul-Mage lost a piece of Gokul's heart in our home! Help me find it! 💖"*
-* **Quest Proclamation Text:**
-  > *"Thirty years of magic, and today begins your greatest quest yet! Follow Gokul-Mage’s clues around our home, find the 27 physical photo cards, and unlock your birthday vault!"*
 
-### Interactive Action Buttons:
-1. **`I ACCEPT THE WIZARDING QUEST ✨` (Primary YES Button):**
-   - Styled with a solid gold background (`#D4AF37`), dark purple bold text (`#0F0A1C`), and a glowing gold aura box-shadow.
-   - **Click Action:** Plays `sfx_spell_quest.mp3` and `voice_tap_yay.mp3`, fires the emerald Floo Network particle swirl on `EnchantedCanvas`, and advances `currentScreen` to `'prank'`.
-2. **`No, thanks 😜` (Disillusionment Trap Button):**
-   - Styled as a subtle, translucent outline button.
-   - **Trap Behavior:** On `onMouseEnter`, `onFocus`, or `onTouchStart`, the button instantly teleports to a random relative coordinate across the viewport so Aishu can never click it!
-   - **Audio Failsafe:** Executes `audioEngine.stopAllSFXAndVoices()` immediately before playing `sfx_wand_swish.mp3` and `voice_no_nice_try.mp3`.
-   - **Fleeing Speech Bubble:** Spawns a floating cartoon popup over the button:  
-     > *"Hey! No skipping your own birthday surprise! Try again! 😜"*
+### B. Ginger the Orange & White Tabby Cat (`src/components/GingerCatCompanion.jsx`)
+* **Visuals:** Stylized orange-and-white tabby cartoon cat companion anchored right beside Mini-Me.
+* **Idle Mechanics:** Tail swishes, ear twitches, paw-batting at ambient fireflies.
+* **Random Play Loop (Every 12–15 Seconds):**
+  1. *Yarn Toss:* Mini-Me tosses a sparkling golden yarn ball; Ginger pounces and rolls on her back with heart confetti explosions!
+  2. *Head Scratches:* Mini-Me reaches over to pet Ginger behind the ears, triggering a soft purring aura and phone vibration.
+  3. *Head Bumps:* Mini-Me and Ginger gently bump heads with a sparkling chime sound effect!
+* **Touch Interaction:** Tapping Ginger directly plays `sfx_cat_purr` / `sfx_cat_meow` and fires a fountain of pastel heart particles.
 
----
-
-## 😜 4. SCREEN 2: THE 99% SWEETNESS OVERLOAD PRANK (`src/components/Screen2Prank.jsx`)
-
-### Mechanics & Progression:
-1. **The Fast Loading Bar:**
-   - Renders a glowing wizarding magic meter at the center of the screen.
-   - The bar fills rapidly: `10%... 45%... 72%... 88%...` and **freezes abruptly at 99%**.
-2. **Mini-Me Glass-Press Physics:**
-   - Gokul-Mage avatar (`/avatar.png`) animates to the front, flattening his hands against the inside glass pane of her phone screen.
-3. **Coral-Pink Warning Pop-up:**
-   > *"✨ OH NO! SWEETNESS OVERLOAD! ✨ The Wellington wind must have blown away our connection! 💨 But wait... my heart-meters show this phone is being held by a girl with TWO university degrees! 🎓🎓 Your brilliant brain and breathtaking beauty have completely melted my little birthday servers! 💘 Quick, tap my face to give me a kiss and fix the system!"*
-4. **Interactive Face-Kiss Trigger:**
-   - Aishu must physically tap Mini-Me's face on her phone screen.
-   - **Reward & WebAudio Unlock:** Satisfies mobile browser autoplay security rules, triggers a golden heart confetti explosion across the screen, plays a high-pitched chipmunk giggle, plays `voice_tap_yay.mp3`, and smoothly transitions `currentScreen` to `'video_montage'`.
+### C. Cat Assist on "NO" Disillusionment Trap
+* When Aishu tries to hover or tap **"No, thanks 😜"**:
+  1. The "NO" button teleports away (`1px solid #D4AF37` gold border, gold pill background `rgba(212, 175, 55, 0.2)`, bright glowing text `#FFE5A3`).
+  2. Ginger leaps across the screen with a playful meow (`sfx_cat_meow`) and sits/bats at the NO button.
+  3. Mini-Me peeks out with speech bubble: *"Nice try, my love! Ginger and I say only YES works! 😜"*.
+  4. Audio engine invokes `stopAllSFXAndVoices()` first so sounds never overlap or clip.
 
 ---
 
-## 🎥 5. SCREEN 3: INTRO ROMANTIC VIDEO MONTAGE (`src/components/ScreenVideoMontage.jsx`)
+## 🌌 3. WHIMSICAL MINIMAL ATMOSPHERE (`src/components/EnchantedCanvas.jsx`)
 
-* **Content:** Embedded YouTube Unlisted Video Player containing family and friends' wishes, sentimental memories, and the AI-animated voice-cloned tribute from her late uncle.
-* **Controls:** Once the video finishes (or she taps **"Continue Quest"**), advances `currentScreen` to `'ar_scanner'` to begin Chapter 1 of the Scavenger Hunt.
-
----
-
-## 🔊 6. AUDIO ENGINE SPECIFICATION (`src/utils/audioEngine.js`)
-
-A central WebAudio management utility used across all components.
-
-```javascript
-// Master Audio Helper Rules
-1. stopAllSFXAndVoices() MUST run prior to playing any new voice line or sound effect.
-2. Missing audio files in /public/audio/*.mp3 MUST fail quietly without crashing React console.
-3. Audio keys mapping:
-   - bgm_intro: 'audio/bgm_intro.mp3' (Loops smoothly in background)
-   - sfx_wand_swish: 'audio/sfx_wand_swish.mp3'
-   - sfx_spell_quest: 'audio/sfx_spell_quest.mp3'
-   - voice_no_nice_try: 'audio/voice_no_nice_try.mp3'
-   - voice_tap_yay: 'audio/voice_tap_yay.mp3'
-```
+* **Clutter-Free Visuals:** 2–3 distant floating candles and acceptance envelopes (no heavy screen clutter!).
+* **Random Ambient Animations:**
+  * Silhouettes of **Flying Owls & Bats** sweeping gracefully across the upper night sky (`#0F0A1C`).
+  * Soft yellow-green **Fireflies** drifting with gentle glowing light halos.
+  * A small **Flying Broomstick** zooming diagonally across the canvas background.
+  * Subtle **Wand Sparks & Potion Bubbles** popping randomly in the corners.
+* **Interactive Lumos Wand Trail:** Diamond-white core sparks, golden starbursts, and trailing ember dust following her finger/mouse touch across the screen.
 
 ---
 
-## 🗝️ 7. THREE-CHAPTER SCAVENGER HUNT & ANAGRAM MATRIX
+## 📜 4. INTERACTIVE WAX-SEAL PARCHMENT SCROLL (`src/components/Screen1Gateway.jsx`)
 
-### Chapter 1: Cozy Comforts (Steps 1–10)
-* **Theme:** Everyday routines, home warmth, and cozy comforts.
-* **Milestone 10 Target Anagram:** `MICROWAVECUPBOARD` (17 Letters)
-* **Locations:** Mirror, Sofa, Computer Table, Curtain, Pooja Drawer, Cutlery Drawer, Teddy Bear, Closet, Dining Chair, Microwave Cupboard.
-
-### Chapter 2: The Detective Investigation (Steps 11–20)
-* **Theme:** Detective mystery with Mini-Me wearing a Sherlock Holmes hat.
-* **Milestone 20 Target Anagram:** `GOLDJEWELRYPOUCH` (16 Letters)
-* **Locations:** Fridge, Sofa Cover Layer, Bathroom Cabinet, Dyson Airwrap Box, Board Game, Shoe, Wedding Photo Frame, Beauty Cabinet, Plant Shelf, Gold Jewelry Pouch.
-
-### Chapter 3: The Epic Grand Finale (Steps 21–30)
-* **Theme:** Mysterious, romantic, high-stakes finale with Mini-Me in aviator sunglasses.
-* **Target Grand Vault Password:** `UNDERSTAIRS` (11 Letters: U, N, D, E, R, S, T, A, I, R, S)
-* **Step-by-Step Card-to-Letter Mapping:**
-  - Card 21 (Step 21): **U - B** *(Target: U | Dummy: B)* -> Location: Subwoofer
-  - Card 22 (Step 22): **N - G** *(Target: N | Dummy: G)* -> Location: Blue Spring Photo Frame
-  - Card 23 (Step 23): **D - J** *(Target: D | Dummy: J)* -> Location: Uncle's Photo Frame
-  - Card 24 (Step 24): **E - W** *(Target: E | Dummy: W)* -> Location: Laundry Cabinet Shelf
-  - Card 25 (Step 25): **R - R - M** *(Target: R, R | Dummy: M)* -> Location: Bedside Table Drawer
-  - Card 26 (Step 26): **S - S - O** *(Target: S, S | Dummy: O)* -> Location: Balcony Door Frame
-  - Card 27 (Step 27): **T - C** *(Target: T | Dummy: C)* -> Location: Kitchen Island
-  - Card 28 (Step 28): **A - V** *(Target: A | Dummy: V)* -> Location: Bookshelf Top
-  - Card 29 (Step 29): **I - H** *(Target: I | Dummy: H)* -> Location: Ginger's Food Area
-  - Step 30: **Grand Anagram Workbench** -> 20 floating wooden blocks on desk. Drag 9 decoys (B, G, J, W, M, O, C, V, H) into the Dust Bunny Trash Can to reveal the 11 target letters and spell `UNDERSTAIRS`.
+* **Initial State:** Unopened rolled parchment wrapped in golden ribbon stamped with a 3D Crimson Wax Seal with "30".
+* **Unboxing Action:** Tapping the red "30" Wax Seal plays `sfx_wax_crack` sound effect and triggers a smooth CSS unroll animation downward.
+* **Parchment Styling:** Compact (`max-width: 360px`), semi-transparent (`rgba(245, 230, 200, 0.82)` with `backdrop-filter: blur(8px)`) so background owls, broomsticks, and fireflies stay visible behind it.
+* **Typography & Styling:**
+  * Header: `✨ HOGWARTS SECRET PROTOCOL 0510 ✨`
+  * Title: `THE SEARCH FOR A STRAY HEART`
+  * Proclamation: *"Thirty years of magic..."* styled in gold-foil gradient (`linear-gradient(135deg, #FFF0C2, #D4AF37)`) with drop shadow glow and filigree borders.
+  * YES Button: `🪄 I ACCEPT THE WIZARDING QUEST ✨`
 
 ---
 
-## 📂 8. REQUIRED FILE & DIRECTORY STRUCTURE FOR CURSOR
+## 💖 5. SCREEN 2: 99% SWEETNESS OVERLOAD PRANK (`src/components/Screen2Prank.jsx`)
 
-```
-project-ar-app/
-├── public/
-│   ├── avatar.png                    <-- mini_me_diamond_stud_master_3d.png
-│   └── audio/                        <-- MP3 voice & SFX files
-├── src/
-│   ├── components/
-│   │   ├── EnchantedCanvas.jsx      <-- Great Hall 3D floating letters, candles, spark trail
-│   │   ├── Screen1Gateway.jsx       <-- Aged parchment scroll, Crimson wax seal, Gokul-Mage quote
-│   │   ├── Screen2Prank.jsx         <-- 99% Sweetness Overload freeze & Kiss interaction
-│   │   └── ScreenVideoMontage.jsx   <-- Intro Romantic Video Teaser
-│   ├── utils/
-│   │   └── audioEngine.js           <-- WebAudio manager with stopAllSFXAndVoices()
-│   ├── App.jsx                       <-- State machine (gateway -> prank -> video_montage -> ar)
-│   └── main.jsx
-├── .cursorrules                      <-- Reference to this Master Blueprint
-└── package.json
-```
+* **Loading Progress Bar:** Rushes quickly (10% → 45% → 72% → 88% → 99%) and **FREEZES at 99%**.
+* **Glass Pane Interaction:** Mini-Me and Ginger move to center screen and flatten hands/paws against the mobile screen glass.
+* **Coral-Pink Warning Pop-up:**
+  > *"✨ OH NO! SWEETNESS OVERLOAD! ✨ The Wellington wind must have blown away our connection! 💨 But wait... my heart-meters show this phone is being held by a girl with TWO university degrees! 🎓🎓 Your brilliant brain and breathtaking beauty have completely melted my little birthday servers! 💘 Quick, tap my face to give me a kiss and fix the system!"*
+* **Face-Tap Action:** Tapping Mini-Me's face satisfies mobile browser auto-play security policies:
+  * Plays chipmunk giggle (`voice_tap_yay`), cat purr (`sfx_cat_purr`), and releases golden heart confetti.
+  * Unlocks WebAudio context for BGM.
+  * Advances state machine to `video_montage` (Screen 3).
 
-========================================================================================
-END OF MASTER PRODUCTION BLUEPRINT
+---
+
+## 🎬 6. SCREEN 3: INTRO ROMANTIC VIDEO MONTAGE (`src/components/ScreenVideoMontage.jsx`)
+
+* **Video Container:** Full-screen responsive 9:16 vertical video player embedding YouTube Unlisted Video URL.
+* **Content:** Compilation of friends' and family birthday wishes, favorite romantic memories, and the ElevenLabs + Hedra/HeyGen AI-animated video tribute from her late uncle speaking warm birthday greetings.
+* **Controls:** Autoplays with audio unlocked from Screen 2, with a floating gold button: `✨ Continue to Scavenger Hunt ➔`.
+
+---
+
+## 🃏 7. PHASE 2: WEBAR SCAVENGER HUNT & ANAGRAM WORKBENCHES (STEPS 1–30)
+
+### A. WebAR Camera & Target Tracking
+* Uses MindAR + A-Frame inside React.
+* Tracks high-contrast black sans-serif letter blocks printed on the bottom-right of 27 physical Instax-style cards.
+* **State Persistence (`localStorage`):** Progress is cached continuously (`{ currentStepIndex, unlockedCards, collectedLetters }`). Page refreshes or phone battery deaths restore state seamlessly!
+* **Help Drawer Failsafe:** Persistent rose-gold **"Can't Scan? [ ❓ Help ]"** button opens a slide-up drawer accepting the step's specific **Bypass Safety Password**.
+
+---
+
+### B. The 3 Anagram Workbenches & Chapter Breakdown
+
+#### 🌸 CHAPTER 1 (Steps 1–10): Everyday Comforts
+* **Theme:** Hoodies, cozy routines, morning coffee.
+* **Step 10 Workbench Target Anagram:** **`MICROWAVECUPBOARD`** (17 Letters)
+* **Decoys:** Christchurch dust-bunnies thrown into trash can.
+* **Milestone Vault Location:** Kitchen Microwave Cupboard (contains warm breakfast/drink surprise).
+
+#### 🕵️‍♂️ CHAPTER 2 (Steps 11–20): The Detective Investigation
+* **Theme:** Sherlock hat, searching high and low.
+* **Step 20 Workbench Target Anagram:** **`GOLDJEWELRYPOUCH`** (16 Letters)
+* **Decoys:** Auckland wind-traps thrown into trash can.
+* **Milestone Vault Location:** Wardrobe Jewelry Drawer (contains physical Gold Jewelry Pouch with love letter and gift).
+
+#### 🌸 CHAPTER 3 (Steps 21–30): The Epic Grand Finale
+* **Theme:** Aviator sunglasses, orchestral wedding song music, deep emotional payoff.
+* **Target Anagram:** **`UNDERSTAIRS`** (11 Letters: U, N, D, E, R, S, T, A, I, R, S)
+* **Collected Over:** 9 physical cards (Steps 21–29).
+* **Step 30 Workbench Mechanics:**
+  * Camera turns off; wooden desk workbench appears with 20 floating wooden blocks.
+  * Contains 11 target letters + 9 Wellington wind decoy letters (`B, G, J, W, M, O, C, V, H`).
+  * She drags the 9 decoys into the trash bin, then arranges the 11 target letters to spell **`UNDERSTAIRS`**.
+* **Grand Finale Vault:** Under-Stairs Closet lit with battery fairy lights containing the main birthday treasure chest!
+
+---
+
+### C. Master Step-by-Step Card & Riddle Matrix (Steps 1–30)
+
+| Step # | Household Location Clue | Target Anagram Letter | Bypass Password |
+| :---: | :--- | :---: | :---: |
+| **1** | Full-Length Bedroom Mirror | **M** | `mirror` |
+| **2** | Living Room Sofa Cushion | **I** | `sofa` |
+| **3** | Work/Computer Table Monitor | **X** | `computer` |
+| **4** | Bedroom Window Curtain Fold | **O** | `curtain` |
+| **5** | Pooja Drawer / Sacred Shelf | **W** | `pooja` |
+| **6** | Cutlery Drawer (Spoon Tray) | **A** | `cutlery` |
+| **7** | Favorite Teddy Bear Plushie | **V** | `teddy` |
+| **8** | Main Bedroom Wardrobe Closet | **E** | `closet` |
+| **9** | Dining Table Chair Cushion | **C** | `dining` |
+| **10** | **MILESTONE 1 WORKBENCH** | **Unscramble: MICROWAVECUPBOARD** | `microwave` |
+| **11** | Kitchen Refrigerator Door | **G** | `fridge` |
+| **12** | Sofa Throw Blanket Cover | **O** | `blanket` |
+| **13** | Bathroom Cabinet Mirror | **L** | `bathroom` |
+| **14** | Dyson Airwrap Storage Box | **D** | `airwrap` |
+| **15** | Board Game Box Stack | **J** | `boardgame` |
+| **16** | Shoe Rack / Entrance Heel | **E** | `shoerack` |
+| **17** | Wedding Photo Frame Stand | **W** | `wedding` |
+| **18** | Beauty / Skincare Cabinet | **E** | `skincare` |
+| **19** | Living Room Plant Shelf | **L** | `plant` |
+| **20** | **MILESTONE 2 WORKBENCH** | **Unscramble: GOLDJEWELRYPOUCH** | `goldpouch` |
+| **21** | Underneath TV Subwoofer | **U - B** *(Target: U \| Decoy: B)* | `subwoofer` |
+| **22** | Blue Spring Falls Photo Frame | **N - G** *(Target: N \| Decoy: G)* | `bluesprings` |
+| **23** | Late Uncle's Photo Frame | **D - J** *(Target: D \| Decoy: J)* | `uncle` |
+| **24** | Laundry Sliding Cabinet Shelf | **E - W** *(Target: E \| Decoy: W)* | `laundry` |
+| **25** | Coffee Machine Base | **R - R - M** *(Targets: R, R \| Decoy: M)* | `coffee` |
+| **26** | Perfume / Vanity Tray | **S - S - O** *(Targets: S, S \| Decoy: O)* | `perfume` |
+| **27** | Bedside Reading Lamp | **T - C** *(Target: T \| Decoy: C)* | `lamp` |
+| **28** | Bookshelf Favorites Row | **A - V** *(Target: A \| Decoy: V)* | `bookshelf` |
+| **29** | Ginger's Food Area / Mat | **I - H** *(Target: I \| Decoy: H)* | `ginger` |
+| **30** | **GRAND FINALE WORKBENCH** | **Unscramble: UNDERSTAIRS** | `understairs` |
+
+---
+
+## 🔊 8. CENTRAL AUDIO ENGINE (`src/utils/audioEngine.js`)
+
+* **Anti-Chaos Queue:** All `playSfx()` and `playVoice()` calls execute `stopAllSFXAndVoices()` first to eliminate sound overlapping during rapid hovering/tapping.
+* **Fail-Safe Missing Files:** WebAudio helper catches missing `/public/audio/*.mp3` assets silently without crashing React.
+* **Audio Triggers:**
+  * `bgm_intro` (Hogwarts BGM loop)
+  * `sfx_wax_crack` (Seal break)
+  * `sfx_wand_swish` (NO button hover)
+  * `voice_no_nice_try` (NO trap response)
+  * `sfx_spell_quest` / `voice_tap_yay` (YES acceptance)
+  * `sfx_cat_meow` / `sfx_cat_purr` (Ginger interactions)
+  * `sfx_chipmunk_giggle` (Mini-Me face tap)

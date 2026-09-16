@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import EnchantedCanvas from './components/EnchantedCanvas'
 import Screen1Gateway from './components/Screen1Gateway'
 import Screen2Prank from './components/Screen2Prank'
+import ScreenHunt from './components/ScreenHunt'
 import ScreenVideoMontage from './components/ScreenVideoMontage'
 import audioEngine from './utils/audioEngine'
 
@@ -54,6 +55,13 @@ export default function App() {
       return
     }
     setCurrentScreen('video_montage')
+  }
+
+  const handleContinueHunt = () => {
+    if (currentScreen !== 'video_montage') {
+      return
+    }
+    setCurrentScreen('scavenger_hunt')
   }
 
   return (
@@ -110,7 +118,11 @@ export default function App() {
         />
       )}
 
-      {currentScreen === 'video_montage' && <ScreenVideoMontage />}
+      {currentScreen === 'video_montage' && (
+        <ScreenVideoMontage onContinue={handleContinueHunt} />
+      )}
+
+      {currentScreen === 'scavenger_hunt' && <ScreenHunt />}
     </div>
   )
 }
