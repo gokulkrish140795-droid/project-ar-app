@@ -1,5 +1,9 @@
-const GOLD = '#D4AF37'
-const PARCHMENT = '#F4E8C1'
+import { theme } from '../theme'
+import DepthFrame from './DepthFrame'
+import Workbench3D from './Workbench3D'
+
+const GOLD = theme.gold
+const PARCHMENT = theme.parchmentSoft
 
 export default function ScreenHunt() {
   return (
@@ -11,20 +15,11 @@ export default function ScreenHunt() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 24,
+        padding: '88px 16px 28px',
         fontFamily: 'Georgia, "Times New Roman", serif',
       }}
     >
-      <div
-        style={{
-          width: 'min(400px, 100%)',
-          padding: '28px 22px',
-          border: `1px solid ${GOLD}`,
-          background: 'rgba(15, 10, 28, 0.78)',
-          boxShadow: '0 0 40px rgba(212, 175, 55, 0.18)',
-          textAlign: 'center',
-        }}
-      >
+      <DepthFrame style={{ width: 'min(420px, 100%)', textAlign: 'center' }} float>
         <p
           style={{
             margin: 0,
@@ -38,25 +33,43 @@ export default function ScreenHunt() {
         </p>
         <h2
           style={{
-            margin: '12px 0 0',
+            margin: '10px 0 0',
             color: PARCHMENT,
             fontSize: 24,
             fontWeight: 500,
+            textShadow: '0 4px 20px rgba(212,175,55,0.25)',
           }}
         >
           The Search for a Stray Heart begins.
         </h2>
+
+        <div style={{ marginTop: 14 }}>
+          <Workbench3D height={210} />
+        </div>
+
         <p
           style={{
             margin: '12px 0 0',
             color: PARCHMENT,
             fontSize: 14,
-            lineHeight: 1.5,
+            lineHeight: 1.55,
           }}
         >
-          Chapter 1 awaits: everyday comforts, then the anagram MICROWAVECUPBOARD.
+          Chapter 1 awaits: everyday comforts, then the wooden anagram{' '}
+          <span style={{ color: GOLD, fontWeight: 700 }}>MICROWAVECUPBOARD</span>.
         </p>
-      </div>
+        <p
+          style={{
+            margin: '10px 0 0',
+            color: 'rgba(244,232,193,0.7)',
+            fontSize: 12,
+            lineHeight: 1.45,
+          }}
+        >
+          Drag decoy letters into the bin. Arrange the true ones on the desk. Camera
+          tracking arrives next.
+        </p>
+      </DepthFrame>
     </section>
   )
 }

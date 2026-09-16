@@ -1,11 +1,14 @@
-# .cursorrules — PROJECT AR: COMPLETE MASTER SYSTEM BLUEPRINT & SYSTEM INSTRUCTIONS (V5 - COMPREHENSIVE)
+# .cursorrules — PROJECT AR: COMPLETE MASTER SYSTEM BLUEPRINT & SYSTEM INSTRUCTIONS (V6 — THREE.JS / GLB)
 ========================================================================================================
 Project Title: Project AR: Aishwarya’s 30th Birthday Scrapbook Quest ✨
 Theme: "The Search for a Stray Heart"
 Visual Identity: Deep Velvet Great Hall Night (#0F0A1C), Aged Parchment Scroll (#F5E6C8), Gold Filigree (#D4AF37), Crimson Wax Seal, Soft Cream & Blush Linen (#FFFBF7).
-Narrator Engine: Living Animated "Mini-Me" Husband Avatar + "Ginger" Orange & White Tabby Cat Companion.
+Shared theme tokens: `src/theme.js` (keep DOM + Three.js colors in sync).
+Narrator Engine: Living 3D "Mini-Me" Husband Avatar + "Ginger" Orange & White Tabby Cat Companion (Three.js WebGL + GLB).
 
-This file is the SINGLE COMPREHENSIVE SOURCE OF TRUTH for Cursor AI. It contains all 4 Screens/Phases, exact wording, animations, sound cues, state machine flow, WebAR engine, failsafes, and the full 30-step scavenger hunt card mapping.
+This file is the SINGLE COMPREHENSIVE SOURCE OF TRUTH for Cursor AI. It contains all screens/phases, 3D/WebGL architecture, companion director behaviors, exact wording, sound cues, state machine flow, WebAR engine, failsafes, and the full 30-step scavenger hunt card mapping.
+
+**Stack:** Vite + React + `three` (raw WebGL scenes; GLTF via `three/addons/loaders/GLTFLoader.js`). Prefer StackBlitz / GitHub for remote preview; audio MP3s may be added later without blocking visuals.
 
 ---
 
@@ -18,18 +21,19 @@ The application follows a strictly bound 5-phase sequential state machine (`src/
 │                        MASTER PRODUCTION STATE FLOW                         │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ PHASE 1: SCREEN 1 — LUMOS GATEWAY & UNBOXING RITUAL                         │
-│  • Closed Ribbon-Tied Scroll with 3D Crimson Wax Seal "30"                  │
-│  • Whimsical Minimal Canvas (Flying Owls/Bats, Fireflies, Broomstick)       │
-│  • Living Mini-Me Avatar + Ginger the Orange & White Tabby Companion        │
+│  • 3D Ribbon Scroll + Crimson Wax Seal "30" (Three.js ClosedScroll3D)       │
+│  • EnchantedCanvas3D Great Hall (candles, fireflies, owls/bats, broom)      │
+│  • Living MiniMeAvatar3D + GingerCat3D (GLB → demo CDN → procedural)        │
+│  • Companion Director: random peek / walk-in / smile / lean / cute cat      │
 │  • Action: Tap Wax Seal "30" ➔ sfx_wax_crack ➔ Parchment Scroll Unrolls     │
 │  • Action: Tap "I ACCEPT THE WIZARDING QUEST ✨"                            │
 │                                                                             │
 │ PHASE 2: FLOO NETWORK VORTEX TRANSITION (~1.6 seconds)                      │
-│  • Emerald & Gold Particle Swirl Animation                                  │
+│  • Emerald & Gold GPU particle swirl on EnchantedCanvas3D (flooActive)      │
 │                                                                             │
 │ PHASE 3: SCREEN 2 — 99% SWEETNESS OVERLOAD PRANK                            │
 │  • Loading bar rushes (10% → 45% → 72% → 88% → 99% FROZEN!)                  │
-│  • Mini-Me & Ginger press hands/paws flat against phone screen glass        │
+│  • 3D Mini-Me & Ginger pose="glass" (hands/paws press screen glass)         │
 │  • Coral-Pink Warning Pop-up: "...girl with TWO university degrees! 🎓🎓"   │
 │  • Action: Tap Mini-Me's face ➔ Unlocks WebAudio, plays chipmunk giggle,    │
 │    cat purr (sfx_cat_purr), fires heart confetti, advances state!           │
@@ -48,114 +52,131 @@ The application follows a strictly bound 5-phase sequential state machine (`src/
 
 ---
 
-## 🎭 2. LIVING COMPANION ENGINE (MINI-ME & GINGER THE CAT)
+## 🎭 2. LIVING COMPANION ENGINE (MINI-ME & GINGER — THREE.JS)
 
-### A. Mini-Me Avatar (`src/components/MiniMeAvatar.jsx`)
-* **Visuals:** Stylized 3D cartoon figurine wearing cardigan, gold chain, and diamond stud (asset path: `/public/avatar.png`).
-* **Animations:** Continuous floating bob up and down, subtle breathing scale, glowing diamond stud sparkle.
-* **Mouth-Anchored Speech:** Speech bubbles scale out directly from Mini-Me's cartoon mouth (`transform: scale(0)` ➔ `scale(1)`).
-* **Single Speech Bubble Rule:** Gokul-Mage's quote appears **ONCE ONLY** inside the speech bubble popping out of Mini-Me's mouth:
+### A. Architecture (source of truth)
+| Piece | Path |
+| :--- | :--- |
+| Mini-Me viewport | `src/components/MiniMeAvatar3D.jsx` |
+| Ginger viewport | `src/components/GingerCat3D.jsx` |
+| GLB config | `src/config/companionModels.js` |
+| GLTF load / fit / mixer | `src/utils/gltfCharacter.js` |
+| Random behavior director | `src/hooks/useCompanionDirector.js` |
+| Behavior catalog | `src/utils/companionBehaviors.js` |
+| Dispose helpers | `src/utils/threeDispose.js` |
+| Legacy 2D (unused fallback) | `MiniMeAvatar.jsx`, `GingerCatCompanion.jsx` |
+
+**Load priority (do not break):**
+1. Local GLB: `/public/models/minime.glb` and `/public/models/ginger.glb`
+2. Else CDN demo GLBs (RobotExpressive / Fox) so StackBlitz stays visual
+3. Else procedural Pixar-style primitive meshes
+
+**Animation:** `AnimationMixer` + clip aliases from `companionModels.js`. Root staging (`peek`, `walkIn`, `lean`, `leap`, etc.) applied even when clips are missing. Dispose all geometries/materials/renderer on unmount.
+
+### B. Mini-Me Avatar3D
+* **Visuals:** Stylized 3D character (cardigan, gold chain, diamond stud when procedural; final look from `minime.glb`).
+* **Idle:** Float + breathe; blink; stud sparkle / chain sway (procedural); GLB idle clip when present.
+* **Poses:** `idle`, `talk`, `smile`, `lean`, `peek`, `walkIn`, `yarn`, `scratch`, `bump`, `glass`.
+* **Mouth / lip-sync:** Speech bubble anchored to projected 3D mouth (or jaw/head bone). `talking` + `audioEngine.getLipAmplitude()` drives mouth flap / jaw.
+* **Intro speech (once on scroll open):**
   > 💬 **Gokul-Mage:** *"Aishwarya! Gokul-Mage lost a piece of Gokul's heart in our home! Help me find it! 💖"*
+* **Idle chatter (director):** rotates `voice_idle_1`–`3` lines from `companionBehaviors.js`.
 
-### B. Ginger the Orange & White Tabby Cat (`src/components/GingerCatCompanion.jsx`)
-* **Visuals:** Stylized orange-and-white tabby cartoon cat companion anchored right beside Mini-Me.
-* **Idle Mechanics:** Tail swishes, ear twitches, paw-batting at ambient fireflies.
-* **Random Play Loop (Every 12–15 Seconds):**
-  1. *Yarn Toss:* Mini-Me tosses a sparkling golden yarn ball; Ginger pounces and rolls on her back with heart confetti explosions!
-  2. *Head Scratches:* Mini-Me reaches over to pet Ginger behind the ears, triggering a soft purring aura and phone vibration.
-  3. *Head Bumps:* Mini-Me and Ginger gently bump heads with a sparkling chime sound effect!
-* **Touch Interaction:** Tapping Ginger directly plays `sfx_cat_purr` / `sfx_cat_meow` and fires a fountain of pastel heart particles.
+### C. Ginger Cat3D
+* **Visuals:** Orange & white tabby (procedural fur shader or `ginger.glb`).
+* **Idle:** Tail swish, ear twitch, paw bat, blink.
+* **Cute poses:** `stretch`, `loaf`, `lick`, `bat`, `roll`, `sleep`, `nuzzle`, plus `leap`, `sit`, `yarn`, `scratch`, `bump`, `glass`, `peek`, `walkIn`.
+* **Touch:** Tap plays `sfx_cat_purr` (silent if missing) + pastel heart fountain.
 
-### C. Cat Assist on "NO" Disillusionment Trap
+### D. Companion Director (`useCompanionDirector`)
+* Active on Screen 1 after scroll opens; paused during NO trap.
+* Interval ~6.5–11s; weighted random behaviors (peek, walk_in, smile, lean_touch, yarn, scratch, bump, ginger_*, talk).
+* On open: `playIntro()` → talk pose + `voice_quest_intro` (or chirp fallback).
+* On NO trap: `playTrap()` → Mini-Me peek + Ginger leap + trap line.
+
+### E. Cat Assist on "NO" Disillusionment Trap
 * When Aishu tries to hover or tap **"No, thanks 😜"**:
   1. The "NO" button teleports away (`1px solid #D4AF37` gold border, gold pill background `rgba(212, 175, 55, 0.2)`, bright glowing text `#FFE5A3`).
-  2. Ginger leaps across the screen with a playful meow (`sfx_cat_meow`) and sits/bats at the NO button.
-  3. Mini-Me peeks out with speech bubble: *"Nice try, my love! Ginger and I say only YES works! 😜"*.
+  2. Ginger leaps onto the button (`pose="leap"`) with `sfx_cat_meow`.
+  3. Mini-Me peeks with speech: *"Nice try, my love! Ginger and I say only YES works! 😜"* (`voice_no_nice_try`).
   4. Audio engine invokes `stopAllSFXAndVoices()` first so sounds never overlap or clip.
 
 ---
 
-## 🌌 3. WHIMSICAL MINIMAL ATMOSPHERE (`src/components/EnchantedCanvas.jsx`)
+## 🌌 3. 3D GREAT HALL ATMOSPHERE (`src/components/EnchantedCanvas3D.jsx`)
 
-* **Clutter-Free Visuals:** 2–3 distant floating candles and acceptance envelopes (no heavy screen clutter!).
-* **Random Ambient Animations:**
-  * Silhouettes of **Flying Owls & Bats** sweeping gracefully across the upper night sky (`#0F0A1C`).
-  * Soft yellow-green **Fireflies** drifting with gentle glowing light halos.
-  * A small **Flying Broomstick** zooming diagonally across the canvas background.
-  * Subtle **Wand Sparks & Potion Bubbles** popping randomly in the corners.
-* **Interactive Lumos Wand Trail:** Diamond-white core sparks, golden starbursts, and trailing ember dust following her finger/mouse touch across the screen.
+* **Engine:** Full-screen Three.js WebGL — `PerspectiveCamera`, ambient + studio point lights, fog, geometry dispose on unmount.
+* **Props:** `lumosOn` (boost intensity / Lumos trail), `flooActive` (emerald–gold vortex particles).
+* **Scene content (clutter-free):**
+  * 2–3 floating candles with flame **shader** + point lights
+  * Hogwarts envelopes drifting in depth
+  * GPU fireflies (yellow-green) + gold stardust
+  * Owl / bat silhouette sweeps
+  * Diagonal flying broomstick
+  * Interactive **Lumos wand trail** (pointer/touch → diamond-gold sparks)
+* **Legacy:** `EnchantedCanvas.jsx` (2D canvas) is superseded; App must use `EnchantedCanvas3D`.
 
 ---
 
 ## 📜 4. INTERACTIVE WAX-SEAL PARCHMENT SCROLL (`src/components/Screen1Gateway.jsx`)
 
-* **Initial State:** Unopened rolled parchment wrapped in golden ribbon stamped with a 3D Crimson Wax Seal with "30".
-* **Unboxing Action:** Tapping the red "30" Wax Seal plays `sfx_wax_crack` sound effect and triggers a smooth CSS unroll animation downward.
-* **Parchment Styling:** Compact (`max-width: 360px`), semi-transparent (`rgba(245, 230, 200, 0.82)` with `backdrop-filter: blur(8px)`) so background owls, broomsticks, and fireflies stay visible behind it.
-* **Typography & Styling:**
+* **Initial State:** Three.js closed ribbon scroll + crimson wax seal **"30"** (`ClosedScroll3D` inside gateway).
+* **Unboxing:** Tap seal → `sfx_wax_crack` → seal crack anim → parchment unrolls downward.
+* **Parchment:** Compact (`max-width: 360px`), semi-transparent (`rgba(245, 230, 200, 0.82)` + `backdrop-filter: blur(8px)`) so the 3D hall stays visible.
+* **Typography:**
   * Header: `✨ HOGWARTS SECRET PROTOCOL 0510 ✨`
   * Title: `THE SEARCH FOR A STRAY HEART`
-  * Proclamation: *"Thirty years of magic..."* styled in gold-foil gradient (`linear-gradient(135deg, #FFF0C2, #D4AF37)`) with drop shadow glow and filigree borders.
-  * YES Button: `🪄 I ACCEPT THE WIZARDING QUEST ✨`
+  * Proclamation: *"Thirty years of magic..."* gold-foil gradient (`linear-gradient(135deg, #FFF0C2, #D4AF37)`)
+  * YES: `🪄 I ACCEPT THE WIZARDING QUEST ✨`
+* **Companions:** Wired through `useCompanionDirector` → `MiniMeAvatar3D` + `GingerCat3D`.
 
 ---
 
 ## 💖 5. SCREEN 2: 99% SWEETNESS OVERLOAD PRANK (`src/components/Screen2Prank.jsx`)
 
 * **Loading Progress Bar:** Rushes quickly (10% → 45% → 72% → 88% → 99%) and **FREEZES at 99%**.
-* **Glass Pane Interaction:** Mini-Me and Ginger move to center screen and flatten hands/paws against the mobile screen glass.
+* **Glass Pane:** `MiniMeAvatar3D` + `GingerCat3D` with `pose="glass"`.
 * **Coral-Pink Warning Pop-up:**
   > *"✨ OH NO! SWEETNESS OVERLOAD! ✨ The Wellington wind must have blown away our connection! 💨 But wait... my heart-meters show this phone is being held by a girl with TWO university degrees! 🎓🎓 Your brilliant brain and breathtaking beauty have completely melted my little birthday servers! 💘 Quick, tap my face to give me a kiss and fix the system!"*
-* **Face-Tap Action:** Tapping Mini-Me's face satisfies mobile browser auto-play security policies:
-  * Plays chipmunk giggle (`voice_tap_yay`), cat purr (`sfx_cat_purr`), and releases golden heart confetti.
-  * Unlocks WebAudio context for BGM.
-  * Advances state machine to `video_montage` (Screen 3).
+* **Face-Tap:** Unlocks WebAudio / BGM; `voice_tap_yay` + `sfx_cat_purr` + chipmunk giggle + heart confetti → `video_montage`.
 
 ---
 
 ## 🎬 6. SCREEN 3: INTRO ROMANTIC VIDEO MONTAGE (`src/components/ScreenVideoMontage.jsx`)
 
-* **Video Container:** Full-screen responsive 9:16 vertical video player embedding YouTube Unlisted Video URL.
-* **Content:** Compilation of friends' and family birthday wishes, favorite romantic memories, and the ElevenLabs + Hedra/HeyGen AI-animated video tribute from her late uncle speaking warm birthday greetings.
-* **Controls:** Autoplays with audio unlocked from Screen 2, with a floating gold button: `✨ Continue to Scavenger Hunt ➔`.
+* **Video Container:** Full-screen responsive 9:16 vertical YouTube Unlisted embed.
+* **Content:** Friends/family wishes, romantic memories, AI uncle tribute.
+* **Controls:** Autoplays after Screen 2 audio unlock; gold button `✨ Continue to Scavenger Hunt ➔`.
 
 ---
 
 ## 🃏 7. PHASE 2: WEBAR SCAVENGER HUNT & ANAGRAM WORKBENCHES (STEPS 1–30)
 
 ### A. WebAR Camera & Target Tracking
-* Uses MindAR + A-Frame inside React.
-* Tracks high-contrast black sans-serif letter blocks printed on the bottom-right of 27 physical Instax-style cards.
-* **State Persistence (`localStorage`):** Progress is cached continuously (`{ currentStepIndex, unlockedCards, collectedLetters }`). Page refreshes or phone battery deaths restore state seamlessly!
-* **Help Drawer Failsafe:** Persistent rose-gold **"Can't Scan? [ ❓ Help ]"** button opens a slide-up drawer accepting the step's specific **Bypass Safety Password**.
-
----
+* Uses MindAR + A-Frame inside React (`ScreenHunt.jsx` — implement when Phase 2 is built).
+* Tracks high-contrast black sans-serif letter blocks on 27 physical Instax-style cards.
+* **State Persistence (`localStorage`):** `{ currentStepIndex, unlockedCards, collectedLetters }`.
+* **Help Drawer:** Rose-gold **"Can't Scan? [ ❓ Help ]"** + per-step **Bypass Safety Password**.
 
 ### B. The 3 Anagram Workbenches & Chapter Breakdown
 
 #### 🌸 CHAPTER 1 (Steps 1–10): Everyday Comforts
 * **Theme:** Hoodies, cozy routines, morning coffee.
-* **Step 10 Workbench Target Anagram:** **`MICROWAVECUPBOARD`** (17 Letters)
-* **Decoys:** Christchurch dust-bunnies thrown into trash can.
-* **Milestone Vault Location:** Kitchen Microwave Cupboard (contains warm breakfast/drink surprise).
+* **Step 10 Anagram:** **`MICROWAVECUPBOARD`** (17 Letters)
+* **Decoys:** Christchurch dust-bunnies → trash.
+* **Vault:** Kitchen Microwave Cupboard.
 
 #### 🕵️‍♂️ CHAPTER 2 (Steps 11–20): The Detective Investigation
 * **Theme:** Sherlock hat, searching high and low.
-* **Step 20 Workbench Target Anagram:** **`GOLDJEWELRYPOUCH`** (16 Letters)
-* **Decoys:** Auckland wind-traps thrown into trash can.
-* **Milestone Vault Location:** Wardrobe Jewelry Drawer (contains physical Gold Jewelry Pouch with love letter and gift).
+* **Step 20 Anagram:** **`GOLDJEWELRYPOUCH`** (16 Letters)
+* **Decoys:** Auckland wind-traps → trash.
+* **Vault:** Wardrobe Jewelry Drawer (Gold Jewelry Pouch).
 
 #### 🌸 CHAPTER 3 (Steps 21–30): The Epic Grand Finale
-* **Theme:** Aviator sunglasses, orchestral wedding song music, deep emotional payoff.
-* **Target Anagram:** **`UNDERSTAIRS`** (11 Letters: U, N, D, E, R, S, T, A, I, R, S)
-* **Collected Over:** 9 physical cards (Steps 21–29).
-* **Step 30 Workbench Mechanics:**
-  * Camera turns off; wooden desk workbench appears with 20 floating wooden blocks.
-  * Contains 11 target letters + 9 Wellington wind decoy letters (`B, G, J, W, M, O, C, V, H`).
-  * She drags the 9 decoys into the trash bin, then arranges the 11 target letters to spell **`UNDERSTAIRS`**.
-* **Grand Finale Vault:** Under-Stairs Closet lit with battery fairy lights containing the main birthday treasure chest!
-
----
+* **Theme:** Aviator sunglasses, wedding song, emotional payoff.
+* **Anagram:** **`UNDERSTAIRS`** (11 Letters)
+* **Step 30:** Camera off; 20 wooden blocks (11 target + 9 decoys `B,G,J,W,M,O,C,V,H`); trash decoys; spell UNDERSTAIRS.
+* **Vault:** Under-Stairs Closet + fairy lights + treasure chest.
 
 ### C. Master Step-by-Step Card & Riddle Matrix (Steps 1–30)
 
@@ -196,13 +217,34 @@ The application follows a strictly bound 5-phase sequential state machine (`src/
 
 ## 🔊 8. CENTRAL AUDIO ENGINE (`src/utils/audioEngine.js`)
 
-* **Anti-Chaos Queue:** All `playSfx()` and `playVoice()` calls execute `stopAllSFXAndVoices()` first to eliminate sound overlapping during rapid hovering/tapping.
-* **Fail-Safe Missing Files:** WebAudio helper catches missing `/public/audio/*.mp3` assets silently without crashing React.
-* **Audio Triggers:**
-  * `bgm_intro` (Hogwarts BGM loop)
-  * `sfx_wax_crack` (Seal break)
-  * `sfx_wand_swish` (NO button hover)
-  * `voice_no_nice_try` (NO trap response)
-  * `sfx_spell_quest` / `voice_tap_yay` (YES acceptance)
-  * `sfx_cat_meow` / `sfx_cat_purr` (Ginger interactions)
-  * `sfx_chipmunk_giggle` (Mini-Me face tap)
+* **Anti-Chaos:** `playSfx` / `playVoice` call `stopAllSFXAndVoices()` first (unless `stack: true`).
+* **Buses:** `bgmGain`, `sfxGain`, `voiceGain` → analyser → master. Voices duck BGM.
+* **Lip-sync:** `getLipAmplitude()` from analyser (or procedural chirp pulse when MP3 missing).
+* **Fail-safe:** Missing `/public/audio/*.mp3` never crash React; `playVoiceOrChirp(name)` synthesizes a short talk chirp for demos.
+* **Asset list** (exact filenames; see also `public/audio/README.txt`):
+
+| Priority | Files |
+| :--- | :--- |
+| Voices | `voice_quest_intro`, `voice_no_nice_try`, `voice_tap_yay`, `voice_idle_1`, `voice_idle_2`, `voice_idle_3` |
+| Cat | `sfx_cat_meow`, `sfx_cat_purr` |
+| Core SFX | `sfx_wax_crack`, `sfx_wand_swish`, `sfx_spell_quest`, `bgm_intro` |
+| Extras | `sfx_revelio_bell`, `sfx_chipmunk_giggle`, `sfx_peek_whoosh`, `sfx_footstep_soft`, `sfx_soft_chime` |
+
+---
+
+## 📦 9. 3D / GLB ASSET RULES (FOR CURSOR + HUMAN)
+
+* Drop finals at: `public/models/minime.glb`, `public/models/ginger.glb` (see `public/models/README.txt`).
+* Prefer single-file `.glb`, ~5–8 MB max for mobile.
+* Prefer clip names: `Idle`, `Walk`, `Talk`, `Jump`, `Happy`, etc. — aliases live in `src/config/companionModels.js`.
+* Never remove procedural fallback or CDN demo path without an explicit request.
+* Always dispose Three.js resources on unmount (`threeDispose.js`).
+* Visuals ship without audio; do not block UX on missing MP3s.
+
+---
+
+## 🧪 10. PREFERRED WORKFLOW NOTES
+
+* Primary remote test path: GitHub → StackBlitz (user may skip local Node).
+* When changing companions: update director poses + `clipAliases` + this blueprint together.
+* Phase 2 WebAR hunt is still the largest unfinished production block; keep Screen 1–3 3D polish from regressing while building it.

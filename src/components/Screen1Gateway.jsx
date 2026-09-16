@@ -417,16 +417,13 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
           )}
 
           {opened && (
-            <div
+            <DepthFrame
+              variant="parchment"
+              float
               style={{
                 overflow: 'hidden',
                 animation: 'unroll3d 0.7s ease',
                 maxWidth: 360,
-                borderRadius: 18,
-                background: 'rgba(245, 230, 200, 0.82)',
-                backdropFilter: 'blur(8px)',
-                boxShadow: '0 18px 40px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(212, 175, 55, 0.45)',
-                padding: '18px 16px 16px',
               }}
             >
               <p
@@ -450,6 +447,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                   textAlign: 'center',
                   color: VELVET,
                   fontWeight: 700,
+                  textShadow: '0 2px 0 rgba(255,255,255,0.35)',
                 }}
               >
                 THE SEARCH FOR A STRAY HEART
@@ -460,12 +458,14 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                   fontSize: 13,
                   lineHeight: 1.5,
                   textAlign: 'center',
-                  background: 'linear-gradient(135deg, #FFF0C2, #D4AF37)',
+                  background: 'linear-gradient(135deg, #FFF0C2, #D4AF37, #B8922A)',
+                  backgroundSize: '200% auto',
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
                   color: 'transparent',
                   filter: 'drop-shadow(0 1px 2px rgba(80, 40, 8, 0.35))',
                   fontWeight: 700,
+                  animation: 'arShimmer 4s linear infinite',
                 }}
               >
                 Thirty years of magic, and today begins your greatest quest yet!
@@ -480,6 +480,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                   gap: 4,
                   position: 'relative',
                   minHeight: 140,
+                  transform: 'translateZ(24px)',
                 }}
               >
                 <MiniMeAvatar3D
@@ -524,27 +525,21 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
                   type="button"
                   onClick={handleAccept}
                   disabled={accepted}
+                  className="ar-btn-3d ar-btn-3d--gold"
                   style={{
                     width: '100%',
                     padding: '11px 12px',
-                    borderRadius: 999,
-                    border: `1px solid ${GOLD}`,
-                    background: GOLD,
-                    color: VELVET,
-                    fontFamily: 'inherit',
-                    fontWeight: 700,
-                    letterSpacing: 0.4,
                     fontSize: 12,
                     lineHeight: 1.3,
                     cursor: accepted ? 'default' : 'pointer',
-                    boxShadow: '0 0 18px rgba(212, 175, 55, 0.55)',
+                    opacity: accepted ? 0.75 : 1,
                   }}
                 >
                   🪄 I ACCEPT THE WIZARDING QUEST ✨
                 </button>
                 {!noPos && !accepted && trapButton()}
               </div>
-            </div>
+            </DepthFrame>
           )}
         </div>
       </div>

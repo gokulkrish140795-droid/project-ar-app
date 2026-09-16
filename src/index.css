@@ -187,10 +187,10 @@ html {
 @keyframes arFloatY {
   0%,
   100% {
-    transform: translateY(0);
+    transform: perspective(900px) rotateX(2.5deg) translateY(0);
   }
   50% {
-    transform: translateY(-6px);
+    transform: perspective(900px) rotateX(2.5deg) translateY(-6px);
   }
 }
 

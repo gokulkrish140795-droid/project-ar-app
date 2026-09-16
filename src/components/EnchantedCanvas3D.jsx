@@ -577,11 +577,31 @@ export default function EnchantedCanvas3D({
     let disposed = false
 
     const moodTargets = {
-      gateway: { fog: 0.038, exposure: 1.05, ambient: 0.5, rim: 0.35, bg: VELVET },
-      prank: { fog: 0.042, exposure: 1.12, ambient: 0.55, rim: 0.7, bg: 0x1a0a18 },
-      video: { fog: 0.05, exposure: 0.92, ambient: 0.4, rim: 0.25, bg: 0x0a0814 },
-      hunt: { fog: 0.034, exposure: 1.08, ambient: 0.58, rim: 0.3, bg: 0x120a1c },
+      gateway: { fog: 0.038, exposure: 1.05, ambient: 0.5, rim: 0.35, bg: new THREE.Color(VELVET) },
+      prank: {
+        fog: 0.042,
+        exposure: 1.12,
+        ambient: 0.55,
+        rim: 0.7,
+        bg: new THREE.Color(0x1a0a18),
+      },
+      video: {
+        fog: 0.05,
+        exposure: 0.92,
+        ambient: 0.4,
+        rim: 0.25,
+        bg: new THREE.Color(0x0a0814),
+      },
+      hunt: {
+        fog: 0.034,
+        exposure: 1.08,
+        ambient: 0.58,
+        rim: 0.3,
+        bg: new THREE.Color(0x120a1c),
+      },
     }
+    const flooFogColor = new THREE.Color(0x0a2a18)
+    const baseFogColor = new THREE.Color(VELVET)
 
     const spawnLumos = (x, y, z, burst = 4) => {
       const sparks = lumos.userData.sparks
@@ -632,7 +652,7 @@ export default function EnchantedCanvas3D({
       renderer.toneMappingExposure += (mt.exposure - renderer.toneMappingExposure) * 0.04
       ambient.intensity += (mt.ambient + intensity * 0.25 - ambient.intensity) * 0.05
       rim.intensity += (mt.rim - rim.intensity) * 0.05
-      scene.background.lerp(new THREE.Color(mt.bg), 0.04)
+      scene.background.lerp(mt.bg, 0.04)
 
       studioA.intensity = 0.7 + intensity * 1.1
 
@@ -754,7 +774,9 @@ export default function EnchantedCanvas3D({
         flooPoints.geometry.attributes.position.needsUpdate = true
         flooMat.color.setHex(Math.sin(t * 8) > 0 ? 0x50dc78 : GOLD)
         flooMat.size = 0.1 + flooBlend * 0.08
-        scene.fog.color.lerp(new THREE.Color(0x0a2a18), flooBlend * 0.5)
+        scene.fog.color.copy(baseFogColor).lerp(flooFogColor, flooBlend * 0.5)
+      } else {
+        scene.fog.color.copy(baseFogColor)
       }
 
       const camZ = 5.2 - flooBlend * 2.8
