@@ -1,5 +1,12 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
+import { MINIME_MODEL } from '../config/companionModels'
+import audioEngine from '../utils/audioEngine'
+import {
+  applyRootStaging,
+  createGltfCompanion,
+  resolveCompanionGltf,
+} from '../utils/gltfCharacter'
 import { disposeObject3D, disposeRenderer } from '../utils/threeDispose'
 
 const GOLD = '#D4AF37'
@@ -7,73 +14,25 @@ const SKIN = 0xf1c27d
 const CARDIGAN = 0x3d2a5c
 const HAIR = 0x1a1228
 
-function buildMiniMe() {
+function buildProceduralMiniMe() {
   const root = new THREE.Group()
-
   const body = new THREE.Mesh(
     new THREE.CapsuleGeometry(0.32, 0.42, 6, 12),
-    new THREE.MeshStandardMaterial({
-      color: CARDIGAN,
-      roughness: 0.78,
-      metalness: 0.08,
-    })
+    new THREE.MeshStandardMaterial({ color: CARDIGAN, roughness: 0.78, metalness: 0.08 })
   )
   body.position.y = 0.15
   root.add(body)
-
-  // Cardigan collar
-  const collar = new THREE.Mesh(
-    new THREE.TorusGeometry(0.28, 0.05, 8, 20),
-    new THREE.MeshStandardMaterial({ color: 0x2a1b42, roughness: 0.7 })
-  )
-  collar.rotation.x = Math.PI / 2
-  collar.position.y = 0.42
-  root.add(collar)
-
-  // Gold chain
-  const chain = new THREE.Mesh(
-    new THREE.TorusGeometry(0.2, 0.018, 8, 28),
-    new THREE.MeshStandardMaterial({
-      color: 0xd4af37,
-      metalness: 0.95,
-      roughness: 0.25,
-      emissive: 0x3a2e08,
-      emissiveIntensity: 0.35,
-    })
-  )
-  chain.rotation.x = Math.PI / 2.2
-  chain.position.y = 0.28
-  root.add(chain)
-
-  const pendant = new THREE.Mesh(
-    new THREE.SphereGeometry(0.04, 12, 12),
-    new THREE.MeshStandardMaterial({
-      color: 0xffe08a,
-      metalness: 1,
-      roughness: 0.15,
-      emissive: 0xd4af37,
-      emissiveIntensity: 0.5,
-    })
-  )
-  pendant.position.set(0, 0.12, 0.18)
-  root.add(pendant)
 
   const head = new THREE.Group()
   head.position.y = 0.72
   root.add(head)
 
-  const skull = new THREE.Mesh(
-    new THREE.SphereGeometry(0.34, 24, 24),
-    new THREE.MeshStandardMaterial({ color: SKIN, roughness: 0.55 })
+  head.add(
+    new THREE.Mesh(
+      new THREE.SphereGeometry(0.34, 24, 24),
+      new THREE.MeshStandardMaterial({ color: SKIN, roughness: 0.55 })
+    )
   )
-  head.add(skull)
-
-  const hair = new THREE.Mesh(
-    new THREE.SphereGeometry(0.36, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.55),
-    new THREE.MeshStandardMaterial({ color: HAIR, roughness: 0.9 })
-  )
-  hair.position.y = 0.06
-  head.add(hair)
 
   const makeEye = (x) => {
     const eye = new THREE.Group()
@@ -86,54 +45,43 @@ function buildMiniMe() {
     eye.add(white)
     const iris = new THREE.Mesh(
       new THREE.SphereGeometry(0.055, 14, 14),
-      new THREE.MeshStandardMaterial({
-        color: 0x2c1810,
-        emissive: 0x1a0c08,
-        emissiveIntensity: 0.2,
-      })
+      new THREE.MeshStandardMaterial({ color: 0x2c1810 })
     )
     iris.position.z = 0.04
     eye.add(iris)
-    const spark = new THREE.Mesh(
-      new THREE.SphereGeometry(0.018, 8, 8),
-      new THREE.MeshBasicMaterial({ color: 0xffffff })
-    )
-    spark.position.set(0.02, 0.025, 0.08)
-    eye.add(spark)
     const lid = new THREE.Mesh(
       new THREE.SphereGeometry(0.095, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.5),
       new THREE.MeshStandardMaterial({ color: SKIN, roughness: 0.55 })
     )
     lid.rotation.x = Math.PI
-    lid.position.y = 0.02
     lid.visible = false
     eye.add(lid)
-    eye.userData = { lid, iris }
+    eye.userData = { lid }
     return eye
   }
-
   const leftEye = makeEye(-0.11)
   const rightEye = makeEye(0.11)
   head.add(leftEye)
   head.add(rightEye)
 
-  const nose = new THREE.Mesh(
-    new THREE.SphereGeometry(0.04, 10, 10),
-    new THREE.MeshStandardMaterial({ color: 0xe0a86a, roughness: 0.6 })
+  const mouthGroup = new THREE.Group()
+  mouthGroup.position.set(0, -0.12, 0.3)
+  head.add(mouthGroup)
+  const smile = new THREE.Mesh(
+    new THREE.TorusGeometry(0.07, 0.012, 8, 20, Math.PI),
+    new THREE.MeshStandardMaterial({ color: 0xc45c6a, roughness: 0.45 })
   )
-  nose.position.set(0, -0.02, 0.33)
-  nose.scale.set(0.8, 1, 0.9)
-  head.add(nose)
-
-  const mouth = new THREE.Mesh(
-    new THREE.TorusGeometry(0.06, 0.012, 8, 16, Math.PI),
-    new THREE.MeshStandardMaterial({ color: 0xc45c6a, roughness: 0.5 })
+  smile.rotation.x = Math.PI
+  mouthGroup.add(smile)
+  const mouthOpen = new THREE.Mesh(
+    new THREE.SphereGeometry(0.045, 10, 10),
+    new THREE.MeshStandardMaterial({ color: 0x5a2030, roughness: 0.6 })
   )
-  mouth.position.set(0, -0.12, 0.3)
-  mouth.rotation.x = Math.PI
-  head.add(mouth)
+  mouthOpen.scale.set(1.1, 0.15, 0.7)
+  mouthOpen.position.y = -0.02
+  mouthOpen.visible = false
+  mouthGroup.add(mouthOpen)
 
-  // Diamond stud earring
   const stud = new THREE.Mesh(
     new THREE.OctahedronGeometry(0.035, 0),
     new THREE.MeshStandardMaterial({
@@ -154,7 +102,6 @@ function buildMiniMe() {
   armL.position.set(-0.4, 0.2, 0)
   armL.rotation.z = 0.35
   root.add(armL)
-
   const armR = armL.clone()
   armR.position.set(0.4, 0.2, 0)
   armR.rotation.z = -0.35
@@ -166,14 +113,29 @@ function buildMiniMe() {
   )
   handL.position.set(-0.48, -0.02, 0.05)
   root.add(handL)
-
   const handR = handL.clone()
   handR.position.set(0.48, -0.02, 0.05)
   root.add(handR)
 
+  const chain = new THREE.Mesh(
+    new THREE.TorusGeometry(0.2, 0.018, 8, 28),
+    new THREE.MeshStandardMaterial({
+      color: 0xd4af37,
+      metalness: 0.95,
+      roughness: 0.25,
+      emissive: 0x3a2e08,
+      emissiveIntensity: 0.35,
+    })
+  )
+  chain.rotation.x = Math.PI / 2.2
+  chain.position.y = 0.28
+  root.add(chain)
+
   root.userData = {
     head,
-    mouth,
+    mouth: mouthGroup,
+    smile,
+    mouthOpen,
     leftEye,
     rightEye,
     stud,
@@ -182,8 +144,77 @@ function buildMiniMe() {
     handL,
     handR,
     body,
+    chain,
+    isGltf: false,
   }
   return root
+}
+
+function animateProcedural(mini, pose, localT, t, talking) {
+  const u = mini.userData
+  const floatY = Math.sin(t * 1.6) * 0.05
+  const breath = 1 + Math.sin(t * 2.1) * 0.02
+  mini.position.set(0, floatY, 0)
+  mini.rotation.set(0, 0, 0)
+  mini.scale.setScalar(1)
+  u.armL.rotation.set(0, 0, 0.35)
+  u.armR.rotation.set(0, 0, -0.35)
+  u.handL.position.set(-0.48, -0.02, 0.05)
+  u.handR.position.set(0.48, -0.02, 0.05)
+  u.body.scale.set(breath, 1 + Math.sin(t * 2.1) * 0.015, breath)
+  u.smile.scale.set(1, 1, 1)
+  u.mouthOpen.visible = false
+  u.head.rotation.set(0, 0, 0)
+  u.leftEye.scale.y = 1
+  u.rightEye.scale.y = 1
+
+  const amp =
+    talking || pose === 'talk'
+      ? Math.max(audioEngine.getLipAmplitude(), 0.08 + Math.abs(Math.sin(t * 12)) * 0.15)
+      : 0
+  if (amp > 0.05) {
+    u.mouthOpen.visible = true
+    u.mouthOpen.scale.set(1.1, 0.15 + amp * 1.8, 0.7)
+    u.smile.scale.set(1, 0.4, 1)
+  }
+
+  if (pose === 'peek') {
+    const k = Math.min(1, localT / 0.45)
+    mini.position.x = -1.2 + k * 1.2
+    mini.rotation.y = 0.35 * (1 - k)
+  } else if (pose === 'walkIn') {
+    const k = Math.min(1, localT / 1.1)
+    const ease = 1 - (1 - k) ** 3
+    mini.position.x = -1.6 + ease * 1.6
+    u.armL.rotation.x = Math.sin(k * Math.PI * 4) * 0.4
+    u.armR.rotation.x = -Math.sin(k * Math.PI * 4) * 0.4
+  } else if (pose === 'smile') {
+    u.smile.scale.set(1.25, 1.15, 1)
+    u.leftEye.scale.y = 0.82
+    u.rightEye.scale.y = 0.82
+  } else if (pose === 'lean') {
+    mini.rotation.z = 0.18
+    mini.position.x = 0.22
+    u.armR.rotation.x = -0.85
+    u.handR.position.set(0.55, 0.15, 0.25)
+  } else if (pose === 'yarn') {
+    mini.rotation.z = -0.18
+    u.armR.rotation.set(-0.6, 0, -1.1)
+  } else if (pose === 'scratch') {
+    mini.position.x = 0.12
+    u.armR.rotation.set(-0.9, 0, -0.2)
+  } else if (pose === 'bump') {
+    mini.position.x = 0.18
+  } else if (pose === 'glass') {
+    mini.scale.setScalar(1.05)
+    u.handL.position.z = 0.28
+    u.handR.position.z = 0.28
+  } else {
+    u.head.rotation.y = Math.sin(t * 0.55) * 0.12
+  }
+
+  u.stud.material.emissiveIntensity = 0.4 + (0.5 + Math.sin(t * 6) * 0.5) * 0.8
+  u.chain.rotation.z = Math.sin(t * 1.8) * 0.04
 }
 
 export default function MiniMeAvatar3D({
@@ -192,6 +223,7 @@ export default function MiniMeAvatar3D({
   pose = 'idle',
   size = 140,
   peek = false,
+  talking = false,
   onFaceTap,
   disabled = false,
   ariaLabel = 'Gokul-Mage',
@@ -200,16 +232,20 @@ export default function MiniMeAvatar3D({
   const bubbleRef = useRef(null)
   const poseRef = useRef(pose)
   const peekRef = useRef(peek)
+  const talkingRef = useRef(talking)
   poseRef.current = pose
   peekRef.current = peek
+  talkingRef.current = talking
 
   useEffect(() => {
     const mount = mountRef.current
     if (!mount) return undefined
 
+    let disposed = false
+    let raf = 0
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 20)
-    camera.position.set(0, 0.45, 3.2)
+    camera.position.set(0, 0.55, 3.4)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
@@ -218,107 +254,92 @@ export default function MiniMeAvatar3D({
     renderer.outputColorSpace = THREE.SRGBColorSpace
     mount.appendChild(renderer.domElement)
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.65)
-    scene.add(ambient)
-    const key = new THREE.PointLight(0xffe0a0, 1.6, 10)
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7))
+    const key = new THREE.PointLight(0xffe0a0, 1.7, 12)
     key.position.set(1.2, 1.8, 2.4)
     scene.add(key)
-    const fill = new THREE.PointLight(0x88aaff, 0.5, 8)
-    fill.position.set(-1.5, 0.4, 1.5)
-    scene.add(fill)
-    const rim = new THREE.PointLight(0xd4af37, 0.7, 6)
-    rim.position.set(0, 0.8, -1.5)
-    scene.add(rim)
+    scene.add(new THREE.PointLight(0x88aaff, 0.5, 8).translateX(-1.5).translateY(0.4))
+    scene.add(new THREE.PointLight(0xd4af37, 0.65, 6).translateY(0.8).translateZ(-1.5))
 
-    const mini = buildMiniMe()
-    scene.add(mini)
-
-    const clock = new THREE.Clock()
+    let companion = null
+    let lastPose = ''
+    let poseStart = 0
     let blinkT = 2 + Math.random() * 2
     let blinking = false
     let blinkAge = 0
-    let raf = 0
-    let disposed = false
+    const clock = new THREE.Clock()
     const mouthWorld = new THREE.Vector3()
     const mouthNdc = new THREE.Vector3()
 
+    const mountCompanion = (node) => {
+      if (companion?.root) scene.remove(companion.root)
+      companion = node
+      scene.add(node.root || node)
+      lastPose = ''
+    }
+
+    // Instant procedural, upgrade to GLB when ready
+    const procedural = buildProceduralMiniMe()
+    mountCompanion({ root: procedural, mouth: procedural.userData.mouth, isGltf: false })
+
+    resolveCompanionGltf(MINIME_MODEL).then((resolved) => {
+      if (disposed || !resolved) return
+      const gltfCompanion = createGltfCompanion(resolved.gltf, resolved.config)
+      mountCompanion(gltfCompanion)
+      gltfCompanion.playPose('idle')
+    })
+
     const tick = () => {
       if (disposed) return
-      const t = clock.getElapsedTime()
-      const p = poseRef.current
+      const dt = Math.min(clock.getDelta(), 0.05)
+      const t = clock.elapsedTime
+      const p = peekRef.current ? 'peek' : poseRef.current
+      if (p !== lastPose) {
+        poseStart = t
+        lastPose = p
+        if (companion?.playPose) companion.playPose(p)
+      }
+      const localT = t - poseStart
 
-      const floatY = Math.sin(t * 1.6) * 0.06
-      const breath = 1 + Math.sin(t * 2.1) * 0.02
-      mini.position.y = floatY
-      mini.userData.body.scale.set(breath, 1 + Math.sin(t * 2.1) * 0.015, breath)
+      if (companion?.mixer) companion.mixer.update(dt)
 
-      mini.rotation.set(0, 0, 0)
-      mini.position.x = 0
-      if (peekRef.current) {
-        mini.position.x = -0.15 + Math.min(1, t * 2) * 0.15
-        mini.rotation.z = -0.12
-      } else if (p === 'yarn') {
-        mini.rotation.z = -0.18
-        mini.position.y = floatY + 0.12
-        mini.userData.armR.rotation.z = -1.1
-        mini.userData.armR.rotation.x = -0.6
-      } else if (p === 'scratch') {
-        mini.rotation.z = 0.12
-        mini.position.x = 0.12
-        mini.userData.armR.rotation.z = -0.2
-        mini.userData.armR.rotation.x = -0.9
-      } else if (p === 'bump') {
-        mini.position.x = 0.18
-      } else if (p === 'glass') {
-        mini.position.y = floatY * 0.3 + 0.04
-        mini.scale.setScalar(1.05)
-        mini.userData.handL.position.z = 0.28
-        mini.userData.handR.position.z = 0.28
-        mini.userData.handL.scale.setScalar(1.25)
-        mini.userData.handR.scale.setScalar(1.25)
-      } else {
-        mini.scale.setScalar(1)
-        mini.userData.armR.rotation.z = -0.35
-        mini.userData.armR.rotation.x = 0
-        mini.userData.handL.position.z = 0.05
-        mini.userData.handR.position.z = 0.05
-        mini.userData.handL.scale.setScalar(1)
-        mini.userData.handR.scale.setScalar(1)
+      if (companion?.isGltf) {
+        applyRootStaging(companion.root, p, localT, t)
+        // Jaw / mouth flap on GLB
+        if (companion.mouth && companion.mouth !== companion.model) {
+          const amp =
+            talkingRef.current || p === 'talk' ? Math.max(audioEngine.getLipAmplitude(), 0.1) : 0
+          companion.mouth.rotation.x = -amp * 0.45
+        }
+      } else if (companion?.root) {
+        animateProcedural(companion.root, p, localT, t, talkingRef.current)
+        const u = companion.root.userData
+        blinkT -= 0.016
+        if (blinkT <= 0 && !blinking) {
+          blinking = true
+          blinkAge = 0
+          blinkT = 2.2 + Math.random() * 3
+        }
+        if (blinking) {
+          blinkAge += 0.016
+          const closed = blinkAge < 0.08 || (blinkAge > 0.1 && blinkAge < 0.16)
+          u.leftEye.userData.lid.visible = closed
+          u.rightEye.userData.lid.visible = closed
+          if (blinkAge > 0.2) blinking = false
+        }
       }
 
-      blinkT -= 0.016
-      if (blinkT <= 0 && !blinking) {
-        blinking = true
-        blinkAge = 0
-        blinkT = 2.5 + Math.random() * 3
-      }
-      if (blinking) {
-        blinkAge += 0.016
-        const closed = blinkAge < 0.08 || (blinkAge > 0.1 && blinkAge < 0.16)
-        mini.userData.leftEye.userData.lid.visible = closed
-        mini.userData.rightEye.userData.lid.visible = closed
-        if (blinkAge > 0.2) blinking = false
-      }
-
-      const spark = 0.5 + Math.sin(t * 6) * 0.5
-      mini.userData.stud.material.emissiveIntensity = 0.4 + spark * 0.8
-      mini.userData.stud.rotation.y = t * 2
-      mini.userData.stud.rotation.x = t * 1.4
-
-      // Anchor speech bubble to projected 3D mouth (DOM, no React setState)
-      mini.userData.mouth.getWorldPosition(mouthWorld)
-      mouthNdc.copy(mouthWorld).project(camera)
-      const ax = ((mouthNdc.x + 1) / 2) * size
-      const ay = ((1 - mouthNdc.y) / 2) * (size + 24)
-      if (bubbleRef.current) {
-        bubbleRef.current.style.left = `${ax}px`
-        bubbleRef.current.style.top = `${ay}px`
+      const mouthObj = companion?.mouth || companion?.root?.userData?.mouth
+      if (mouthObj && bubbleRef.current) {
+        mouthObj.getWorldPosition(mouthWorld)
+        mouthNdc.copy(mouthWorld).project(camera)
+        bubbleRef.current.style.left = `${((mouthNdc.x + 1) / 2) * size}px`
+        bubbleRef.current.style.top = `${((1 - mouthNdc.y) / 2) * (size + 24)}px`
       }
 
       renderer.render(scene, camera)
       raf = window.requestAnimationFrame(tick)
     }
-
     raf = window.requestAnimationFrame(tick)
 
     return () => {
@@ -330,23 +351,13 @@ export default function MiniMeAvatar3D({
   }, [size])
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: size,
-        height: size + 24,
-        flexShrink: 0,
-      }}
-    >
-      <style>
-        {`
-          @keyframes mouthBubble3d {
-            from { opacity: 0; transform: scale(0); }
-            to { opacity: 1; transform: scale(1); }
-          }
-        `}
-      </style>
-
+    <div style={{ position: 'relative', width: size, height: size + 24, flexShrink: 0 }}>
+      <style>{`
+        @keyframes mouthBubble3d {
+          from { opacity: 0; transform: scale(0); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
       {showSpeech && speech && (
         <div
           ref={bubbleRef}
@@ -378,23 +389,8 @@ export default function MiniMeAvatar3D({
           >
             {speech}
           </div>
-          <span
-            aria-hidden="true"
-            style={{
-              display: 'block',
-              width: 12,
-              height: 12,
-              marginLeft: 10,
-              marginTop: -7,
-              background: 'rgba(255, 251, 247, 0.94)',
-              borderRight: `1px solid ${GOLD}`,
-              borderBottom: `1px solid ${GOLD}`,
-              transform: 'rotate(45deg)',
-            }}
-          />
         </div>
       )}
-
       <button
         type="button"
         onClick={onFaceTap}

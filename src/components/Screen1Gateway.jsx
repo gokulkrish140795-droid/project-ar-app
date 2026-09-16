@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import useCompanionDirector from '../hooks/useCompanionDirector'
+import { theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
 import { disposeObject3D, disposeRenderer } from '../utils/threeDispose'
+import DepthFrame from './DepthFrame'
 import GingerCat3D from './GingerCat3D'
 import MiniMeAvatar3D from './MiniMeAvatar3D'
 
-const GOLD = '#D4AF37'
-const INK = '#3B2414'
-const VELVET = '#0F0A1C'
-const QUEST_QUOTE =
-  '💬 Gokul-Mage: “Aishwarya! Gokul-Mage lost a piece of Gokul\'s heart in our home! Help me find it! 💖”'
-const TRAP_QUOTE = 'Nice try, my love! Ginger and I say only YES works! 😜'
-const PLAY_POSES = ['yarn', 'scratch', 'bump']
+const GOLD = theme.gold
+const INK = theme.ink
+const VELVET = theme.velvet
 
 function randomTrapPosition(stage, button, avoid) {
   const pad = 18
@@ -225,11 +224,13 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
   const [noPos, setNoPos] = useState(null)
   const [trapping, setTrapping] = useState(false)
   const [accepted, setAccepted] = useState(false)
-  const [speech, setSpeech] = useState(QUEST_QUOTE)
-  const [showSpeech, setShowSpeech] = useState(false)
-  const [playPose, setPlayPose] = useState('idle')
-  const [yarnVisible, setYarnVisible] = useState(false)
   const [scrollWidth, setScrollWidth] = useState(320)
+
+  const companions = useCompanionDirector({
+    active: opened && !accepted,
+    paused: trapping,
+    intervalMs: [6500, 11000],
+  })
 
   useEffect(() => {
     const measure = () => setScrollWidth(Math.min(360, window.innerWidth - 32))
@@ -250,11 +251,10 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playSfx('sfx_wax_crack')
 
-    window.setTimeout(() => {
+    window.setTimeout(async () => {
       setOpened(true)
       setUnrolling(false)
-      setShowSpeech(true)
-      setSpeech(QUEST_QUOTE)
+      await companions.playIntro()
     }, 720)
   }
 
@@ -267,11 +267,10 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
 
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
-    audioEngine.playLayered(['sfx_wand_swish', 'sfx_cat_meow', 'voice_no_nice_try'])
+    audioEngine.playLayered(['sfx_wand_swish', 'sfx_cat_meow'])
     trappingRef.current = true
     setTrapping(true)
-    setSpeech(TRAP_QUOTE)
-    setShowSpeech(true)
+    companions.playTrap()
 
     const stage = stageRef.current?.getBoundingClientRect()
     const noBox = noRef.current?.getBoundingClientRect()
@@ -307,45 +306,12 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
     const timer = window.setTimeout(() => {
       trappingRef.current = false
       setTrapping(false)
-    }, 1100)
+    }, 1400)
     return () => window.clearTimeout(timer)
   }, [trapping, noPos])
 
-  useEffect(() => {
-    if (!opened || accepted) return undefined
-    let cancelled = false
-    const schedule = () => {
-      const wait = 12000 + Math.random() * 3000
-      return window.setTimeout(() => {
-        if (cancelled || trappingRef.current) return
-        const next = PLAY_POSES[Math.floor(Math.random() * PLAY_POSES.length)]
-        setPlayPose(next)
-        setYarnVisible(next === 'yarn')
-        if (next === 'scratch') {
-          audioEngine.stopAllSFXAndVoices()
-          audioEngine.playSfx('sfx_cat_purr')
-          if (navigator.vibrate) navigator.vibrate(80)
-        } else if (next === 'bump') {
-          audioEngine.stopAllSFXAndVoices()
-          audioEngine.playSfx('sfx_revelio_bell')
-        }
-        window.setTimeout(() => {
-          if (!cancelled) {
-            setPlayPose('idle')
-            setYarnVisible(false)
-          }
-        }, 1400)
-        timer = schedule()
-      }, wait)
-    }
-    let timer = schedule()
-    return () => {
-      cancelled = true
-      window.clearTimeout(timer)
-    }
-  }, [opened, accepted])
-
-  const miniPose = trapping ? 'idle' : playPose
+  const miniPose = trapping ? 'peek' : companions.miniPose
+  const gingerPose = trapping ? 'leap' : companions.gingerPose
 
   const trapButton = (extraStyle = {}) => (
     <button
@@ -518,13 +484,14 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
               >
                 <MiniMeAvatar3D
                   size={110}
-                  speech={speech}
-                  showSpeech={showSpeech}
+                  speech={companions.speech}
+                  showSpeech={companions.showSpeech}
                   pose={miniPose}
                   peek={trapping}
+                  talking={companions.lipTalking}
                 />
-                <GingerCat3D pose={trapping ? 'leap' : playPose} size={100} />
-                {yarnVisible && (
+                <GingerCat3D pose={gingerPose} size={100} />
+                {companions.yarnVisible && (
                   <span
                     aria-hidden="true"
                     style={{

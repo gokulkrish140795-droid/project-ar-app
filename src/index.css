@@ -1,8 +1,22 @@
-\* {
+:root {
+  --ar-velvet: #0f0a1c;
+  --ar-velvet-deep: #090612;
+  --ar-parchment: #f5e6c8;
+  --ar-gold: #d4af37;
+  --ar-gold-bright: #ffe5a3;
+  --ar-ink: #3b2414;
+  --ar-coral: #ff6f91;
+  --ar-floo: #50dc78;
+  --ar-cream: #fffbf7;
+  --ar-font-display: Georgia, 'Palatino Linotype', 'Book Antiqua', serif;
+}
+
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
+
 body,
 html {
   margin: 0;
@@ -10,5 +24,181 @@ html {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #0f0a1c;
+  background-color: var(--ar-velvet);
+  font-family: var(--ar-font-display);
+  color: var(--ar-parchment);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100%;
+}
+
+/* Shared depth chrome used by every phase */
+.ar-depth-panel {
+  position: relative;
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(245, 230, 200, 0.14), rgba(15, 10, 28, 0.55) 45%, rgba(9, 6, 18, 0.72)),
+    radial-gradient(ellipse at 30% 0%, rgba(212, 175, 55, 0.18), transparent 55%);
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  box-shadow:
+    0 28px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 229, 163, 0.08) inset,
+    0 1px 0 rgba(255, 240, 194, 0.2) inset,
+    0 0 40px rgba(212, 175, 55, 0.12);
+  backdrop-filter: blur(12px) saturate(1.15);
+  transform: perspective(900px) rotateX(2.5deg);
+  transform-style: preserve-3d;
+}
+
+.ar-depth-panel::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  pointer-events: none;
+  box-shadow: inset 0 0 24px rgba(212, 175, 55, 0.06);
+}
+
+.ar-depth-panel--parchment {
+  background:
+    linear-gradient(160deg, rgba(245, 230, 200, 0.92), rgba(232, 210, 168, 0.88) 55%, rgba(220, 190, 140, 0.9)),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 240, 194, 0.55), transparent 60%);
+  color: var(--ar-ink);
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(212, 175, 55, 0.5) inset,
+    0 2px 0 rgba(255, 255, 255, 0.35) inset;
+}
+
+.ar-filigree-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ar-filigree-corner::before,
+.ar-filigree-corner::after {
+  content: '';
+  position: absolute;
+  background: linear-gradient(90deg, var(--ar-gold), var(--ar-gold-bright));
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.45);
+}
+
+.ar-filigree-corner::before {
+  width: 100%;
+  height: 2px;
+  top: 0;
+  left: 0;
+}
+
+.ar-filigree-corner::after {
+  width: 2px;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.ar-filigree-corner.tl {
+  top: 6px;
+  left: 6px;
+}
+.ar-filigree-corner.tr {
+  top: 6px;
+  right: 6px;
+  transform: scaleX(-1);
+}
+.ar-filigree-corner.bl {
+  bottom: 6px;
+  left: 6px;
+  transform: scaleY(-1);
+}
+.ar-filigree-corner.br {
+  bottom: 6px;
+  right: 6px;
+  transform: scale(-1);
+}
+
+.ar-btn-3d {
+  position: relative;
+  border-radius: 999px;
+  border: 1px solid var(--ar-gold);
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transform: translateZ(18px);
+  box-shadow:
+    0 10px 0 rgba(90, 60, 10, 0.55),
+    0 14px 28px rgba(0, 0, 0, 0.35),
+    0 0 22px rgba(212, 175, 55, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ar-btn-3d:active:not(:disabled) {
+  transform: translateY(6px) translateZ(8px);
+  box-shadow:
+    0 4px 0 rgba(90, 60, 10, 0.55),
+    0 8px 16px rgba(0, 0, 0, 0.3),
+    0 0 14px rgba(212, 175, 55, 0.35);
+}
+
+.ar-btn-3d--gold {
+  background: linear-gradient(180deg, #ffe5a3 0%, #d4af37 55%, #b8922a 100%);
+  color: var(--ar-velvet);
+}
+
+.ar-btn-3d--ghost {
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.35), rgba(212, 175, 55, 0.12));
+  color: var(--ar-gold);
+}
+
+.ar-floo-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 55%, rgba(80, 220, 120, 0.35), transparent 55%),
+    radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.2), transparent 40%),
+    rgba(9, 6, 18, 0.35);
+  animation: arFlooPulse 1.6s ease-in-out;
+}
+
+@keyframes arFlooPulse {
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  35% {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+  100% {
+    opacity: 0.85;
+    backdrop-filter: blur(2px);
+  }
+}
+
+@keyframes arFloatY {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes arShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }

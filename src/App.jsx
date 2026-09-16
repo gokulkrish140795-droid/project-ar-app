@@ -4,11 +4,15 @@ import Screen1Gateway from './components/Screen1Gateway'
 import Screen2Prank from './components/Screen2Prank'
 import ScreenHunt from './components/ScreenHunt'
 import ScreenVideoMontage from './components/ScreenVideoMontage'
+import { fonts, theme } from './theme'
 import audioEngine from './utils/audioEngine'
 
-const GOLD = '#D4AF37'
-const PARCHMENT = '#F4E8C1'
-const VELVET = '#0F0A1C'
+const moodForScreen = {
+  gateway: 'gateway',
+  prank: 'prank',
+  video_montage: 'video',
+  scavenger_hunt: 'hunt',
+}
 
 /**
  * Master production state machine:
@@ -62,22 +66,28 @@ export default function App() {
     setCurrentScreen('scavenger_hunt')
   }
 
+  const mood = moodForScreen[currentScreen] || 'gateway'
+
   return (
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: VELVET,
-        color: PARCHMENT,
+        backgroundColor: theme.velvet,
+        color: theme.parchment,
         position: 'relative',
+        fontFamily: fonts.display,
       }}
     >
-      <EnchantedCanvas3D lumosOn={lumosOn} flooActive={flooActive} />
+      <EnchantedCanvas3D lumosOn={lumosOn} flooActive={flooActive} mood={mood} />
+
+      {flooActive && <div className="ar-floo-veil" aria-hidden="true" />}
 
       <button
         type="button"
         onClick={toggleLumos}
         aria-pressed={lumosOn}
         aria-label={lumosOn ? 'Nox Audio' : 'Lumos Audio'}
+        className={lumosOn ? 'ar-btn-3d ar-btn-3d--gold' : 'ar-btn-3d ar-btn-3d--ghost'}
         style={{
           position: 'fixed',
           top: 18,
@@ -87,34 +97,41 @@ export default function App() {
           alignItems: 'center',
           gap: 8,
           padding: '8px 14px',
-          borderRadius: 999,
-          border: `1px solid ${GOLD}`,
-          background: lumosOn ? 'rgba(212, 175, 55, 0.18)' : 'rgba(15, 10, 28, 0.82)',
-          color: GOLD,
-          fontFamily: 'Georgia, "Times New Roman", serif',
+          color: lumosOn ? theme.velvet : theme.gold,
           letterSpacing: 1.2,
           fontSize: 12,
-          cursor: 'pointer',
-          boxShadow: lumosOn ? '0 0 18px rgba(212, 175, 55, 0.55)' : 'none',
-          backdropFilter: 'blur(10px)',
+          boxShadow: lumosOn
+            ? '0 8px 0 rgba(90, 60, 10, 0.55), 0 0 22px rgba(212, 175, 55, 0.55)'
+            : undefined,
         }}
       >
         {lumosOn ? '🔔 Lumos Audio' : '🔇 Nox Audio'}
       </button>
 
-      {currentScreen === 'gateway' && (
-        <Screen1Gateway onEnsureAudio={ensureAudio} onComplete={handleAcceptQuest} />
-      )}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          opacity: flooActive ? 0.25 : 1,
+          filter: flooActive ? 'blur(3px) saturate(1.4)' : 'none',
+          transition: 'opacity 0.45s ease, filter 0.45s ease',
+          transform: flooActive ? 'scale(1.04) rotateZ(1deg)' : 'none',
+        }}
+      >
+        {currentScreen === 'gateway' && (
+          <Screen1Gateway onEnsureAudio={ensureAudio} onComplete={handleAcceptQuest} />
+        )}
 
-      {currentScreen === 'prank' && (
-        <Screen2Prank onEnsureAudio={ensureAudio} onKiss={handleKiss} />
-      )}
+        {currentScreen === 'prank' && (
+          <Screen2Prank onEnsureAudio={ensureAudio} onKiss={handleKiss} />
+        )}
 
-      {currentScreen === 'video_montage' && (
-        <ScreenVideoMontage onContinue={handleContinueHunt} />
-      )}
+        {currentScreen === 'video_montage' && (
+          <ScreenVideoMontage onContinue={handleContinueHunt} />
+        )}
 
-      {currentScreen === 'scavenger_hunt' && <ScreenHunt />}
+        {currentScreen === 'scavenger_hunt' && <ScreenHunt />}
+      </div>
     </div>
   )
 }

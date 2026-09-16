@@ -6,37 +6,45 @@ class AudioEngine {
     this.master = null
     this.bgmGain = null
     this.sfxGain = null
+    this.voiceGain = null
+    this.analyser = null
     this.buffers = new Map()
     this.bgmSource = null
     this.bgmName = null
     this.sfxSources = new Set()
     this.muted = true
     this.unlocked = false
+    this.lipAmp = 0
+    this._raf = 0
   }
 
   async unlock() {
-    if (typeof window === 'undefined') {
-      return
-    }
+    if (typeof window === 'undefined') return
 
     if (!this.ctx) {
       const Ctx = window.AudioContext || window.webkitAudioContext
-      if (!Ctx) {
-        return
-      }
+      if (!Ctx) return
 
       this.ctx = new Ctx()
       this.master = this.ctx.createGain()
       this.bgmGain = this.ctx.createGain()
       this.sfxGain = this.ctx.createGain()
+      this.voiceGain = this.ctx.createGain()
+      this.analyser = this.ctx.createAnalyser()
+      this.analyser.fftSize = 256
+      this.analyser.smoothingTimeConstant = 0.72
 
       this.bgmGain.gain.value = 0.32
       this.sfxGain.gain.value = 0.9
+      this.voiceGain.gain.value = 1
       this.master.gain.value = this.muted ? 0 : 1
 
       this.bgmGain.connect(this.master)
       this.sfxGain.connect(this.master)
+      this.voiceGain.connect(this.analyser)
+      this.analyser.connect(this.master)
       this.master.connect(this.ctx.destination)
+      this._startLipMeter()
     }
 
     if (this.ctx.state === 'suspended') {
@@ -46,18 +54,28 @@ class AudioEngine {
     this.unlocked = true
   }
 
+  _startLipMeter() {
+    if (!this.analyser || this._raf) return
+    const data = new Uint8Array(this.analyser.frequencyBinCount)
+    const tick = () => {
+      this.analyser.getByteFrequencyData(data)
+      let sum = 0
+      for (let i = 2; i < 28; i += 1) sum += data[i]
+      const avg = sum / 26 / 255
+      this.lipAmp += (avg - this.lipAmp) * 0.35
+      this._raf = window.requestAnimationFrame(tick)
+    }
+    this._raf = window.requestAnimationFrame(tick)
+  }
+
+  getLipAmplitude() {
+    return this.lipAmp
+  }
+
   async load(name) {
-    if (!this.ctx) {
-      await this.unlock()
-    }
-
-    if (!this.ctx) {
-      return null
-    }
-
-    if (this.buffers.has(name)) {
-      return this.buffers.get(name)
-    }
+    if (!this.ctx) await this.unlock()
+    if (!this.ctx) return null
+    if (this.buffers.has(name)) return this.buffers.get(name)
 
     try {
       const response = await fetch(`${AUDIO_BASE}/${name}.mp3`)
@@ -65,7 +83,6 @@ class AudioEngine {
         this.buffers.set(name, null)
         return null
       }
-
       const data = await response.arrayBuffer()
       const buffer = await this.ctx.decodeAudioData(data.slice(0))
       this.buffers.set(name, buffer)
@@ -85,38 +102,58 @@ class AudioEngine {
       }
     }
     this.sfxSources.clear()
+    this.lipAmp = 0
+    this._unduckBgm()
   }
 
   trackSfx(source) {
     this.sfxSources.add(source)
     source.onended = () => {
       this.sfxSources.delete(source)
+      if (this.sfxSources.size === 0) {
+        this.lipAmp = 0
+        this._unduckBgm()
+      }
     }
   }
 
-  async play(name, { loop = false, bus = 'sfx', stack = false, playbackRate = 1 } = {}) {
-    if (!this.unlocked) {
-      await this.unlock()
-    }
+  _duckBgm(amount = 0.12) {
+    if (!this.bgmGain || !this.ctx) return
+    this.bgmGain.gain.setTargetAtTime(amount, this.ctx.currentTime, 0.08)
+  }
+
+  _unduckBgm() {
+    if (!this.bgmGain || !this.ctx) return
+    this.bgmGain.gain.setTargetAtTime(0.32, this.ctx.currentTime, 0.2)
+  }
+
+  async play(name, {
+    loop = false,
+    bus = 'sfx',
+    stack = false,
+    playbackRate = 1,
+    duck = false,
+  } = {}) {
+    if (!this.unlocked) await this.unlock()
 
     if (bus !== 'bgm' && !stack) {
       this.stopAllSFXAndVoices()
     }
 
     const buffer = await this.load(name)
-    if (!buffer || !this.ctx) {
-      return null
-    }
+    if (!buffer || !this.ctx) return null
 
     const source = this.ctx.createBufferSource()
     source.buffer = buffer
     source.loop = loop
     source.playbackRate.value = playbackRate
-    source.connect(bus === 'bgm' ? this.bgmGain : this.sfxGain)
 
-    if (bus !== 'bgm') {
-      this.trackSfx(source)
-    }
+    const dest =
+      bus === 'bgm' ? this.bgmGain : bus === 'voice' ? this.voiceGain : this.sfxGain
+    source.connect(dest)
+
+    if (bus !== 'bgm') this.trackSfx(source)
+    if (duck || bus === 'voice') this._duckBgm()
 
     source.start()
     return source
@@ -146,7 +183,60 @@ class AudioEngine {
 
   async playVoice(name, options = {}) {
     await this.unlock()
-    return this.play(name, { bus: 'sfx', stack: false, ...options })
+    return this.play(name, { bus: 'voice', stack: false, duck: true, ...options })
+  }
+
+  /**
+   * Prefer real MP3; if missing, synthesize a short friendly chirp so lips still move.
+   * Returns { source, usedFallback }.
+   */
+  async playVoiceOrChirp(name, { duration = 1.4 } = {}) {
+    await this.unlock()
+    if (!this.ctx) return { source: null, usedFallback: true }
+
+    this.stopAllSFXAndVoices()
+    const buffer = await this.load(name)
+    if (buffer) {
+      const source = this.ctx.createBufferSource()
+      source.buffer = buffer
+      source.connect(this.voiceGain)
+      this.trackSfx(source)
+      this._duckBgm()
+      source.start()
+      return { source, usedFallback: false }
+    }
+
+    // Procedural “talking” chirp so mouth flap still demos without assets
+    const now = this.ctx.currentTime
+    const notes = [392, 440, 494, 523, 587, 659]
+    notes.forEach((freq, index) => {
+      const osc = this.ctx.createOscillator()
+      const gain = this.ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.value = freq
+      const start = now + index * 0.12
+      gain.gain.setValueAtTime(0.0001, start)
+      gain.gain.exponentialRampToValueAtTime(0.08, start + 0.03)
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.14)
+      osc.connect(gain)
+      gain.connect(this.voiceGain)
+      osc.start(start)
+      osc.stop(start + 0.16)
+      this.trackSfx(osc)
+    })
+    this._duckBgm()
+    // Fake lip energy while chirp plays
+    const end = now + Math.min(duration, notes.length * 0.12 + 0.2)
+    const pulse = () => {
+      if (!this.ctx || this.ctx.currentTime > end) {
+        this.lipAmp *= 0.8
+        return
+      }
+      this.lipAmp = 0.35 + Math.random() * 0.45
+      window.setTimeout(pulse, 70)
+    }
+    pulse()
+    return { source: null, usedFallback: true }
   }
 
   playLayered(names) {
@@ -164,13 +254,9 @@ class AudioEngine {
   }
 
   playChipmunkGiggle() {
-    if (!this.ctx) {
-      return
-    }
-
+    if (!this.ctx) return
     const now = this.ctx.currentTime
     const notes = [880, 988, 1175, 1319, 1568]
-
     notes.forEach((freq, index) => {
       const osc = this.ctx.createOscillator()
       const gain = this.ctx.createGain()
@@ -190,11 +276,7 @@ class AudioEngine {
   setMuted(muted) {
     this.muted = muted
     if (this.master && this.ctx) {
-      this.master.gain.setTargetAtTime(
-        muted ? 0 : 1,
-        this.ctx.currentTime,
-        0.04
-      )
+      this.master.gain.setTargetAtTime(muted ? 0 : 1, this.ctx.currentTime, 0.04)
     }
   }
 
