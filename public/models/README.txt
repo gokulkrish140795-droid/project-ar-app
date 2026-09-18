@@ -1,14 +1,18 @@
 # Companion GLB models
 #
 # Drop your final art here (exact names):
-#   minime.glb   — stylized husband Mini-Me (idle/walk/talk clips if possible)
-#   ginger.glb   — orange & white tabby Ginger
+#   minime.glb   — stylized husband Mini-Me
+#   ginger.glb   — orange & white tabby Ginger (quest guide)
+#
+# Full Blender checklist (clip names, export, size limits):
+#   ../../BLENDER_COMPANION_CHECKLIST.md
+#   (or project root: BLENDER_COMPANION_CHECKLIST.md)
 #
 # Until those files exist, the app loads animated demo GLBs from a CDN
-# (RobotExpressive + Fox) so StackBlitz still shows real 3D characters.
-# Your local files always win over the demos.
+# (RobotExpressive + Fox). Your local files always win over the demos.
 #
-# Tips:
-# - Prefer .glb (single file) over .gltf + bins
-# - Keep under ~5–8 MB each for mobile
-# - Name animation clips: Idle, Walk, Talk, Jump, etc.
+# Rules:
+# - Prefer .glb (single file)
+# - Keep under ~6–8 MB each for iPhone 14
+# - Name Actions exactly: Idle, Talk, WalkIn, Peek, Smile, Lean, Glass, Jump
+#   Ginger: Idle, WalkIn, Leap, Sit, Nuzzle, Peek, Glass, Loaf, Stretch, Lick, Bat, Roll, Sleep, Yarn

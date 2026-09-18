@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js'
 
 const loader = new GLTFLoader()
 const gltfCache = new Map()
@@ -94,7 +95,10 @@ function findNamedBone(root, patterns) {
  */
 export function createGltfCompanion(gltf, config) {
   const root = new THREE.Group()
-  const model = gltf.scene.clone(true)
+  // Skinned Mixamo / Blender rigs MUST use SkeletonUtils.clone — scene.clone(true)
+  // leaves the mesh bound to the original skeleton, so clips never move the body.
+  const model = cloneSkinned(gltf.scene)
+  const morphMeshes = []
   model.traverse((obj) => {
     if (obj.isMesh) {
       obj.castShadow = false
@@ -102,14 +106,27 @@ export function createGltfCompanion(gltf, config) {
       if (obj.material) {
         const mats = Array.isArray(obj.material) ? obj.material : [obj.material]
         mats.forEach((m) => {
-          if (m) m.side = THREE.FrontSide
+          if (m) {
+            // Cardigan holes look black with FrontSide when normals flip under deform
+            m.side = THREE.DoubleSide
+            if (m.isMeshPhysicalMaterial) {
+              // Mobile-friendly: keep sparkle without looking like a flat clay stamp
+              m.roughness = Math.min(m.roughness ?? 0.6, 0.72)
+              m.metalness = Math.min(m.metalness ?? 0.2, 0.35)
+            }
+          }
         })
+      }
+      if (obj.morphTargetDictionary && obj.morphTargetInfluences) {
+        morphMeshes.push(obj)
       }
     }
   })
 
   fitModel(model, config.targetHeight || 1.4)
   model.position.y += config.offsetY || 0
+  // Face the camera by default (Mixamo often faces +Z; our avatar cams look from +Z)
+  if (config.yaw !== undefined) model.rotation.y = config.yaw
   root.add(model)
 
   const mixer = new THREE.AnimationMixer(model)
@@ -122,6 +139,71 @@ export function createGltfCompanion(gltf, config) {
     findNamedBone(model, ['mouth', 'jaw', 'chin']) ||
     findNamedBone(model, ['head', 'face', 'neck']) ||
     model
+
+  const morphIndex = (name) => {
+    for (const mesh of morphMeshes) {
+      const idx = mesh.morphTargetDictionary?.[name]
+      if (idx !== undefined) return { mesh, idx }
+    }
+    return null
+  }
+
+  const setMorph = (name, value) => {
+    const hit = morphIndex(name)
+    if (!hit) return false
+    hit.mesh.morphTargetInfluences[hit.idx] = Math.max(0, Math.min(1, value))
+    return true
+  }
+
+  const getMorph = (name) => {
+    const hit = morphIndex(name)
+    if (!hit) return 0
+    return hit.mesh.morphTargetInfluences[hit.idx] || 0
+  }
+
+  /** Pose-driven face overlay (works even when clip morph tracks are missing). */
+  const driveFace = (pose, talking, lipAmp, t) => {
+    if (!morphMeshes.length) return
+    const talk =
+      talking || pose === 'talk' || pose === 'laugh'
+        ? Math.max(lipAmp || 0, pose === 'talk' ? 0.12 : 0)
+        : 0
+
+    let mouthOpen = talk * 0.85
+    let smile = 0
+    let blinkL = 0
+    let blinkR = 0
+
+    if (pose === 'smile' || pose === 'cheer' || pose === 'flyKiss' || pose === 'wave') {
+      smile = 0.75
+    } else if (pose === 'winkSmile') {
+      smile = 0.85
+      blinkL = 1
+    } else if (pose === 'laugh') {
+      mouthOpen = Math.max(mouthOpen, 0.45 + Math.abs(Math.sin(t * 12)) * 0.35)
+      smile = 0.55
+    } else if (pose === 'surprise') {
+      mouthOpen = Math.max(mouthOpen, 0.55)
+    } else if (pose === 'shh') {
+      smile = 0.2
+    } else if (pose === 'jump') {
+      mouthOpen = Math.max(mouthOpen, 0.35)
+      smile = 0.5
+    } else if (pose === 'idle' || !pose) {
+      // soft idle blink every ~3s
+      const phase = (t % 3.2) / 3.2
+      if (phase > 0.92 && phase < 0.97) {
+        blinkL = blinkR = 1
+      }
+    }
+
+    if (pose === 'talk') smile = Math.max(smile, 0.25)
+
+    setMorph('mouthOpen', mouthOpen)
+    setMorph('smile', smile)
+    setMorph('blink_L', blinkL)
+    setMorph('blink_R', blinkR)
+  }
 
   let currentAction = null
 
@@ -153,8 +235,31 @@ export function createGltfCompanion(gltf, config) {
     const next = mixer.clipAction(clip)
     next.enabled = true
     next.setEffectiveWeight(1)
+    next.setEffectiveTimeScale(pose === 'idle' ? 1.35 : 1.15)
     next.setLoop(THREE.LoopRepeat, Infinity)
-    if (pose === 'walkIn' || pose === 'leap' || pose === 'yarn' || pose === 'roll') {
+    const once = new Set([
+      'walkIn',
+      'leap',
+      'yarn',
+      'roll',
+      'cheer',
+      'flyKiss',
+      'winkSmile',
+      'jump',
+      'magicCast',
+      'clap',
+      'wave',
+      'heartHands',
+      'search',
+      'shh',
+      'think',
+      'surprise',
+      'bow',
+      'holdHeart',
+      'laugh',
+      'point',
+    ])
+    if (once.has(pose)) {
       next.setLoop(THREE.LoopOnce, 1)
       next.clampWhenFinished = true
     }
@@ -182,15 +287,21 @@ export function createGltfCompanion(gltf, config) {
     mouth,
     clipsByName,
     playPose,
+    setMorph,
+    getMorph,
+    driveFace,
+    morphMeshes,
     isGltf: true,
     source: 'gltf',
   }
 }
 
 export function applyRootStaging(root, pose, localT, t) {
-  const floatY = Math.sin(t * 1.6) * 0.04
+  // Keep root motion readable even when Blender Idle is deliberately subtle
+  const floatY = Math.sin(t * 1.8) * (pose === 'idle' || !pose ? 0.028 : 0.04)
+  const idleSway = pose === 'idle' || !pose ? Math.sin(t * 0.9) * 0.06 : 0
   root.position.set(0, floatY, 0)
-  root.rotation.set(0, 0, 0)
+  root.rotation.set(0, idleSway, 0)
   root.scale.setScalar(1)
 
   if (pose === 'peek') {
@@ -214,10 +325,24 @@ export function applyRootStaging(root, pose, localT, t) {
     const k = Math.min(1, localT / 0.55)
     const arc = Math.sin(k * Math.PI)
     root.position.set(-0.55 + k * 0.55, 0.12 + arc * 0.5, 0)
-  } else if (pose === 'smile') {
+  } else if (pose === 'smile' || pose === 'winkSmile') {
     root.rotation.y = Math.sin(t * 2) * 0.08
-  } else if (pose === 'nuzzle') {
+  } else if (pose === 'nuzzle' || pose === 'heartHands') {
     root.position.x = -0.25
     root.position.y = floatY + 0.06
+  } else if (pose === 'cheer' || pose === 'jump') {
+    root.position.y = floatY + Math.abs(Math.sin(localT * 8)) * 0.08
+  } else if (pose === 'flyKiss') {
+    root.rotation.y = -0.18
+    root.position.z = 0.06
+  } else if (pose === 'wave') {
+    root.rotation.y = -0.12
+  } else if (pose === 'magicCast') {
+    root.rotation.y = 0.2
+  } else if (pose === 'search') {
+    root.rotation.y = Math.sin(localT * 3.2) * 0.35
+  } else if (pose === 'dance') {
+    root.position.x = Math.sin(t * 6) * 0.06
+    root.rotation.y = Math.sin(t * 4) * 0.12
   }
 }

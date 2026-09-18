@@ -21,3 +21,5 @@
 # sfx_peek_whoosh.mp3
 # sfx_footstep_soft.mp3
 # sfx_soft_chime.mp3
+# voice_kiss_giggle.mp3
+# voice_tap_yay.mp3

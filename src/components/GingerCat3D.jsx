@@ -152,6 +152,8 @@ function animateProceduralGinger(ginger, pose, localT, t) {
   u.pawBL.visible = true
   u.pawBR.visible = true
   u.head.rotation.set(0, 0, 0)
+  if (u.eyeL?.userData?.lid) u.eyeL.userData.lid.visible = false
+  if (u.eyeR?.userData?.lid) u.eyeR.userData.lid.visible = false
   ginger.position.set(0, Math.sin(t * 1.8) * 0.03, 0)
   ginger.rotation.set(0, 0.15, 0)
   ginger.scale.setScalar(1)
@@ -191,6 +193,35 @@ function animateProceduralGinger(ginger, pose, localT, t) {
   } else if (pose === 'glass') {
     u.pawFL.position.set(-0.12, 0.2, 0.38)
     u.pawFR.position.set(0.12, 0.2, 0.38)
+  } else if (pose === 'cheer' || pose === 'jump') {
+    ginger.position.y = 0.08 + Math.abs(Math.sin(localT * 8)) * 0.1
+    u.tail.rotation.z = Math.sin(t * 8) * 0.8
+  } else if (pose === 'flyKiss' || pose === 'heartHands') {
+    ginger.position.x = -0.22
+    u.head.rotation.z = -0.15
+  } else if (pose === 'winkSmile') {
+    if (u.eyeL?.userData?.lid) u.eyeL.userData.lid.visible = true
+    u.head.rotation.z = 0.12
+  } else if (pose === 'search') {
+    u.head.rotation.y = Math.sin(localT * 3) * 0.4
+    ginger.position.x = Math.sin(localT * 2) * 0.12
+  } else if (pose === 'magicCast') {
+    u.pawFL.position.set(-0.22, 0.18 + Math.sin(t * 10) * 0.08, 0.32)
+  } else if (pose === 'dance') {
+    ginger.position.x = Math.sin(t * 6) * 0.1
+    ginger.rotation.y = 0.15 + Math.sin(t * 5) * 0.2
+  } else if (pose === 'boop') {
+    ginger.position.set(-0.15, 0.08, 0.12)
+    u.head.rotation.x = 0.25
+    u.pawFL.position.set(-0.05, 0.22, 0.38)
+  } else if (pose === 'loafOnHim') {
+    u.body.scale.set(1.3, 0.5, 1.1)
+    ginger.position.set(-0.35, 0.18, 0.05)
+    u.pawBL.visible = false
+    u.pawBR.visible = false
+  } else if (pose === 'tailWrap') {
+    ginger.position.x = -0.22
+    u.tail.rotation.z = 1.1 + Math.sin(t * 2) * 0.2
   } else {
     u.pawFL.position.y = -0.12 + Math.max(0, Math.sin(t * 2.2)) * 0.08
   }
@@ -214,18 +245,22 @@ export default function GingerCat3D({
     let disposed = false
     let raf = 0
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 20)
-    camera.position.set(0, 0.4, 3.0)
+    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 20)
+    camera.position.set(0, 0.45, 2.85)
+    camera.lookAt(0, 0.25, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
     renderer.setSize(size, size)
     renderer.setClearColor(0x000000, 0)
     renderer.outputColorSpace = THREE.SRGBColorSpace
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.1
     mount.appendChild(renderer.domElement)
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.75))
-    scene.add(new THREE.PointLight(0xffd090, 1.5, 10).translateX(1).translateY(1.5).translateZ(2))
+    scene.add(new THREE.AmbientLight(0xfff0dd, 0.6))
+    scene.add(new THREE.PointLight(0xffd090, 1.6, 10).translateX(1).translateY(1.5).translateZ(2))
+    scene.add(new THREE.PointLight(0x6a90ff, 0.4, 8).translateX(-1.2).translateY(0.5))
 
     let companion = null
     let lastPose = ''

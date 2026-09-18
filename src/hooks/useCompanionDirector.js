@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import audioEngine from './audioEngine'
-import { pickBehavior, pickIdleLine } from './companionBehaviors'
+import audioEngine from '../utils/audioEngine'
+import { pickBehavior, pickIdleLine } from '../utils/companionBehaviors'
 
 const QUEST_QUOTE =
   '💬 Gokul-Mage: “Aishwarya! Gokul-Mage lost a piece of Gokul\'s heart in our home! Help me find it! 💖”'
@@ -73,21 +73,33 @@ export default function useCompanionDirector({
     }, behavior.duration)
   }
 
-  /** Call once when scroll opens — intro line + talk pose */
+  /** Call once when scroll opens — walk in, then intro line + talk pose */
   const playIntro = async () => {
+    setShowSpeech(false)
+    setMiniPose('walkIn')
+    setGingerPose('walkIn')
+    busyRef.current = true
+    await new Promise((r) => window.setTimeout(r, 1100))
     setShowSpeech(true)
     setSpeech(QUEST_QUOTE)
     setMiniPose('talk')
     setGingerPose('sit')
     setLipTalking(true)
-    busyRef.current = true
     await audioEngine.playVoiceOrChirp('voice_quest_intro', { duration: 2.4 })
+    window.setTimeout(() => {
+      setMiniPose('jump')
+      setGingerPose('cheer')
+    }, 2400)
+    window.setTimeout(() => {
+      setMiniPose('wave')
+      setGingerPose('stretch')
+    }, 3600)
     window.setTimeout(() => {
       setMiniPose('idle')
       setGingerPose('idle')
       setLipTalking(false)
       busyRef.current = false
-    }, 2600)
+    }, 5200)
   }
 
   /** Trap reaction */

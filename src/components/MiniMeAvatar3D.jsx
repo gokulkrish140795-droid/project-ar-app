@@ -9,7 +9,6 @@ import {
 } from '../utils/gltfCharacter'
 import { disposeObject3D, disposeRenderer } from '../utils/threeDispose'
 
-const GOLD = '#D4AF37'
 const SKIN = 0xf1c27d
 const CARDIGAN = 0x3d2a5c
 const HAIR = 0x1a1228
@@ -167,6 +166,8 @@ function animateProcedural(mini, pose, localT, t, talking) {
   u.head.rotation.set(0, 0, 0)
   u.leftEye.scale.y = 1
   u.rightEye.scale.y = 1
+  if (u.leftEye.userData?.lid) u.leftEye.userData.lid.visible = false
+  if (u.rightEye.userData?.lid) u.rightEye.userData.lid.visible = false
 
   const amp =
     talking || pose === 'talk'
@@ -209,6 +210,92 @@ function animateProcedural(mini, pose, localT, t, talking) {
     mini.scale.setScalar(1.05)
     u.handL.position.z = 0.28
     u.handR.position.z = 0.28
+  } else if (pose === 'cheer' || pose === 'jump') {
+    const bounce = Math.abs(Math.sin(localT * 9)) * 0.1
+    mini.position.y = floatY + bounce
+    u.armL.rotation.set(-1.05, 0, 0.55)
+    u.armR.rotation.set(-1.05, 0, -0.55)
+    u.handL.position.set(-0.42, 0.42, 0.08)
+    u.handR.position.set(0.42, 0.42, 0.08)
+    u.smile.scale.set(1.2, 1.1, 1)
+  } else if (pose === 'flyKiss') {
+    const k = Math.min(1, localT / 0.55)
+    u.head.rotation.set(0.08, -0.22, 0.08)
+    u.armR.rotation.set(-0.95 + k * 0.35, 0, -0.35)
+    u.handR.position.set(0.12 + k * 0.35, 0.28 + k * 0.12, 0.32)
+    u.smile.scale.set(1.2, 1.05, 1)
+    if (u.leftEye.userData?.lid) u.leftEye.userData.lid.visible = localT > 0.25 && localT < 0.7
+    u.leftEye.scale.y = localT > 0.25 && localT < 0.7 ? 0.15 : 0.85
+  } else if (pose === 'winkSmile') {
+    u.head.rotation.set(0.05, 0.12, -0.08)
+    u.smile.scale.set(1.3, 1.2, 1)
+    u.leftEye.scale.y = 0.12
+    if (u.leftEye.userData?.lid) u.leftEye.userData.lid.visible = true
+    u.rightEye.scale.y = 0.88
+  } else if (pose === 'wave') {
+    u.armR.rotation.set(-0.85, 0, -0.15 + Math.sin(t * 10) * 0.35)
+    u.handR.position.set(0.52, 0.38 + Math.sin(t * 10) * 0.06, 0.12)
+    u.head.rotation.y = -0.15
+  } else if (pose === 'magicCast') {
+    u.armR.rotation.set(-0.7, 0.2, -0.9)
+    u.handR.position.set(0.55, 0.32, 0.28)
+    u.head.rotation.set(0.1, 0.25, 0)
+    u.stud.material.emissiveIntensity = 1.4 + Math.sin(t * 14) * 0.6
+  } else if (pose === 'search') {
+    u.head.rotation.y = Math.sin(localT * 3.4) * 0.55
+    u.head.rotation.x = 0.08
+    mini.rotation.y = Math.sin(localT * 2.2) * 0.18
+  } else if (pose === 'clap') {
+    const clap = (Math.sin(t * 14) + 1) * 0.5
+    u.armL.rotation.set(-0.7, 0, 0.55 - clap * 0.35)
+    u.armR.rotation.set(-0.7, 0, -0.55 + clap * 0.35)
+    u.handL.position.set(-0.12 - clap * 0.04, 0.22, 0.28)
+    u.handR.position.set(0.12 + clap * 0.04, 0.22, 0.28)
+  } else if (pose === 'heartHands') {
+    u.armL.rotation.set(-0.85, 0, 0.7)
+    u.armR.rotation.set(-0.85, 0, -0.7)
+    u.handL.position.set(-0.08, 0.28, 0.3)
+    u.handR.position.set(0.08, 0.28, 0.3)
+    u.smile.scale.set(1.2, 1.1, 1)
+  } else if (pose === 'dance') {
+    mini.position.x = Math.sin(t * 6) * 0.08
+    mini.rotation.y = Math.sin(t * 4) * 0.15
+    u.armL.rotation.z = 0.25 + Math.sin(t * 6) * 0.2
+    u.armR.rotation.z = -0.25 - Math.sin(t * 6) * 0.2
+  } else if (pose === 'shh') {
+    u.armR.rotation.set(-1.05, 0.2, -0.15)
+    u.handR.position.set(0.08, 0.38, 0.32)
+    u.head.rotation.set(0.08, 0.12, 0)
+  } else if (pose === 'think') {
+    u.armR.rotation.set(-1.15, 0.15, 0.1)
+    u.handR.position.set(0.12, 0.42, 0.28)
+    u.head.rotation.set(0.12, -0.18, 0.08)
+  } else if (pose === 'surprise') {
+    mini.position.y = floatY + 0.08
+    u.armL.rotation.set(-0.55, 0, 0.45)
+    u.armR.rotation.set(-0.55, 0, -0.45)
+    u.smile.scale.set(0.7, 0.8, 1)
+    u.mouthOpen.visible = true
+    u.mouthOpen.scale.set(1.1, 0.55, 0.8)
+  } else if (pose === 'bow') {
+    const k = Math.min(1, localT / 0.6)
+    u.head.rotation.x = 0.55 * k
+    mini.rotation.x = 0.18 * k
+  } else if (pose === 'holdHeart') {
+    u.armL.rotation.set(-0.9, 0, 0.55)
+    u.armR.rotation.set(-0.9, 0, -0.55)
+    u.handL.position.set(-0.06, 0.32, 0.28)
+    u.handR.position.set(0.06, 0.32, 0.28)
+    u.smile.scale.set(1.2, 1.1, 1)
+  } else if (pose === 'laugh') {
+    u.head.rotation.x = -0.12 + Math.sin(t * 10) * 0.08
+    u.smile.scale.set(1.35, 1.2, 1)
+    u.mouthOpen.visible = true
+    u.mouthOpen.scale.set(1.2, 0.45 + Math.abs(Math.sin(t * 12)) * 0.3, 0.8)
+  } else if (pose === 'point') {
+    u.armR.rotation.set(-0.35, 0.4, -1.05)
+    u.handR.position.set(0.62, 0.28, 0.22)
+    u.head.rotation.y = 0.25
   } else {
     u.head.rotation.y = Math.sin(t * 0.55) * 0.12
   }
@@ -218,8 +305,8 @@ function animateProcedural(mini, pose, localT, t, talking) {
 }
 
 export default function MiniMeAvatar3D({
-  speech = '',
-  showSpeech = false,
+  speech: _speech = '',
+  showSpeech: _showSpeech = false,
   pose = 'idle',
   size = 140,
   peek = false,
@@ -229,7 +316,6 @@ export default function MiniMeAvatar3D({
   ariaLabel = 'Gokul-Mage',
 }) {
   const mountRef = useRef(null)
-  const bubbleRef = useRef(null)
   const poseRef = useRef(pose)
   const peekRef = useRef(peek)
   const talkingRef = useRef(talking)
@@ -244,22 +330,28 @@ export default function MiniMeAvatar3D({
     let disposed = false
     let raf = 0
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 20)
-    camera.position.set(0, 0.55, 3.4)
+    const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 20)
+    camera.position.set(0, 0.72, 3.15)
+    camera.lookAt(0, 0.55, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
     renderer.setSize(size, size + 24)
     renderer.setClearColor(0x000000, 0)
     renderer.outputColorSpace = THREE.SRGBColorSpace
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.15
     mount.appendChild(renderer.domElement)
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7))
-    const key = new THREE.PointLight(0xffe0a0, 1.7, 12)
-    key.position.set(1.2, 1.8, 2.4)
+    scene.add(new THREE.AmbientLight(0xfff0dd, 0.55))
+    const key = new THREE.DirectionalLight(0xffe6b8, 1.35)
+    key.position.set(1.4, 2.2, 2.6)
     scene.add(key)
-    scene.add(new THREE.PointLight(0x88aaff, 0.5, 8).translateX(-1.5).translateY(0.4))
-    scene.add(new THREE.PointLight(0xd4af37, 0.65, 6).translateY(0.8).translateZ(-1.5))
+    scene.add(new THREE.PointLight(0x9ab6ff, 0.55, 10).translateX(-1.6).translateY(0.6).translateZ(1.2))
+    scene.add(new THREE.PointLight(0xd4af37, 0.85, 8).translateY(1.1).translateZ(1.8))
+    const rim = new THREE.PointLight(0xff6f91, 0.4, 7)
+    rim.position.set(0, 0.4, -1.8)
+    scene.add(rim)
 
     let companion = null
     let lastPose = ''
@@ -268,8 +360,6 @@ export default function MiniMeAvatar3D({
     let blinking = false
     let blinkAge = 0
     const clock = new THREE.Clock()
-    const mouthWorld = new THREE.Vector3()
-    const mouthNdc = new THREE.Vector3()
 
     const mountCompanion = (node) => {
       if (companion?.root) scene.remove(companion.root)
@@ -305,8 +395,10 @@ export default function MiniMeAvatar3D({
 
       if (companion?.isGltf) {
         applyRootStaging(companion.root, p, localT, t)
-        // Jaw / mouth flap on GLB
-        if (companion.mouth && companion.mouth !== companion.model) {
+        // Morph face (mouthOpen / smile / blink) when present on GLB
+        if (companion.driveFace) {
+          companion.driveFace(p, talkingRef.current, audioEngine.getLipAmplitude(), t)
+        } else if (companion.mouth && companion.mouth !== companion.model) {
           const amp =
             talkingRef.current || p === 'talk' ? Math.max(audioEngine.getLipAmplitude(), 0.1) : 0
           companion.mouth.rotation.x = -amp * 0.45
@@ -329,14 +421,6 @@ export default function MiniMeAvatar3D({
         }
       }
 
-      const mouthObj = companion?.mouth || companion?.root?.userData?.mouth
-      if (mouthObj && bubbleRef.current) {
-        mouthObj.getWorldPosition(mouthWorld)
-        mouthNdc.copy(mouthWorld).project(camera)
-        bubbleRef.current.style.left = `${((mouthNdc.x + 1) / 2) * size}px`
-        bubbleRef.current.style.top = `${((1 - mouthNdc.y) / 2) * (size + 24)}px`
-      }
-
       renderer.render(scene, camera)
       raf = window.requestAnimationFrame(tick)
     }
@@ -352,45 +436,6 @@ export default function MiniMeAvatar3D({
 
   return (
     <div style={{ position: 'relative', width: size, height: size + 24, flexShrink: 0 }}>
-      <style>{`
-        @keyframes mouthBubble3d {
-          from { opacity: 0; transform: scale(0); }
-          to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
-      {showSpeech && speech && (
-        <div
-          ref={bubbleRef}
-          role="status"
-          style={{
-            position: 'absolute',
-            left: size * 0.58,
-            top: size * 0.28,
-            width: 220,
-            transformOrigin: '8px 100%',
-            transform: 'translate(4px, -100%)',
-            animation: 'mouthBubble3d 0.35s cubic-bezier(0.2, 1.4, 0.3, 1) both',
-            zIndex: 4,
-            pointerEvents: 'none',
-          }}
-        >
-          <div
-            style={{
-              background: 'rgba(255, 251, 247, 0.94)',
-              color: '#3B2414',
-              border: `1px solid ${GOLD}`,
-              borderRadius: 14,
-              padding: '10px 12px',
-              fontSize: 12,
-              lineHeight: 1.4,
-              boxShadow: '0 10px 22px rgba(0,0,0,0.28)',
-              fontFamily: 'Georgia, "Times New Roman", serif',
-            }}
-          >
-            {speech}
-          </div>
-        </div>
-      )}
       <button
         type="button"
         onClick={onFaceTap}

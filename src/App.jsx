@@ -3,6 +3,7 @@ import EnchantedCanvas3D from './components/EnchantedCanvas3D'
 import Screen1Gateway from './components/Screen1Gateway'
 import Screen2Prank from './components/Screen2Prank'
 import ScreenHunt from './components/ScreenHunt'
+import ScreenUncleHologram from './components/ScreenUncleHologram'
 import ScreenVideoMontage from './components/ScreenVideoMontage'
 import { fonts, theme } from './theme'
 import audioEngine from './utils/audioEngine'
@@ -11,12 +12,13 @@ const moodForScreen = {
   gateway: 'gateway',
   prank: 'prank',
   video_montage: 'video',
+  uncle_hologram: 'video',
   scavenger_hunt: 'hunt',
 }
 
 /**
  * Master production state machine:
- * gateway → floo swirl → prank → video_montage → scavenger_hunt
+ * gateway → floo → prank → video_montage → uncle_hologram → scavenger_hunt
  */
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('gateway')
@@ -61,12 +63,18 @@ export default function App() {
     setCurrentScreen('video_montage')
   }
 
-  const handleContinueHunt = () => {
+  const handleContinueToHologram = () => {
     if (currentScreen !== 'video_montage') return
+    setCurrentScreen('uncle_hologram')
+  }
+
+  const handleContinueHunt = () => {
+    if (currentScreen !== 'uncle_hologram') return
     setCurrentScreen('scavenger_hunt')
   }
 
   const mood = moodForScreen[currentScreen] || 'gateway'
+  const hideAtmosphere = currentScreen === 'uncle_hologram'
 
   return (
     <div
@@ -75,10 +83,12 @@ export default function App() {
         backgroundColor: theme.velvet,
         color: theme.parchment,
         position: 'relative',
-        fontFamily: fonts.display,
+        fontFamily: fonts.body,
       }}
     >
-      <EnchantedCanvas3D lumosOn={lumosOn} flooActive={flooActive} mood={mood} />
+      {!hideAtmosphere && (
+        <EnchantedCanvas3D lumosOn={lumosOn} flooActive={flooActive} mood={mood} />
+      )}
 
       {flooActive && <div className="ar-floo-veil" aria-hidden="true" />}
 
@@ -99,13 +109,11 @@ export default function App() {
           padding: '8px 14px',
           color: lumosOn ? theme.velvet : theme.gold,
           letterSpacing: 1.2,
-          fontSize: 12,
-          boxShadow: lumosOn
-            ? '0 8px 0 rgba(90, 60, 10, 0.55), 0 0 22px rgba(212, 175, 55, 0.55)'
-            : undefined,
+          fontSize: 11,
+          fontFamily: fonts.display,
         }}
       >
-        {lumosOn ? '🔔 Lumos Audio' : '🔇 Nox Audio'}
+        {lumosOn ? 'Lumos Audio' : 'Nox Audio'}
       </button>
 
       <div
@@ -127,7 +135,11 @@ export default function App() {
         )}
 
         {currentScreen === 'video_montage' && (
-          <ScreenVideoMontage onContinue={handleContinueHunt} />
+          <ScreenVideoMontage onContinue={handleContinueToHologram} />
+        )}
+
+        {currentScreen === 'uncle_hologram' && (
+          <ScreenUncleHologram onEnsureAudio={ensureAudio} onContinue={handleContinueHunt} />
         )}
 
         {currentScreen === 'scavenger_hunt' && <ScreenHunt />}

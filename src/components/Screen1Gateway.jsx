@@ -1,16 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import * as THREE from 'three'
 import useCompanionDirector from '../hooks/useCompanionDirector'
-import { theme } from '../theme'
+import { fonts, theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
-import { disposeObject3D, disposeRenderer } from '../utils/threeDispose'
-import DepthFrame from './DepthFrame'
+import CaptionRail from './ui/CaptionRail'
 import GingerCat3D from './GingerCat3D'
 import MiniMeAvatar3D from './MiniMeAvatar3D'
 
-const GOLD = theme.gold
-const INK = theme.ink
-const VELVET = theme.velvet
+const CREAM = theme.cream
 
 function randomTrapPosition(stage, button, avoid) {
   const pad = 18
@@ -36,181 +32,9 @@ function randomTrapPosition(stage, button, avoid) {
   return { x, y }
 }
 
-/** Closed 3D ribbon scroll + crimson wax seal "30" */
-function ClosedScroll3D({ unrolling, onOpen, width = 320 }) {
-  const mountRef = useRef(null)
-  const unrollingRef = useRef(unrolling)
-  unrollingRef.current = unrolling
-
-  useEffect(() => {
-    const mount = mountRef.current
-    if (!mount) return undefined
-
-    const h = 120
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(40, width / h, 0.1, 20)
-    camera.position.set(0, 0.15, 2.6)
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
-    renderer.setSize(width, h)
-    renderer.setClearColor(0x000000, 0)
-    renderer.outputColorSpace = THREE.SRGBColorSpace
-    mount.appendChild(renderer.domElement)
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7))
-    const key = new THREE.PointLight(0xffe0a8, 1.5, 8)
-    key.position.set(1, 1.2, 2)
-    scene.add(key)
-    const rim = new THREE.PointLight(0xd4af37, 0.6, 6)
-    rim.position.set(-1, 0.4, 1)
-    scene.add(rim)
-
-    const scroll = new THREE.Group()
-    scene.add(scroll)
-
-    const roll = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.28, 0.28, 1.7, 32),
-      new THREE.MeshStandardMaterial({
-        color: 0xc49a56,
-        roughness: 0.65,
-        metalness: 0.08,
-      })
-    )
-    roll.rotation.z = Math.PI / 2
-    scroll.add(roll)
-
-    const endL = new THREE.Mesh(
-      new THREE.TorusGeometry(0.29, 0.04, 10, 24),
-      new THREE.MeshStandardMaterial({ color: 0x8a6030, roughness: 0.7 })
-    )
-    endL.rotation.y = Math.PI / 2
-    endL.position.x = -0.85
-    scroll.add(endL)
-    const endR = endL.clone()
-    endR.position.x = 0.85
-    scroll.add(endR)
-
-    const ribbon = new THREE.Mesh(
-      new THREE.TorusGeometry(0.32, 0.035, 8, 32),
-      new THREE.MeshStandardMaterial({
-        color: 0xd4af37,
-        metalness: 0.85,
-        roughness: 0.3,
-        emissive: 0x3a2e08,
-        emissiveIntensity: 0.35,
-      })
-    )
-    ribbon.rotation.y = Math.PI / 2
-    scroll.add(ribbon)
-
-    const ribbonBand = new THREE.Mesh(
-      new THREE.BoxGeometry(0.12, 0.08, 0.7),
-      new THREE.MeshStandardMaterial({
-        color: 0xc9a227,
-        metalness: 0.7,
-        roughness: 0.35,
-      })
-    )
-    ribbonBand.position.z = 0.28
-    scroll.add(ribbonBand)
-
-    const seal = new THREE.Group()
-    seal.position.set(0, 0.02, 0.42)
-    scroll.add(seal)
-
-    const wax = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.22, 0.24, 0.08, 24),
-      new THREE.MeshStandardMaterial({
-        color: 0xc41e2a,
-        roughness: 0.45,
-        metalness: 0.15,
-        emissive: 0x5c0b12,
-        emissiveIntensity: 0.35,
-      })
-    )
-    wax.rotation.x = Math.PI / 2
-    seal.add(wax)
-
-    const digitMat = new THREE.MeshStandardMaterial({
-      color: 0xd4af37,
-      metalness: 0.9,
-      roughness: 0.25,
-      emissive: 0xd4af37,
-      emissiveIntensity: 0.4,
-    })
-    const d3 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.14, 0.03), digitMat)
-    d3.position.set(-0.06, 0, 0.05)
-    seal.add(d3)
-    const d0 = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.018, 8, 16), digitMat)
-    d0.position.set(0.07, 0, 0.05)
-    seal.add(d0)
-
-    const clock = new THREE.Clock()
-    let raf = 0
-    let disposed = false
-    let crackT = -1
-
-    const tick = () => {
-      if (disposed) return
-      const t = clock.getElapsedTime()
-      scroll.rotation.y = Math.sin(t * 0.8) * 0.08
-      scroll.position.y = Math.sin(t * 1.4) * 0.03
-
-      if (unrollingRef.current && crackT < 0) crackT = t
-      if (crackT >= 0) {
-        const u = Math.min(1, (t - crackT) / 0.7)
-        seal.rotation.z = -0.15 + u * 1.2
-        seal.scale.setScalar(Math.max(0.05, 1 - u * 0.95))
-        seal.position.y = 0.02 + u * 0.4
-        wax.material.transparent = true
-        wax.material.opacity = 1 - u
-      } else {
-        seal.scale.setScalar(1 + Math.sin(t * 2.2) * 0.04)
-        seal.rotation.z = -0.12 + Math.sin(t * 1.5) * 0.04
-      }
-
-      renderer.render(scene, camera)
-      raf = window.requestAnimationFrame(tick)
-    }
-    raf = window.requestAnimationFrame(tick)
-
-    return () => {
-      disposed = true
-      window.cancelAnimationFrame(raf)
-      disposeObject3D(scene)
-      disposeRenderer(renderer)
-    }
-  }, [width])
-
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      aria-label="Tap the crimson wax seal to open the scroll"
-      style={{
-        width: '100%',
-        border: 'none',
-        background: 'transparent',
-        cursor: 'pointer',
-        padding: 0,
-      }}
-    >
-      <div ref={mountRef} style={{ width, height: 120, margin: '0 auto' }} />
-      <p
-        style={{
-          margin: '4px 0 0',
-          textAlign: 'center',
-          color: GOLD,
-          fontSize: 11,
-          letterSpacing: 1.2,
-          fontFamily: 'Georgia, "Times New Roman", serif',
-        }}
-      >
-        Tap the wax seal “30”
-      </p>
-    </button>
-  )
+function stripSpeaker(line = '') {
+  const cleaned = line.replace(/^💬\s*Gokul-Mage:\s*/i, '').replace(/^["“]|["”]$/g, '')
+  return cleaned.trim() || line
 }
 
 export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
@@ -219,47 +43,38 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
   const noRef = useRef(null)
   const trapLockRef = useRef(0)
   const trappingRef = useRef(false)
-  const [opened, setOpened] = useState(false)
-  const [unrolling, setUnrolling] = useState(false)
+  const introStarted = useRef(false)
   const [noPos, setNoPos] = useState(null)
   const [trapping, setTrapping] = useState(false)
   const [accepted, setAccepted] = useState(false)
-  const [scrollWidth, setScrollWidth] = useState(320)
 
   const companions = useCompanionDirector({
-    active: opened && !accepted,
+    active: !accepted,
     paused: trapping,
-    intervalMs: [6500, 11000],
+    intervalMs: [4200, 7500],
   })
-
-  useEffect(() => {
-    const measure = () => setScrollWidth(Math.min(360, window.innerWidth - 32))
-    measure()
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [])
 
   const ensureAudio = async () => {
     if (onEnsureAudio) await onEnsureAudio()
     else await audioEngine.unlock()
   }
 
-  const openScroll = async () => {
-    if (opened || unrolling) return
-    setUnrolling(true)
-    await ensureAudio()
-    audioEngine.stopAllSFXAndVoices()
-    audioEngine.playSfx('sfx_wax_crack')
-
-    window.setTimeout(async () => {
-      setOpened(true)
-      setUnrolling(false)
-      await companions.playIntro()
-    }, 720)
-  }
+  useEffect(() => {
+    if (introStarted.current) return undefined
+    introStarted.current = true
+    let cancelled = false
+    ;(async () => {
+      await ensureAudio()
+      if (!cancelled) await companions.playIntro()
+    })()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const teleportNo = async () => {
-    if (accepted || !opened) return
+    if (accepted) return
 
     const now = Date.now()
     if (now - trapLockRef.current < 280) return
@@ -293,7 +108,7 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
   }
 
   const handleAccept = async () => {
-    if (accepted || !opened) return
+    if (accepted) return
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playLayered(['sfx_spell_quest', 'voice_tap_yay'])
@@ -329,20 +144,12 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
         event.stopPropagation()
         teleportNo()
       }}
+      className="ar-btn-3d ar-btn-3d--ghost"
       style={{
         position: extraStyle.position || 'relative',
         minWidth: 140,
-        padding: '9px 18px',
-        borderRadius: 999,
-        border: '1px solid #D4AF37',
-        background: 'linear-gradient(180deg, rgba(212, 175, 55, 0.42), rgba(212, 175, 55, 0.2))',
-        color: '#FFE5A3',
-        fontFamily: 'Georgia, "Times New Roman", serif',
-        fontWeight: 700,
-        letterSpacing: 0.4,
-        cursor: 'pointer',
-        boxShadow: '0 0 16px rgba(212, 175, 55, 0.35)',
-        textShadow: '0 0 8px rgba(255, 229, 163, 0.65)',
+        padding: '10px 18px',
+        fontSize: 13,
         ...extraStyle,
       }}
     >
@@ -352,12 +159,12 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
           style={{
             position: 'absolute',
             left: '50%',
-            top: -78,
+            top: -92,
             transform: 'translateX(-50%)',
             pointerEvents: 'none',
           }}
         >
-          <GingerCat3D pose="leap" size={72} heartsOnTap={false} />
+          <GingerCat3D pose="leap" size={88} heartsOnTap={false} />
         </span>
       )}
     </button>
@@ -370,20 +177,15 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
         position: 'relative',
         zIndex: 2,
         width: '100%',
-        height: '100%',
         minHeight: '100vh',
         overflow: 'hidden',
         background: 'transparent',
-        color: INK,
-        fontFamily: 'Georgia, "Times New Roman", serif',
+        color: CREAM,
+        fontFamily: fonts.body,
       }}
     >
       <style>
         {`
-          @keyframes unroll3d {
-            from { max-height: 86px; opacity: 0.6; }
-            to { max-height: 720px; opacity: 1; }
-          }
           @keyframes yarnArc3d {
             0% { transform: translate(0, 0) scale(1); opacity: 1; }
             100% { transform: translate(54px, 28px) scale(0.85); opacity: 0.2; }
@@ -402,145 +204,132 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
           zIndex: 2,
           minHeight: '100vh',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          padding: '88px 16px 28px',
+          justifyContent: 'space-between',
+          padding: '72px 16px 28px',
+          gap: 12,
         }}
       >
-        <div style={{ width: 'min(360px, 100%)', maxWidth: 360 }}>
-          {!opened && (
-            <ClosedScroll3D
-              unrolling={unrolling}
-              onOpen={openScroll}
-              width={scrollWidth}
+        <header
+          style={{
+            width: 'min(520px, 100%)',
+            textAlign: 'center',
+            animation: 'arTitleIn 0.7s ease both',
+          }}
+        >
+          <p className="ar-quest-kicker" style={{ margin: 0 }}>
+            Hogwarts Secret Protocol 0510
+          </p>
+          <h1
+            className="ar-quest-title"
+            style={{ margin: '10px 0 0', fontSize: 'clamp(22px, 5.5vw, 34px)' }}
+          >
+            THE SEARCH FOR A STRAY HEART
+          </h1>
+          <p className="ar-quest-sub" style={{ margin: '12px auto 0', maxWidth: 360, fontSize: 15 }}>
+            Thirty years of magic, and today begins your greatest quest yet!
+          </p>
+        </header>
+
+        <div
+          style={{
+            position: 'relative',
+            width: 'min(420px, 100%)',
+            minHeight: 250,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            animation: 'arStageIn 0.85s cubic-bezier(0.2, 1.1, 0.3, 1) both',
+          }}
+        >
+          <div
+            className="ar-stage-glow"
+            aria-hidden="true"
+            style={{ position: 'absolute', inset: '-10% -20% 0', zIndex: 0 }}
+          />
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              left: '18%',
+              right: '18%',
+              bottom: 10,
+              height: 18,
+              borderRadius: '50%',
+              background: 'rgba(0,0,0,0.45)',
+              filter: 'blur(10px)',
+              zIndex: 0,
+            }}
+          />
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 1,
+              display: 'flex',
+              alignItems: 'flex-end',
+              gap: 2,
+            }}
+          >
+            <MiniMeAvatar3D size={220} pose={miniPose} peek={trapping} talking={companions.lipTalking} />
+            <div style={{ marginLeft: -36, marginBottom: 8 }}>
+              <GingerCat3D pose={gingerPose} size={170} />
+            </div>
+          </div>
+          {companions.yarnVisible && (
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                left: '42%',
+                top: 36,
+                width: 20,
+                height: 20,
+                borderRadius: '50%',
+                background: 'radial-gradient(circle at 30% 30%, #FFF3B0, #E8C56A 60%, #8A6A12)',
+                boxShadow: '0 0 16px rgba(232, 197, 106, 0.7)',
+                animation: 'yarnArc3d 0.7s ease forwards',
+                zIndex: 2,
+              }}
             />
           )}
+        </div>
 
-          {opened && (
-            <DepthFrame
-              variant="parchment"
-              float
-              style={{
-                overflow: 'hidden',
-                animation: 'unroll3d 0.7s ease',
-                maxWidth: 360,
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  letterSpacing: 1.4,
-                  fontSize: 10,
-                  color: '#7a4b12',
-                  textAlign: 'center',
-                  textTransform: 'uppercase',
-                }}
-              >
-                ✨ HOGWARTS SECRET PROTOCOL 0510 ✨
-              </p>
-              <h1
-                style={{
-                  margin: '8px 0 0',
-                  fontSize: 18,
-                  lineHeight: 1.25,
-                  letterSpacing: 0.6,
-                  textAlign: 'center',
-                  color: VELVET,
-                  fontWeight: 700,
-                  textShadow: '0 2px 0 rgba(255,255,255,0.35)',
-                }}
-              >
-                THE SEARCH FOR A STRAY HEART
-              </h1>
-              <p
-                style={{
-                  margin: '10px 4px 0',
-                  fontSize: 13,
-                  lineHeight: 1.5,
-                  textAlign: 'center',
-                  background: 'linear-gradient(135deg, #FFF0C2, #D4AF37, #B8922A)',
-                  backgroundSize: '200% auto',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  color: 'transparent',
-                  filter: 'drop-shadow(0 1px 2px rgba(80, 40, 8, 0.35))',
-                  fontWeight: 700,
-                  animation: 'arShimmer 4s linear infinite',
-                }}
-              >
-                Thirty years of magic, and today begins your greatest quest yet!
-              </p>
+        <div
+          style={{
+            width: 'min(400px, 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+            alignItems: 'center',
+            animation: 'arTitleIn 0.75s ease 0.12s both',
+          }}
+        >
+          <CaptionRail
+            visible={companions.showSpeech && !!companions.speech}
+            speaker="Gokul-Mage"
+          >
+            {stripSpeaker(companions.speech)}
+          </CaptionRail>
 
-              <div
-                style={{
-                  marginTop: 16,
-                  display: 'flex',
-                  alignItems: 'flex-end',
-                  justifyContent: 'center',
-                  gap: 4,
-                  position: 'relative',
-                  minHeight: 140,
-                  transform: 'translateZ(24px)',
-                }}
-              >
-                <MiniMeAvatar3D
-                  size={110}
-                  speech={companions.speech}
-                  showSpeech={companions.showSpeech}
-                  pose={miniPose}
-                  peek={trapping}
-                  talking={companions.lipTalking}
-                />
-                <GingerCat3D pose={gingerPose} size={100} />
-                {companions.yarnVisible && (
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      left: 96,
-                      top: 18,
-                      width: 18,
-                      height: 18,
-                      borderRadius: '50%',
-                      background:
-                        'radial-gradient(circle at 30% 30%, #FFF3B0, #D4AF37 60%, #8A6A12)',
-                      boxShadow: '0 0 10px rgba(212, 175, 55, 0.8)',
-                      animation: 'yarnArc3d 0.7s ease forwards',
-                    }}
-                  />
-                )}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 16,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 10,
-                  alignItems: 'center',
-                }}
-              >
-                <button
-                  ref={yesRef}
-                  type="button"
-                  onClick={handleAccept}
-                  disabled={accepted}
-                  className="ar-btn-3d ar-btn-3d--gold"
-                  style={{
-                    width: '100%',
-                    padding: '11px 12px',
-                    fontSize: 12,
-                    lineHeight: 1.3,
-                    cursor: accepted ? 'default' : 'pointer',
-                    opacity: accepted ? 0.75 : 1,
-                  }}
-                >
-                  🪄 I ACCEPT THE WIZARDING QUEST ✨
-                </button>
-                {!noPos && !accepted && trapButton()}
-              </div>
-            </DepthFrame>
-          )}
+          <button
+            ref={yesRef}
+            type="button"
+            onClick={handleAccept}
+            disabled={accepted}
+            className="ar-btn-3d ar-btn-3d--gold"
+            style={{
+              width: '100%',
+              padding: '14px 16px',
+              fontSize: 14,
+              lineHeight: 1.3,
+              cursor: accepted ? 'default' : 'pointer',
+              opacity: accepted ? 0.75 : 1,
+            }}
+          >
+            I ACCEPT THE WIZARDING QUEST
+          </button>
+          {!noPos && !accepted && trapButton()}
         </div>
       </div>
 

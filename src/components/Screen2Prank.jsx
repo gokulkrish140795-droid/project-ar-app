@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import confetti from 'canvas-confetti'
-import { theme } from '../theme'
+import { fonts, theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
-import DepthFrame from './DepthFrame'
+import DeviceFrame from './ui/DeviceFrame'
 import GingerCat3D from './GingerCat3D'
 import MiniMeAvatar3D from './MiniMeAvatar3D'
 
@@ -42,28 +42,12 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
   const fireHearts = () => {
     const origin = { x: 0.5, y: 0.58 }
     confetti({
-      particleCount: 90,
-      spread: 80,
+      particleCount: 70,
+      spread: 70,
       origin,
-      colors: [GOLD, CORAL, '#FFFFFF', PARCHMENT, '#FF4D6D'],
-      shapes: ['heart', 'star'],
+      colors: [GOLD, CORAL, '#FFFFFF', PARCHMENT],
+      shapes: ['heart'],
       scalar: 1.05,
-    })
-    confetti({
-      particleCount: 50,
-      angle: 60,
-      spread: 55,
-      origin: { x: 0.2, y: 0.7 },
-      colors: [CORAL, GOLD, '#FFFFFF'],
-      shapes: ['heart'],
-    })
-    confetti({
-      particleCount: 50,
-      angle: 120,
-      spread: 55,
-      origin: { x: 0.8, y: 0.7 },
-      colors: [CORAL, GOLD, '#FFFFFF'],
-      shapes: ['heart'],
     })
   }
 
@@ -97,42 +81,35 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '88px 16px 28px',
-        fontFamily: 'Georgia, "Times New Roman", serif',
+        fontFamily: fonts.body,
         color: PARCHMENT,
+        gap: 16,
       }}
     >
       <style>
         {`
           @keyframes glassPress3d {
-            0% { transform: translateY(18px) scale(0.92) rotateX(12deg); filter: blur(2px); }
-            70% { transform: translateY(0) scale(1.04) rotateX(0deg); }
-            100% { transform: translateY(2px) scale(1) rotateX(4deg); }
+            0% { transform: translateY(18px) scale(0.92); filter: blur(2px); }
+            70% { transform: translateY(0) scale(1.04); }
+            100% { transform: translateY(2px) scale(1); }
           }
           @keyframes meterGlow3d {
-            0%, 100% { box-shadow: 0 0 12px rgba(212, 175, 55, 0.35), 0 12px 28px rgba(0,0,0,0.4); }
-            50% { box-shadow: 0 0 28px rgba(255, 111, 145, 0.65), 0 12px 28px rgba(0,0,0,0.4); }
+            0%, 100% { box-shadow: 0 0 12px rgba(232, 197, 106, 0.3); }
+            50% { box-shadow: 0 0 28px rgba(255, 107, 138, 0.55); }
           }
           @keyframes popupIn3d {
-            from { opacity: 0; transform: translateY(22px) scale(0.92) rotateX(10deg); }
-            to { opacity: 1; transform: translateY(0) scale(1) rotateX(0deg); }
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
           }
           @keyframes freezeBlink3d {
-            0%, 100% { opacity: 1; text-shadow: 0 0 12px rgba(255,111,145,0.6); }
-            50% { opacity: 0.45; text-shadow: none; }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.55; }
           }
         `}
       </style>
 
-      <DepthFrame style={{ width: 'min(400px, 100%)', textAlign: 'center' }} float>
-        <p
-          style={{
-            margin: 0,
-            letterSpacing: 2,
-            fontSize: 11,
-            color: GOLD,
-            textTransform: 'uppercase',
-          }}
-        >
+      <DeviceFrame style={{ width: 'min(400px, 100%)', textAlign: 'center' }}>
+        <p className="ar-quest-kicker" style={{ margin: 0 }}>
           Heart-Meter Calibration
         </p>
 
@@ -140,19 +117,16 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
           style={{
             marginTop: 14,
             padding: 12,
-            borderRadius: 999,
+            borderRadius: 12,
             border: `1px solid ${GOLD}`,
-            background:
-              'linear-gradient(180deg, rgba(40, 20, 50, 0.9), rgba(15, 10, 28, 0.85))',
+            background: 'linear-gradient(180deg, rgba(40, 20, 50, 0.55), rgba(15, 10, 28, 0.75))',
             animation: 'meterGlow3d 1.8s ease-in-out infinite',
-            transform: 'perspective(600px) rotateX(8deg)',
-            boxShadow: 'inset 0 2px 8px rgba(255,255,255,0.08)',
           }}
         >
           <div
             style={{
-              height: 18,
-              borderRadius: 999,
+              height: 14,
+              borderRadius: 8,
               overflow: 'hidden',
               background: 'rgba(244, 232, 193, 0.1)',
               boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.45)',
@@ -162,14 +136,14 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
               style={{
                 width: `${progress}%`,
                 height: '100%',
-                borderRadius: 999,
+                borderRadius: 8,
                 background: frozen
-                  ? 'linear-gradient(90deg, #D4AF37, #FF6F91, #FFB4C4)'
-                  : 'linear-gradient(90deg, #8A6A12, #D4AF37, #FFF0C2)',
+                  ? 'linear-gradient(90deg, #E8C56A, #FF6B8A, #FFB4C4)'
+                  : 'linear-gradient(90deg, #8A6A12, #E8C56A, #FFF0C2)',
                 backgroundSize: '200% 100%',
                 animation: frozen ? 'none' : 'arShimmer 2.4s linear infinite',
                 transition: 'width 0.35s ease',
-                boxShadow: '0 0 16px rgba(212, 175, 55, 0.55)',
+                boxShadow: '0 0 16px rgba(232, 197, 106, 0.45)',
               }}
             />
           </div>
@@ -179,24 +153,23 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
             margin: '10px 0 0',
             fontSize: 22,
             fontWeight: 700,
+            fontFamily: fonts.display,
             color: frozen ? CORAL : GOLD,
             animation: frozen ? 'freezeBlink3d 0.9s ease-in-out infinite' : 'none',
           }}
         >
           {progress}%{frozen ? ' — FROZEN' : ''}
         </p>
-      </DepthFrame>
+      </DeviceFrame>
 
       <div
         style={{
-          marginTop: 22,
           position: 'relative',
           width: 300,
           height: 250,
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'center',
-          perspective: 800,
           animation: frozen ? 'glassPress3d 0.85s ease forwards' : 'none',
         }}
       >
@@ -205,64 +178,45 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
           style={{
             position: 'absolute',
             inset: 0,
-            borderRadius: 28,
-            border: '2px solid rgba(212, 175, 55, 0.5)',
+            borderRadius: 20,
+            border: '1px solid rgba(232, 197, 106, 0.4)',
             background:
-              'linear-gradient(160deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.04) 38%, rgba(15,10,28,0.35) 100%)',
-            boxShadow:
-              'inset 0 0 36px rgba(255,255,255,0.18), 0 24px 40px rgba(0,0,0,0.45), 0 0 30px rgba(212,175,55,0.15)',
-            transform: 'rotateX(12deg)',
+              'linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.03) 38%, rgba(15,10,28,0.35) 100%)',
+            boxShadow: 'inset 0 0 36px rgba(255,255,255,0.12), 0 20px 40px rgba(0,0,0,0.4)',
             pointerEvents: 'none',
           }}
         />
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            left: '12%',
-            right: '12%',
-            bottom: 18,
-            height: 10,
-            borderRadius: '50%',
-            background: 'rgba(0,0,0,0.45)',
-            filter: 'blur(8px)',
-            transform: 'rotateX(70deg)',
-          }}
-        />
         <MiniMeAvatar3D
-          size={150}
+          size={190}
           pose="glass"
           onFaceTap={handleKiss}
           disabled={!frozen || kissed}
           ariaLabel="Tap Gokul-Mage's face to give a kiss"
         />
-        <div style={{ marginLeft: -12, marginBottom: 4 }}>
-          <GingerCat3D pose="glass" size={120} />
+        <div style={{ marginLeft: -18, marginBottom: 4 }}>
+          <GingerCat3D pose="glass" size={150} />
         </div>
       </div>
 
       {frozen && (
-        <DepthFrame
+        <DeviceFrame
           style={{
             width: 'min(400px, 100%)',
-            marginTop: 18,
             background:
-              'linear-gradient(180deg, #FF8FAB 0%, #FF6F91 55%, #E85A7a 100%)',
+              'linear-gradient(180deg, rgba(255, 140, 170, 0.92) 0%, rgba(255, 107, 138, 0.95) 100%)',
             color: '#3B1020',
             border: '1px solid rgba(255, 229, 163, 0.45)',
             animation: 'popupIn3d 0.45s ease',
             textAlign: 'center',
-            transform: 'perspective(800px) rotateX(2deg)',
           }}
         >
           <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, fontWeight: 600 }}>
-            ✨ OH NO! SWEETNESS OVERLOAD! ✨ The Wellington wind must have blown away our
-            connection! 💨 But wait... my heart-meters show this phone is being held by a girl
-            with TWO university degrees! 🎓🎓 Your brilliant brain and breathtaking beauty have
-            completely melted my little birthday servers! 💘 Quick, tap my face to give me a kiss
-            and fix the system!
+            OH NO! SWEETNESS OVERLOAD! The Wellington wind must have blown away our connection!
+            But wait... my heart-meters show this phone is being held by a girl with TWO university
+            degrees! Your brilliant brain and breathtaking beauty have completely melted my little
+            birthday servers! Quick, tap my face to give me a kiss and fix the system!
           </p>
-        </DepthFrame>
+        </DeviceFrame>
       )}
     </section>
   )

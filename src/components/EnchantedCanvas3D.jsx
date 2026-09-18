@@ -340,6 +340,74 @@ function createGodRay(x, rotZ) {
   return mesh
 }
 
+function createHallFill() {
+  // Soft vignette plane behind the stage so the void isn't pure black
+  const geo = new THREE.PlaneGeometry(22, 14)
+  const mat = new THREE.MeshBasicMaterial({
+    color: 0x152238,
+    transparent: true,
+    opacity: 0.55,
+    depthWrite: false,
+  })
+  const mesh = new THREE.Mesh(geo, mat)
+  mesh.position.set(0, 2.2, -7.2)
+  return mesh
+}
+
+function createBanner(x, z) {
+  const group = new THREE.Group()
+  group.position.set(x, 2.6, z)
+  const cloth = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.9, 2.2),
+    new THREE.MeshStandardMaterial({
+      color: 0x1a2840,
+      roughness: 0.85,
+      metalness: 0.05,
+      side: THREE.DoubleSide,
+    })
+  )
+  group.add(cloth)
+  const trim = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.95, 0.08),
+    new THREE.MeshStandardMaterial({
+      color: GOLD,
+      metalness: 0.8,
+      roughness: 0.35,
+      emissive: 0x3a2e08,
+      emissiveIntensity: 0.3,
+    })
+  )
+  trim.position.y = 1.05
+  group.add(trim)
+  const crest = new THREE.Mesh(
+    new THREE.CircleGeometry(0.16, 20),
+    new THREE.MeshStandardMaterial({
+      color: GOLD,
+      emissive: 0x4a3a10,
+      emissiveIntensity: 0.45,
+      metalness: 0.7,
+      roughness: 0.3,
+    })
+  )
+  crest.position.z = 0.02
+  group.add(crest)
+  group.userData = { phase: Math.random() * Math.PI * 2 }
+  return group
+}
+
+function createCeilingBeam(x, z, len = 10) {
+  const beam = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18, 0.22, len),
+    new THREE.MeshStandardMaterial({
+      color: 0x2a1a10,
+      roughness: 0.9,
+      metalness: 0.05,
+    })
+  )
+  beam.position.set(x, 5.2, z)
+  return beam
+}
+
 function createFloatingOrb(x, y, z, color) {
   const group = new THREE.Group()
   group.position.set(x, y, z)
@@ -388,16 +456,16 @@ export default function EnchantedCanvas3D({
     if (!mount) return undefined
 
     const scene = new THREE.Scene()
-    scene.fog = new THREE.FogExp2(VELVET, 0.038)
-    scene.background = new THREE.Color(VELVET)
+    scene.fog = new THREE.FogExp2(VELVET, 0.022)
+    scene.background = new THREE.Color(0x0e1628)
 
     const camera = new THREE.PerspectiveCamera(
-      48,
+      46,
       window.innerWidth / window.innerHeight,
       0.1,
       80
     )
-    camera.position.set(0, 1.1, 5.2)
+    camera.position.set(0, 1.25, 5.6)
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -408,44 +476,65 @@ export default function EnchantedCanvas3D({
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.05
+    renderer.toneMappingExposure = 1.12
     mount.appendChild(renderer.domElement)
 
-    const ambient = new THREE.AmbientLight(0x3a2a55, 0.5)
+    const ambient = new THREE.AmbientLight(0x3a4e72, 0.58)
     scene.add(ambient)
-    const studioA = new THREE.PointLight(GOLD, 1.4, 18, 2)
-    studioA.position.set(-3.5, 3.2, 2)
+    const studioA = new THREE.PointLight(GOLD, 1.55, 20, 2)
+    studioA.position.set(-3.2, 3.6, 2.2)
     scene.add(studioA)
-    const studioB = new THREE.PointLight(0x88aaff, 0.55, 16, 2)
-    studioB.position.set(3.8, 2.4, 1.5)
+    const studioB = new THREE.PointLight(0x6a90ff, 0.65, 18, 2)
+    studioB.position.set(3.6, 2.8, 1.8)
     scene.add(studioB)
-    const rim = new THREE.PointLight(0xff6f91, 0.35, 12, 2)
-    rim.position.set(0, 0.2, 4)
+    const rim = new THREE.PointLight(0xff6b8a, 0.4, 14, 2)
+    rim.position.set(0, 0.35, 4.2)
     scene.add(rim)
-    const hemi = new THREE.HemisphereLight(0x4a3a6a, 0x1a0e28, 0.45)
+    const hemi = new THREE.HemisphereLight(0x3a5078, 0x0a101c, 0.55)
     scene.add(hemi)
 
     // Hall floor with gold inlay ring
     const hallFloor = new THREE.Mesh(
-      new THREE.CircleGeometry(14, 64),
+      new THREE.CircleGeometry(16, 72),
       new THREE.MeshStandardMaterial({
-        color: 0x120a1c,
-        roughness: 0.92,
-        metalness: 0.08,
+        color: 0x101828,
+        roughness: 0.88,
+        metalness: 0.12,
       })
     )
     hallFloor.rotation.x = -Math.PI / 2
     hallFloor.position.y = -1.6
     scene.add(hallFloor)
 
+    // Stone tile hint rings
+    for (const [inner, outer, opacity] of [
+      [5.2, 5.45, 0.35],
+      [7.4, 7.6, 0.22],
+      [9.6, 9.75, 0.14],
+    ]) {
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(inner, outer, 64),
+        new THREE.MeshStandardMaterial({
+          color: themeHex.stoneLite,
+          roughness: 0.95,
+          metalness: 0.05,
+          transparent: true,
+          opacity,
+        })
+      )
+      ring.rotation.x = -Math.PI / 2
+      ring.position.y = -1.59
+      scene.add(ring)
+    }
+
     const inlay = new THREE.Mesh(
-      new THREE.RingGeometry(3.2, 3.45, 64),
+      new THREE.RingGeometry(3.05, 3.35, 64),
       new THREE.MeshStandardMaterial({
         color: GOLD,
         metalness: 0.85,
         roughness: 0.3,
         emissive: 0x3a2e08,
-        emissiveIntensity: 0.35,
+        emissiveIntensity: 0.4,
       })
     )
     inlay.rotation.x = -Math.PI / 2
@@ -453,38 +542,80 @@ export default function EnchantedCanvas3D({
     scene.add(inlay)
 
     const inlayInner = new THREE.Mesh(
-      new THREE.RingGeometry(1.4, 1.55, 48),
+      new THREE.RingGeometry(1.35, 1.52, 48),
       new THREE.MeshStandardMaterial({
-        color: 0xffe5a3,
+        color: 0xffe7a8,
         metalness: 0.8,
         roughness: 0.35,
         emissive: 0x4a3a10,
-        emissiveIntensity: 0.25,
+        emissiveIntensity: 0.3,
         transparent: true,
-        opacity: 0.75,
+        opacity: 0.8,
       })
     )
     inlayInner.rotation.x = -Math.PI / 2
     inlayInner.position.y = -1.57
     scene.add(inlayInner)
 
-    // Distant back wall for depth
-    const backWall = new THREE.Mesh(
-      new THREE.PlaneGeometry(28, 12),
-      new THREE.MeshStandardMaterial({
-        color: themeHex.velvetDeep,
-        roughness: 1,
-        metalness: 0,
-      })
-    )
-    backWall.position.set(0, 2.5, -8)
+    // Distant back wall + side walls for enclosure
+    const wallMat = new THREE.MeshStandardMaterial({
+      color: themeHex.velvetDeep,
+      roughness: 0.95,
+      metalness: 0.04,
+    })
+    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(32, 14), wallMat)
+    backWall.position.set(0, 3.2, -9)
     scene.add(backWall)
+
+    const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 12), wallMat.clone())
+    leftWall.position.set(-10, 2.8, -2)
+    leftWall.rotation.y = Math.PI / 2.4
+    scene.add(leftWall)
+    const rightWall = leftWall.clone()
+    rightWall.position.set(10, 2.8, -2)
+    rightWall.rotation.y = -Math.PI / 2.4
+    scene.add(rightWall)
+
+    scene.add(createHallFill())
+    ;[-3.6, 3.6].forEach((x) => scene.add(createBanner(x, -5.2)))
+    ;[-2.2, 0, 2.2].forEach((x) => scene.add(createCeilingBeam(x, -3.5, 12)))
+
+    // Moonlit arched windows
+    const windowMat = new THREE.MeshBasicMaterial({
+      color: 0x6a90c8,
+      transparent: true,
+      opacity: 0.22,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })
+    ;[-4.5, 0, 4.5].forEach((x, i) => {
+      const pane = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 2.8), windowMat.clone())
+      pane.position.set(x, 3.4, -8.85)
+      scene.add(pane)
+      const arch = new THREE.Mesh(
+        new THREE.RingGeometry(0.75, 0.88, 24, 1, 0, Math.PI),
+        new THREE.MeshStandardMaterial({
+          color: GOLD,
+          metalness: 0.7,
+          roughness: 0.4,
+          emissive: 0x2a2208,
+          emissiveIntensity: 0.25,
+        })
+      )
+      arch.position.set(x, 4.75, -8.8)
+      scene.add(arch)
+      const winLight = new THREE.PointLight(0x88aaff, 0.35 + i * 0.05, 10, 2)
+      winLight.position.set(x, 3.6, -7.5)
+      scene.add(winLight)
+    })
 
     const pillars = [
       createPillar(-4.2, -1.5, -1),
       createPillar(4.2, -1.5, 1),
       createPillar(-5.2, -4.2, -1),
       createPillar(5.2, -4.2, 1),
+      createPillar(-6.2, -6.5, -1),
+      createPillar(6.2, -6.5, 1),
     ]
     pillars.forEach((p) => scene.add(p))
 
@@ -493,16 +624,25 @@ export default function EnchantedCanvas3D({
 
     const orbs = [
       createFloatingOrb(-3.2, 2.4, -2.2, GOLD),
-      createFloatingOrb(3.4, 2.8, -2.8, 0xff6f91),
+      createFloatingOrb(3.4, 2.8, -2.8, 0xff6b8a),
       createFloatingOrb(0.8, 3.2, -3.5, FIREFLY),
+      createFloatingOrb(-1.4, 3.6, -4.2, 0x6a90ff),
     ]
     orbs.forEach((o) => scene.add(o))
 
+    // Floating candle chandelier + side candles
     const candles = [
       createCandle(-2.4, 0.9, -1.2),
       createCandle(2.6, 1.15, -1.8),
       createCandle(1.4, -0.2, 0.4),
       createCandle(-1.6, 1.8, -3.2),
+      createCandle(-0.8, 2.6, -2.4),
+      createCandle(0.9, 2.8, -2.6),
+      createCandle(-3.4, 1.4, -3.8),
+      createCandle(3.2, 1.6, -3.5),
+      createCandle(0, 3.4, -4.5),
+      createCandle(-1.8, 3.1, -4.2),
+      createCandle(1.9, 3.2, -4.1),
     ]
     candles.forEach((c) => scene.add(c))
 
@@ -510,14 +650,13 @@ export default function EnchantedCanvas3D({
       createEnvelope(-2.8, 0.2, -0.6),
       createEnvelope(2.2, 1.6, -2.2),
       createEnvelope(-1.2, 2.2, -3.5),
+      createEnvelope(3.0, 0.5, -1.0),
     ]
     envelopes.forEach((e) => scene.add(e))
 
-    const fireflies = createParticleSystem(56, FIREFLY, 0.08, 12)
-    scene.add(fireflies)
-    const stardust = createParticleSystem(110, GOLD, 0.04, 16)
-    stardust.userData.kind = 'stardust'
-    scene.add(stardust)
+    const fireflies = null
+    const stardust = null
+    // Cheap square Points dust removed — AAA soft FX only at UI layer (summon/holo CSS)
 
     const fliers = [createSilhouette('owl'), createSilhouette('bat'), createSilhouette('bat')]
     fliers.forEach((f) => scene.add(f))
@@ -577,27 +716,27 @@ export default function EnchantedCanvas3D({
     let disposed = false
 
     const moodTargets = {
-      gateway: { fog: 0.038, exposure: 1.05, ambient: 0.5, rim: 0.35, bg: new THREE.Color(VELVET) },
+      gateway: { fog: 0.022, exposure: 1.18, ambient: 0.58, rim: 0.45, bg: new THREE.Color(0x0e1628) },
       prank: {
-        fog: 0.042,
-        exposure: 1.12,
-        ambient: 0.55,
-        rim: 0.7,
-        bg: new THREE.Color(0x1a0a18),
+        fog: 0.034,
+        exposure: 1.18,
+        ambient: 0.5,
+        rim: 0.75,
+        bg: new THREE.Color(0x14101c),
       },
       video: {
-        fog: 0.05,
-        exposure: 0.92,
-        ambient: 0.4,
-        rim: 0.25,
-        bg: new THREE.Color(0x0a0814),
+        fog: 0.042,
+        exposure: 0.95,
+        ambient: 0.35,
+        rim: 0.28,
+        bg: new THREE.Color(0x080c14),
       },
       hunt: {
-        fog: 0.034,
-        exposure: 1.08,
-        ambient: 0.58,
-        rim: 0.3,
-        bg: new THREE.Color(0x120a1c),
+        fog: 0.026,
+        exposure: 1.14,
+        ambient: 0.5,
+        rim: 0.35,
+        bg: new THREE.Color(0x0c1422),
       },
     }
     const flooFogColor = new THREE.Color(0x0a2a18)
@@ -688,23 +827,7 @@ export default function EnchantedCanvas3D({
       inlay.rotation.z = t * 0.04
       inlayInner.rotation.z = -t * 0.06
 
-      const ffPos = fireflies.geometry.attributes.position.array
-      const ffPhases = fireflies.userData.phases
-      for (let i = 0; i < fireflies.userData.count; i += 1) {
-        const i3 = i * 3
-        ffPos[i3] += Math.sin(t * 0.7 + ffPhases[i]) * 0.004
-        ffPos[i3 + 1] += Math.cos(t * 0.9 + ffPhases[i] * 1.3) * 0.003
-        ffPos[i3 + 2] += Math.sin(t * 0.5 + ffPhases[i]) * 0.002
-      }
-      fireflies.geometry.attributes.position.needsUpdate = true
-      fireflies.material.opacity = 0.45 + intensity * 0.45
-
-      const sdPos = stardust.geometry.attributes.position.array
-      for (let i = 0; i < stardust.userData.count; i += 1) {
-        sdPos[i * 3 + 1] += 0.004
-        if (sdPos[i * 3 + 1] > 4.2) sdPos[i * 3 + 1] = -1
-      }
-      stardust.geometry.attributes.position.needsUpdate = true
+      // Particle dust systems removed (AAA bar)
 
       for (const flier of fliers) {
         const d = flier.userData
@@ -779,13 +902,13 @@ export default function EnchantedCanvas3D({
         scene.fog.color.copy(baseFogColor)
       }
 
-      const camZ = 5.2 - flooBlend * 2.8
-      const camY = 1.1 + flooBlend * 0.35
+      const camZ = 5.6 - flooBlend * 2.8
+      const camY = 1.25 + flooBlend * 0.35
       camera.position.x = Math.sin(t * 0.12) * 0.15 + Math.sin(t * 2.2) * flooBlend * 0.12
       camera.position.y = camY
       camera.position.z = camZ
       camera.rotation.z = Math.sin(t * 3) * flooBlend * 0.08
-      camera.lookAt(0, 0.6 + flooBlend * 0.2, -flooBlend * 2)
+      camera.lookAt(0, 0.7 + flooBlend * 0.2, -flooBlend * 2)
 
       renderer.render(scene, camera)
       raf = window.requestAnimationFrame(tick)
@@ -816,7 +939,7 @@ export default function EnchantedCanvas3D({
         inset: 0,
         zIndex: 0,
         pointerEvents: 'none',
-        background: '#0F0A1C',
+        background: '#0B1220',
       }}
     />
   )
