@@ -47,6 +47,65 @@ public/models/companions_nuzzle.glb   ← both in one clip if easier
 
 ---
 
+## 2.1 C-G1 — Ginger drop-path (docs only; no GLB invented)
+
+**Ticket:** confirm the app load path and export checklist so a future ≤~6–8 MB `ginger.glb` drops cleanly. Do **not** generate a placeholder binary.
+
+### App load wiring (already in repo)
+
+| Piece | Path / value |
+|---|---|
+| Config | `src/config/companionModels.js` → `GINGER_MODEL` |
+| Drop target | `GINGER_MODEL.localUrl` = **`/models/ginger.glb`** |
+| Vite public file | **`public/models/ginger.glb`** (exact name; not in repo yet) |
+| Viewport | `src/components/GingerCat3D.jsx` calls `resolveCompanionGltf(GINGER_MODEL)` |
+| Resolver | `src/utils/gltfCharacter.js` — local URL first (HEAD/GET probe), then `demoUrl`, else `null` |
+| Missing file | `demoUrl: **null**` → stay on **procedural** tabby (no CDN Fox) |
+| Clip match | case-insensitive substring via `GINGER_MODEL.clipAliases` |
+
+Until `public/models/ginger.glb` exists, GingerCat3D mounts procedural Ginger immediately, then upgrades only if the local GLB probes OK.
+
+### Desktop art workspace (not in this git repo)
+
+Use the existing Blender folder + `ginger-*` reference naming — do not invent meshes or clips here.
+
+```
+C:\Users\aishw\OneDrive\Desktop\ProjectAR-Blender\
+  01-references/ginger-*     ← photos / short walk video (see §9)
+  03-export/ginger.glb       ← Blender staging export when art exists
+```
+
+| Role | Exact path |
+|---|---|
+| References | `ProjectAR-Blender/01-references/ginger-*` |
+| Staging export | `ProjectAR-Blender/03-export/ginger.glb` |
+| App drop (this repo) | `public/models/ginger.glb` |
+
+Copy the staging GLB into the app drop path. Do not pack Ginger into `minime.glb`.
+
+### C-G1 ship-first Actions (already expected by `clipAliases`)
+
+Name Actions exactly (case-insensitive match exists; exact is best). **Idle / Sit / Walk** are the minimum drop set; extra Priority-1 names below are already wired — export them when ready, do not invent new clip names.
+
+| Action name | App pose | `clipAliases` fragments (existing) | Length |
+|---|---|---|---|
+| `Idle` | `idle` | `idle`, `survey`, `wait` | 2–4s loop |
+| `Sit` | `sit` | `sit`, `idle`, `survey` | ~2s |
+| `WalkIn` or `Walk` | `walkIn` | `walkin`, `walk`, `run` | ~1.5–2s |
+
+After those three, keep using the Ginger Priority 1 / 2 tables in §5 (`Leap`, `Nuzzle`, `Peek`, `Glass`, then cute set). Director poses without a matching clip fall back to `idle` / `survey` / first clip.
+
+### C-G1 hard locks
+
+- **Procedural until `ginger.glb` ships.** Missing file is correct. Do not invent a fake / placeholder GLB.
+- **Size:** each companion GLB **≤ ~6–8 MB** (iPhone 14 Safari).
+- **Do not** pack Tripo AI clips (or Ginger) into `public/models/minime.glb` — Mini-Me deploy is a separate gated ticket.
+- **Do not** global auto-weight skins (head-detach history on Tripo).
+- **Photo AR crop / Hunt Image Targets are unrelated** — do not touch Hunt, montage, or DeviceFrame/AAA chrome for this ticket.
+- Ginger cannot use Mini-Me’s humanoid Tripo Animate tab (`Boop` / `LoafOnHim` / `TailWrap` stay procedural until a real Ginger rig exists).
+
+---
+
 ## 3. Look bible (so they feel “alive,” not toys)
 
 ### Mini-Me
@@ -118,6 +177,7 @@ Name Actions exactly like this (case-insensitive matching exists, but exact is b
 | `Dance` | ~2–3s loop | Compact two-step (not Mixamo dance_04) |
 
 ### Ginger — Priority 1
+C-G1 ship-first is **`Idle` / `Sit` / `WalkIn` (or `Walk`)** — see §2.1. The rest of this table is already in `GINGER_MODEL.clipAliases`; export when the rig exists, do not invent extra Action names.
 
 | Action name | Length | What it is |
 |---|---|---|
@@ -197,8 +257,8 @@ After export:
 ## 9. Reference photos to keep open while modelling
 
 - [ ] You: front + ¾ smile (cardigan / chain / stud visible)
-- [ ] Ginger: face, side, sitting, loaf (6–10 photos)
-- [ ] Optional: 1 short video of Ginger walking for WalkIn reference
+- [ ] Ginger: keep open `ProjectAR-Blender/01-references/ginger-*` (face, side, sitting, loaf — 6–10 photos)
+- [ ] Optional: 1 short `ginger-*` walk video for WalkIn reference
 
 ---
 
@@ -206,7 +266,7 @@ After export:
 
 Companions are “done for birthday” when:
 
-- [ ] `minime.glb` + `ginger.glb` load instead of demo robot/fox
+- [ ] `minime.glb` loads instead of demo robot; `ginger.glb` loads instead of **procedural** Ginger (no Fox)
 - [ ] Idle loops look alive (blink / breath / tail)
 - [ ] Talk plays with your voice MP3s
 - [ ] Random director pops Cheer / FlyKiss / WinkSmile / Search (not stuck on one pose)
