@@ -41,6 +41,12 @@ Earlier UI felt game-like / parchment-scroll. **Overhauled in-app chrome** to a 
 
 **Doc:** `UI_BLUEPRINT.md` — source of truth for UI bar. Do not regress to purple-void / cream-scroll / dashboard clutter.
 
+### Companion / M1 — C-G1 Ginger drop-path ready (docs)
+- App drop target confirmed: `GINGER_MODEL.localUrl` → **`/models/ginger.glb`** (`public/models/ginger.glb`).
+- Until that file ships, Ginger stays **procedural** (`demoUrl: null` — no Fox). Do **not** invent a placeholder GLB.
+- Blender refs / staging: `ProjectAR-Blender/01-references/ginger-*` → `03-export/ginger.glb` → app drop. Ship-first clips: `Idle` / `Sit` / `WalkIn` (or `Walk`). Full table: `BLENDER_COMPANION_CHECKLIST.md` §2.1.
+- Hard locks unchanged: no Tripo pack into `minime.glb`; no global auto-weight; Hunt photo-AR crop is unrelated.
+
 ### Uncle wish — LIVE
 - CapCut AI talking video + Tamil ElevenLabs voice (Arunachalam) + lip sync → YouTube Short  
 - Wired in app: `UNCLE_WISH_YOUTUBE_ID = 'ehqNWIrxr60'` in `src/config/media.js`  
@@ -127,7 +133,7 @@ C:\Users\aishw\OneDrive\Desktop\Project AR\project-ar-app\project-ar-app\
 | `src/config/companionModels.js` | GLB URLs + clipAliases |
 | `src/utils/gltfCharacter.js` | Load GLB, poses, **SkeletonUtils.clone**, driveFace |
 | `public/models/minime.glb` | Current Mini-Me art |
-| `public/models/ginger.glb` | **Missing** — procedural Ginger |
+| `public/models/ginger.glb` | **Missing (correct)** — C-G1 drop target; procedural until a real GLB ships |
 
 ### Docs (source of truth)
 | File | Role |
@@ -251,7 +257,7 @@ node project-ar-card-compiler-aaa-hybrid.mjs
 | Companion director + captions | Built |
 | `minime.glb` face morphs + Priority-1 | In public |
 | Tripo AI Priority-2 body clips | Generated; **await deploy** |
-| `ginger.glb` | **Not in repo** — procedural |
+| `ginger.glb` | **Not in repo** — C-G1 drop-path documented; stay procedural until a real file ships |
 | Uncle YouTube Short | **Live** `ehqNWIrxr60` |
 | Montage YouTube / clips | **Pending** (~2 days) |
 | Hunt camera / 8th Wall / MindAR | **Not wired** (placeholder ScreenHunt) |
@@ -266,7 +272,7 @@ node project-ar-card-compiler-aaa-hybrid.mjs
 1. **Print proof** — print 1–2 AAA pairs doublesided; verify cut size + photo uniqueness  
 2. **Hunt AR wiring** — 8th Wall (primary) / MindAR backup; train on photo crop `36,36,558,744`; letter unlock + bypass  
 3. **Montage** — when friend/family clips arrive → CapCut/YouTube → set `MONTAGE_YOUTUBE_ID`  
-4. **Ginger** — ship `ginger.glb` or keep procedural for birthday  
+4. **Ginger** — C-G1 drop-path is ready (docs). Ship a real `public/models/ginger.glb` later, or keep procedural for birthday — do not invent a placeholder binary
 5. **Tripo deploy** — only when Gokul says deploy → pack AI clips into `minime.glb`  
 6. Optional — act-specific back outfits (detective / aviator)
 

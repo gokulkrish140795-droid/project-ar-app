@@ -50,6 +50,7 @@ export const MINIME_MODEL = {
 
 export const GINGER_MODEL = {
   id: 'ginger',
+  /** C-G1 drop target: public/models/ginger.glb. Missing file → procedural (do not invent a placeholder). */
   localUrl: '/models/ginger.glb',
   /** No demo stand-in — procedural Ginger reads clearer than the Fox sample */
   demoUrl: null,
