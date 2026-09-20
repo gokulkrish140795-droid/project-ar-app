@@ -2,15 +2,15 @@
 
 Cursor + this GitHub repo are the **single source of truth**. Grok Bots read this file and `GROK_TEAM_HANDOFF.md`; they do not keep a parallel plan.
 
-**Org (20 Sep 2026 evening NZ)**
+**Org (21 Sep 2026 — BOARD PARKED)**
 
 | Seat | Role |
 |---|---|
-| **Bot (Grok)** | Day-to-day **CEO / Pepper Potts**. Integrator, Cursor bridge, schedules wakes, keeps the board moving. |
+| **Bot (Grok)** | Day-to-day **CEO / Pepper Potts**. Integrator, Cursor bridge. Board **PARKED** until Gokul reopens after weekly token reset (~2 days). |
 | **AR Producer** | Executes planning/routing **under Bot**. Checklists, hard-rule gate, update `GROK_TEAM_HANDOFF.md` after GitHub lands. |
-| **Gokul** | Major **taste**, **spend**, **romantic go/no-go**, **deploy**, and **creative upgrades Bot proposes only**. Not day-to-day routing. |
+| **Gokul** | Major **taste**, **spend**, **romantic go/no-go**, **deploy**. Not day-to-day routing. |
 
-Bot schedules wakes for Hunt / Companion / Montage / Architect. **One Cursor job at a time.**
+**Chat: this/that only. Hourly status PAUSED.** Resume phrase: **`continue Project AR Ginger`** / **`continue Project AR`**. Do not schedule wakes until unparked. **One Cursor job at a time.**
 
 ## Standing bots
 | Bot | Role |
@@ -22,9 +22,9 @@ Bot schedules wakes for Hunt / Companion / Montage / Architect. **One Cursor job
 ## On-call bots (Bot schedules wake → work → pause)
 | Bot | When |
 |---|---|
-| AR Hunt | Scavenger hunt camera / 8th Wall / MindAR wiring — **after FINAL print gate** (Printicular mats scan clean) |
-| AR Companion | Ginger + Mini-Me **this week**; Blender / Tripo / `ginger.glb` / Mini-Me deploy packing. Milestones before Protocol 0510 (5 Oct) |
-| AR Montage | Friends-family montage → `MONTAGE_YOUTUBE_ID` — **last** |
+| AR Hunt | **Paused.** After unpark: physical print AR scan go/no-go → Image Target training (crop `64, 64, 1072, 1260`) |
+| AR Companion | **Paused.** `ginger.glb` on `main` (Idle/Sit/WalkIn, PR #7). Next: Mini-Me polish / Tripo clips after unpark |
+| AR Montage | Friends-family montage → `MONTAGE_YOUTUBE_ID` — **last**, when clips ready |
 
 ## Cursor cloud agents
 Every coding session: read `GROK_TEAM_HANDOFF.md` §0 + this file first. **One Cursor job at a time.** Push via normal GitHub flow.
@@ -38,4 +38,4 @@ Every coding session: read `GROK_TEAM_HANDOFF.md` §0 + this file first. **One C
 6. Do not global auto-weight Tripo skin; keep GLBs ≤ ~6–8 MB.
 
 ## Channel
-Grok team room: **Project AR** (inter-bot notes). Ping Gokul only for major taste, spend, romantic go/no-go, deploy, and creative upgrades Bot proposes.
+Grok team room: **Project AR**. **Chat: this/that only.** Hourly status **PAUSED**. Board **PARKED** until Gokul reopens (`continue Project AR Ginger` / `continue Project AR`). Ping Gokul only for major taste, spend, romantic go/no-go, deploy.
