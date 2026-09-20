@@ -4,55 +4,38 @@
 **Recipient:** Aishwarya — 30th birthday (Protocol 0510 · DOB 5 Oct 1996)  
 **Target device:** iPhone 14 · Safari  
 **Budget cap:** ~USD $200 (DIY engine/characters; spend on uncle video + prints)  
-**Status snapshot:** 19 Sep 2026 (evening) — **includes major AAA UI overhaul + AAA hybrid print cards**
+**Status snapshot:** 20 Sep 2026 — **PR #2 merged to `main`** (`b7aa1a9`) — ScreenHunt **Ch1 shell on main**; **no Image Target training yet**
 
 ---
 
-## 0. Read this first (what changed recently)
+## 0. Read this first (current status)
 
-### Major UI decision (locked) — Magical-phone AAA bar
-Earlier UI felt game-like / parchment-scroll. **Overhauled in-app chrome** to a cinematic **magical device** look:
+Producer snapshot after **PR #2** merge. Do **not** invent puzzle content. `DeviceFrame` / `CaptionRail` stay.
 
-| Keep | Change |
+### Current status
+
+| Item | Truth on `main` |
 |---|---|
-| Wording, riddles, anagrams, flow architecture | Visual theme + shared chrome |
-| Companions own the frame | No parchment cards / wax-scroll panels / mouth speech bubbles covering characters |
-| Heart Reliquary story | Navy velvet + gold + cyan hologram HUD |
+| **Ch1 hunt shell** | **On `main`.** Playable via Help → Unlock with Code → letter collect → **`MICROWAVECUPBOARD` workbench**. Persistence: `localStorage` `project-ar-hunt-v1` (v2). AAA chrome intact. |
+| **Letter payloads** | Desktop `card_registry.json` (in-repo). Cards 01–09: **MIX / CRY / OW / AVZ / EC / UP / BO / AR / DQ** (not one letter per step). |
+| **Bypasses** | Full content-bible phrases (`src/data/ch1ContentBible.js`). Short one-word forms rejected. |
+| **AR training** | **None.** `hasTrainedImageTargets()` is `false` in `src/config/ar.js`. 8th Wall / MindAR are stubs. |
+| **AR crop (B+D+E 6×4)** | **`64, 64, 1072, 1260`** on 1200×1800 (`AR_PHOTO_CROP_1200x1800`). Photograph only — **never letter capsules**. |
+| **Print gate** | **Provisional PASS** — Printicular matte 6×4 ordered. **FINAL go/no-go** when Gokul confirms physical prints scan clean. |
+| **Montage** | Real edit **LAST** (clips ~2–3 days). Placeholder YouTube OK later. Uncle Short **`ehqNWIrxr60`** plays **after montage only** (not in the reel; not from card 23). |
+| **Desktop vs GitHub** | Registry JSON is now in GitHub. **AAA local Desktop may still be ahead** for print PNGs, photos, compiler, 6×4 B+D+E art, and possibly unpushed AAA UI/app files. Do not assume GitHub has the latest print assets. |
 
-**Shared chrome (use everywhere):**
-- `DeviceFrame` — glass HUD panel + gold corner ticks
-- `CaptionRail` — cinematic bottom captions (speech lives here, not on faces)
-- Soft bloom / letterbox — **not** cheap particle spam
-- Fonts: **Cinzel** (display) + **Source Sans 3** (body)
+### Next (this order)
 
-**Theme tokens** (`src/index.css` / `src/theme.js`):
+1. Gokul confirms physical 6×4 prints scan clean (**FINAL** print gate).  
+2. **Then** train AR Image Targets — **photo crop only**, never letter capsules.  
+3. Montage: wait for clips; real edit last. Placeholder YT can land later. Uncle stays after montage.
 
-| Token | Hex |
-|---|---|
-| velvet | `#0b1220` |
-| velvet-deep | `#060b14` |
-| parchment | `#e8f0ff` |
-| gold | `#e8c56a` |
-| gold-bright | `#ffe7a8` |
-| holo (cyan) | `#7ef0ff` |
-| floo | `#3ddc97` |
-| coral | `#ff6b8a` |
-| cream | `#f4f7ff` |
+### Locked chrome (do not regress)
 
-**Doc:** `UI_BLUEPRINT.md` — source of truth for UI bar. Do not regress to purple-void / cream-scroll / dashboard clutter.
+Magical-phone AAA bar: `DeviceFrame` + `CaptionRail` (speech not on faces). Navy velvet / gold / cyan HUD. Fonts Cinzel + Source Sans 3. Tokens in `src/theme.js`. Full bar: `UI_BLUEPRINT.md`.
 
-### Uncle wish — LIVE
-- CapCut AI talking video + Tamil ElevenLabs voice (Arunachalam) + lip sync → YouTube Short  
-- Wired in app: `UNCLE_WISH_YOUTUBE_ID = 'ehqNWIrxr60'` in `src/config/media.js`  
-- Plays on `ScreenUncleHologram` **after montage**, before hunt  
-- Card 23 still = letter collect only (no uncle spawn from scan)
-
-### Print cards — AAA hybrid DONE (54 PNGs)
-Old cream/dusty-pink Instax compiler kept for archive. **New print set** matches AAA UI:
-
-- Front = **A+B hybrid**: navy device frame + cream Instax mat + clean photo + gold letter capsule  
-- Back = navy/gold + mini-me avatar + act chrome (Everyday / Detective / Finale accents)  
-- **AR safest path:** train image targets on **photo rectangle only** — never letter boxes  
+Uncle wish is **live** (`UNCLE_WISH_YOUTUBE_ID = 'ehqNWIrxr60'`). Print fronts are AAA hybrid (navy + cream Instax + photo + gold letter capsule); train AR on the **photo rectangle only**.
 
 ---
 
