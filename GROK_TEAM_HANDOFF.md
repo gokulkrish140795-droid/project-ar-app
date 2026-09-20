@@ -1,64 +1,48 @@
 # Project AR — Full Team Handoff (Initial → Current)
 **For:** Gok Bot / Grok / any new teammate joining the birthday quest build  
-**Owner:** Gokul (software engineer)  
+**Day-to-day:** Bot (Grok) — CEO / Pepper Potts  
+**Owner (major gates):** Gokul — taste, spend, romantic go/no-go, deploy, creative upgrades Bot proposes  
 **Recipient:** Aishwarya — 30th birthday (Protocol 0510 · DOB 5 Oct 1996)  
 **Target device:** iPhone 14 · Safari  
 **Budget cap:** ~USD $200 (DIY engine/characters; spend on uncle video + prints)  
-**Status snapshot:** 19 Sep 2026 (evening) — **includes major AAA UI overhaul + AAA hybrid print cards**
+**Status snapshot:** 20 Sep 2026 (evening NZ) — org: Bot day-to-day CEO; Ch1 shell **PR #2** + §0 note **PR #3** on `main`; print gate provisional PASS; no AR training
 
 ---
 
-## 0. Read this first (what changed recently)
+## 0. Read this first (current status)
 
-### Major UI decision (locked) — Magical-phone AAA bar
-Earlier UI felt game-like / parchment-scroll. **Overhauled in-app chrome** to a cinematic **magical device** look:
+**Org (20 Sep 2026 evening NZ).** Bot (Grok) = day-to-day CEO / Pepper Potts. AR Producer executes planning/routing **under Bot**. Gokul = major taste, spend, romantic go/no-go, deploy, and creative upgrades Bot proposes only. Bot schedules wakes (Hunt / Companion / Montage / Architect). **One Cursor job at a time.** Details: `GROK_BOT_TEAM.md`.
 
-| Keep | Change |
+Build snapshot after **PR #2** (Ch1 shell) + **PR #3** (§0 Ch1 note) on `main`. Do **not** invent puzzle content. Hard locks unchanged. `DeviceFrame` / `CaptionRail` stay.
+
+### Current status
+
+| Item | Truth on `main` |
 |---|---|
-| Wording, riddles, anagrams, flow architecture | Visual theme + shared chrome |
-| Companions own the frame | No parchment cards / wax-scroll panels / mouth speech bubbles covering characters |
-| Heart Reliquary story | Navy velvet + gold + cyan hologram HUD |
+| **Ch1 hunt shell** | **On `main` (PR #2).** Playable via Help → Unlock with Code → letter collect → **`MICROWAVECUPBOARD` workbench**. Persistence: `localStorage` `project-ar-hunt-v1` (v2). AAA chrome intact. |
+| **AR training** | **None.** `hasTrainedImageTargets()` is `false`. 8th Wall / MindAR stubs. Crop **`64, 64, 1072, 1260`** on 1200×1800 — photo only, never letter capsules. |
+| **Print gate** | **Provisional PASS** (Printicular mats). **FINAL** when those mats scan clean → **then** Hunt AR training. |
+| **Companions** | Ginger + Mini-Me **back on board this week**, with milestones before Protocol 0510 (5 Oct). |
+| **Montage** | Real edit **LAST**. Uncle Short **`ehqNWIrxr60`** after montage only (not in the reel; not from card 23). |
 
-**Shared chrome (use everywhere):**
-- `DeviceFrame` — glass HUD panel + gold corner ticks
-- `CaptionRail` — cinematic bottom captions (speech lives here, not on faces)
-- Soft bloom / letterbox — **not** cheap particle spam
-- Fonts: **Cinzel** (display) + **Source Sans 3** (body)
+Ch1 payloads MIX/CRY/OW/AVZ/EC/UP/BO/AR/DQ; full bible bypasses only. Desktop may still be ahead for print PNGs / photos / compiler.
 
-**Theme tokens** (`src/index.css` / `src/theme.js`):
+### Next (this order)
 
-| Token | Hex |
-|---|---|
-| velvet | `#0b1220` |
-| velvet-deep | `#060b14` |
-| parchment | `#e8f0ff` |
-| gold | `#e8c56a` |
-| gold-bright | `#ffe7a8` |
-| holo (cyan) | `#7ef0ff` |
-| floo | `#3ddc97` |
-| coral | `#ff6b8a` |
-| cream | `#f4f7ff` |
+1. FINAL print gate — Printicular mats scan clean.  
+2. **Then** Hunt AR Image Target training (photo crop only).  
+3. Companion Ginger + Mini-Me this week (milestones before 5 Oct).  
+4. Montage last.
 
-**Doc:** `UI_BLUEPRINT.md` — source of truth for UI bar. Do not regress to purple-void / cream-scroll / dashboard clutter.
+### Locked chrome (do not regress)
+
+Magical-phone AAA bar: `DeviceFrame` + `CaptionRail` (speech not on faces). Navy velvet / gold / cyan HUD. Fonts Cinzel + Source Sans 3. Tokens in `src/theme.js`. Full bar: `UI_BLUEPRINT.md`.
 
 ### Companion / M1 — C-G1 Ginger drop-path ready (docs)
 - App drop target confirmed: `GINGER_MODEL.localUrl` → **`/models/ginger.glb`** (`public/models/ginger.glb`).
 - Until that file ships, Ginger stays **procedural** (`demoUrl: null` — no Fox). Do **not** invent a placeholder GLB.
 - Blender refs / staging: `ProjectAR-Blender/01-references/ginger-*` → `03-export/ginger.glb` → app drop. Ship-first clips: `Idle` / `Sit` / `WalkIn` (or `Walk`). Full table: `BLENDER_COMPANION_CHECKLIST.md` §2.1.
 - Hard locks unchanged: no Tripo pack into `minime.glb`; no global auto-weight; Hunt photo-AR crop is unrelated.
-
-### Uncle wish — LIVE
-- CapCut AI talking video + Tamil ElevenLabs voice (Arunachalam) + lip sync → YouTube Short  
-- Wired in app: `UNCLE_WISH_YOUTUBE_ID = 'ehqNWIrxr60'` in `src/config/media.js`  
-- Plays on `ScreenUncleHologram` **after montage**, before hunt  
-- Card 23 still = letter collect only (no uncle spawn from scan)
-
-### Print cards — AAA hybrid DONE (54 PNGs)
-Old cream/dusty-pink Instax compiler kept for archive. **New print set** matches AAA UI:
-
-- Front = **A+B hybrid**: navy device frame + cream Instax mat + clean photo + gold letter capsule  
-- Back = navy/gold + mini-me avatar + act chrome (Everyday / Detective / Finale accents)  
-- **AR safest path:** train image targets on **photo rectangle only** — never letter boxes  
 
 ---
 

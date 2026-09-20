@@ -1,0 +1,222 @@
+{
+  "canvas": {
+    "width": 630,
+    "height": 1020,
+    "arSafeZone": {
+      "note": "Train WebAR image targets on this rectangle only (inner photo, no frame/gutter).",
+      "x": 36,
+      "y": 36,
+      "width": 558,
+      "height": 744
+    }
+  },
+  "acts": {
+    "1": {
+      "roman": "I",
+      "label": "Everyday",
+      "accent": "#e8c56a"
+    },
+    "2": {
+      "roman": "II",
+      "label": "Detective",
+      "accent": "#7ef0ff"
+    },
+    "3": {
+      "roman": "III",
+      "label": "Finale",
+      "accent": "#ff6b8a"
+    }
+  },
+  "avatar": "project_ar_photos/backs/minime_avatar_v1.jpg",
+  "cards": {
+    "11": {
+      "folder": "Chapter_2_Detective",
+      "file": "card_11_midnight_icecream_snack.jpg",
+      "letters": "G - O - F",
+      "quote": "For my sweet midnight\nsnacking, ice-cream loving\npartner-in-crime...",
+      "act": 2
+    },
+    "12": {
+      "folder": "Chapter_2_Detective",
+      "file": "card_12_cozy_carpet_lounging.jpg",
+      "letters": "L - D",
+      "quote": "Tucked deeply inside\nour cozy weekend comfort\nzone on the rug...",
+      "act": 2
+    },
+    "13": {
+      "folder": "Chapter_2_Detective",
+      "file": "card_13_skincare_glow_selfie.jpg",
+      "letters": "J - E - K",
+      "quote": "Glow on, gorgeous!\nYou take my absolute breath\naway every single day...",
+      "act": 2
+    },
+    "14": {
+      "folder": "Chapter_2_Detective",
+      "file": "card_14_gorgeous_hair_styling.jpg",
+      "letters": "W - E",
+      "quote": "Your gorgeous, soft curls,\nstyled perfectly with your\nmagical golden touch...",
+      "act": 2
+    },
+    "15": {
+      "folder": "Chapter_2_Detective",
+      "file": "card_15_boardgame_championship.jpg",
+      "letters": "L - R",
+      "quote": "Winning at board games,\nbut I already won the ultimate\ngrand prize with you...",
+      "act": 2
+    },
+    "16": {
+      "folder": "Chapter_2_Detective",
+      "file": "card_16_hiking_adventures.jpg",
+      "letters": "Y - P",
+      "quote": "Every single step\ntaken right beside you\nis my favorite landscape...",
+      "act": 2
+    },
+    "17": {
+      "folder": "Chapter_2_Detective",
+      "file": "card_17_first_month_anniversary.jpg",
+      "letters": "O - U",
+      "quote": "Right where our beautiful,\nsweet happily-ever-after\nofficially took off...",
+      "act": 2
+    },
+    "18": {
+      "folder": "Chapter_2_Detective",
+      "file": "card_18_stunning_date_night_queen.jpg",
+      "letters": "C - H",
+      "quote": "Absolutely striking...\nmy real-life queen dressed up\nfor our magical evenings...",
+      "act": 2
+    },
+    "19": {
+      "folder": "Chapter_2_Detective",
+      "file": "card_19_growing_green_love.jpg",
+      "letters": "S - P - A - R - K",
+      "quote": "Growing stronger, greener,\nand infinitely more beautiful\ntogether every year...",
+      "act": 2
+    },
+    "21": {
+      "folder": "Chapter_3_Finale",
+      "file": "card_21_deep_rumbles_of_music.jpg",
+      "letters": "U - B",
+      "quote": "The deep, heavy rumble\nof my heart whenever you\nenter our home...",
+      "act": 3
+    },
+    "22": {
+      "folder": "Chapter_3_Finale",
+      "file": "card_22_crystal_turquoise_water.jpg",
+      "letters": "N - G",
+      "quote": "Love as pure, crystal-clear,\nand breathtaking as the\nturquoise flowing streams...",
+      "act": 3
+    },
+    "23": {
+      "folder": "Chapter_3_Finale",
+      "file": "card_23_uncle_timeless_guardian.jpg",
+      "letters": "D - J",
+      "quote": "A timeless love that watches\nover us, warm, protective,\nand eternally bright...",
+      "act": 3
+    },
+    "24": {
+      "folder": "Chapter_3_Finale",
+      "file": "card_24_silly_laundry_folding.jpg",
+      "letters": "E - W",
+      "quote": "Even doing the silly daily\nchores is a blast when I'm\ndoing them beside you...",
+      "act": 3
+    },
+    "25": {
+      "folder": "Chapter_3_Finale",
+      "file": "card_25_cooking_chef_memories.jpg",
+      "letters": "R - R - M",
+      "quote": "Stirring up a lifetime\nof warm, delicious, and\nsweet couple memories...",
+      "act": 3
+    },
+    "26": {
+      "folder": "Chapter_3_Finale",
+      "file": "card_26_morning_vanity_embrace.jpg",
+      "letters": "S - S - O",
+      "quote": "My favorite fragrance is\nthe sweet scent of your\nwarm morning embrace...",
+      "act": 3
+    },
+    "27": {
+      "folder": "Chapter_3_Finale",
+      "file": "card_27_capturing_your_light.jpg",
+      "letters": "T - C",
+      "quote": "Through every camera lens,\nyou are the most stunning\nand radiant light...",
+      "act": 3
+    },
+    "28": {
+      "folder": "Chapter_3_Finale",
+      "file": "card_28_co_pilot_sleeping.jpg",
+      "letters": "A - V",
+      "quote": "My ultimate road trip co-pilot,\nfast asleep or wide awake,\nmy favorite partner...",
+      "act": 3
+    },
+    "29": {
+      "folder": "Chapter_3_Finale",
+      "file": "card_29_packing_road_tripping.jpg",
+      "letters": "I - H",
+      "quote": "Packed up and ready for\nour next epic, hand-in-hand\nscenic road adventure...",
+      "act": 3
+    },
+    "01": {
+      "folder": "Chapter_1_Everyday",
+      "file": "card_01_morning_smile.jpg",
+      "letters": "M - I - X",
+      "quote": "Your morning smile\nmakes every single day\nbeautiful...",
+      "act": 1
+    },
+    "02": {
+      "folder": "Chapter_1_Everyday",
+      "file": "card_02_movie_snuggle.jpg",
+      "letters": "C - R - Y",
+      "quote": "Our favorite quiet place\nto drift off together\non lazy movie nights...",
+      "act": 1
+    },
+    "03": {
+      "folder": "Chapter_1_Everyday",
+      "file": "card_03_girl_boss_dreams.jpg",
+      "letters": "O - W",
+      "quote": "For the girl with\nthe big dreams, pure fire,\nand two degrees...",
+      "act": 1
+    },
+    "04": {
+      "folder": "Chapter_1_Everyday",
+      "file": "card_04_soft_lounge_selfie.jpg",
+      "letters": "A - V - Z",
+      "quote": "Peeking out at the world,\nbut my absolute favorite view\nis always you...",
+      "act": 1
+    },
+    "05": {
+      "folder": "Chapter_1_Everyday",
+      "file": "card_05_sacred_wedding_blessing.jpg",
+      "letters": "E - C",
+      "quote": "Deeply blessed to stand\nbeside you in peace, love,\nand infinite gratitude...",
+      "act": 1
+    },
+    "06": {
+      "folder": "Chapter_1_Everyday",
+      "file": "card_06_sweet_dinner_date.jpg",
+      "letters": "U - P",
+      "quote": "Every single simple dinner\nbecomes an absolute feast\nwhen I share it with you...",
+      "act": 1
+    },
+    "07": {
+      "folder": "Chapter_1_Everyday",
+      "file": "card_07_first_milestone_cuddles.jpg",
+      "letters": "B - O",
+      "quote": "Cuddling up tightly\nsince the very first months\nof our beautiful story...",
+      "act": 1
+    },
+    "08": {
+      "folder": "Chapter_1_Everyday",
+      "file": "card_08_cozy_bedroom_portrait.jpg",
+      "letters": "A - R",
+      "quote": "A little bit of my heart\ntucked safely inside your\nfavorite cozy space...",
+      "act": 1
+    },
+    "09": {
+      "folder": "Chapter_1_Everyday",
+      "file": "card_09_laughing_together_date.jpg",
+      "letters": "D - Q",
+      "quote": "Pulling up a seat for\na lifetime of laughter,\nroad trips, and dates...",
+      "act": 1
+    }
+  }
+}
