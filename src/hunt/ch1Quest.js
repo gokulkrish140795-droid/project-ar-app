@@ -2,25 +2,30 @@ import { CH1_VAULT_ANAGRAM, getPlayableCards } from '../data/cardRegistry.js'
 
 export const CH1_VAULT = CH1_VAULT_ANAGRAM
 
+/** Trim + collapse whitespace only. Do not strip spaces (computer table ≠ computer). */
 export function normalizeBypass(value) {
   return String(value || '')
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, '')
+    .replace(/\s+/g, ' ')
 }
 
 export function getCurrentCard(state, cards = getPlayableCards()) {
   return cards[state.currentStepIndex] || null
 }
 
+export function makeWorkbenchTilesFromLetters(letters) {
+  return letters.map((letter, index) => ({
+    id: `${index}-${letter}`,
+    letter,
+  }))
+}
+
 export function makeWorkbenchTiles(anagram = CH1_VAULT) {
   if (anagram !== CH1_VAULT) {
     throw new Error('Chapter 1 workbench may only use MICROWAVECUPBOARD')
   }
-  return anagram.split('').map((letter, index) => ({
-    id: `${index}-${letter}`,
-    letter,
-  }))
+  return makeWorkbenchTilesFromLetters(anagram.split(''))
 }
 
 export function shuffleTiles(tiles, random = Math.random) {
@@ -34,13 +39,21 @@ export function shuffleTiles(tiles, random = Math.random) {
 
 export function ensureWorkbench(state, random = Math.random) {
   if (state.workbench?.pool && Array.isArray(state.workbench.slots)) {
-    return state
+    return {
+      ...state,
+      workbench: {
+        pool: state.workbench.pool,
+        slots: state.workbench.slots,
+        trash: Array.isArray(state.workbench.trash) ? state.workbench.trash : [],
+      },
+    }
   }
   return {
     ...state,
     workbench: {
-      pool: shuffleTiles(makeWorkbenchTiles(CH1_VAULT), random),
+      pool: shuffleTiles(makeWorkbenchTilesFromLetters(state.collectedLetters), random),
       slots: Array.from({ length: CH1_VAULT.length }, () => null),
+      trash: [],
     },
   }
 }
@@ -110,31 +123,39 @@ export function applyAnagramUnlock(state, spelled, cards = getPlayableCards()) {
   return { ok: true, reason: 'anagram', state: withStepUnlocked(state, card), card }
 }
 
+function takeTile(workbench, origin) {
+  if (origin.type === 'pool') {
+    const index = workbench.pool.findIndex((tile) => tile.id === origin.id)
+    if (index < 0) return null
+    return workbench.pool.splice(index, 1)[0]
+  }
+  if (origin.type === 'trash') {
+    const index = workbench.trash.findIndex((tile) => tile.id === origin.id)
+    if (index < 0) return null
+    return workbench.trash.splice(index, 1)[0]
+  }
+  const tile = workbench.slots[origin.index]
+  workbench.slots[origin.index] = null
+  return tile || null
+}
+
 export function moveWorkbenchTile(state, from, to) {
   const next = ensureWorkbench(state)
   const workbench = {
     pool: next.workbench.pool.slice(),
     slots: next.workbench.slots.slice(),
+    trash: (next.workbench.trash || []).slice(),
   }
 
-  const take = (origin) => {
-    if (origin.type === 'pool') {
-      const index = workbench.pool.findIndex((tile) => tile.id === origin.id)
-      if (index < 0) return null
-      return workbench.pool.splice(index, 1)[0]
-    }
-    const tile = workbench.slots[origin.index]
-    workbench.slots[origin.index] = null
-    return tile || null
-  }
-
-  const tile = take(from)
+  const tile = takeTile(workbench, from)
   if (!tile) return { ...next, workbench }
 
   if (to.type === 'slot') {
     const occupant = workbench.slots[to.index]
     workbench.slots[to.index] = tile
     if (occupant) workbench.pool.push(occupant)
+  } else if (to.type === 'trash') {
+    workbench.trash.push(tile)
   } else {
     workbench.pool.push(tile)
   }

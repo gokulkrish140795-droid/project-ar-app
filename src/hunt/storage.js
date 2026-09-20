@@ -1,5 +1,5 @@
 export const HUNT_STORAGE_KEY = 'project-ar-hunt-v1'
-export const HUNT_STORAGE_VERSION = 1
+export const HUNT_STORAGE_VERSION = 2
 
 function defaultStorage() {
   if (typeof window === 'undefined') return null
@@ -29,7 +29,7 @@ function isLetter(value) {
 
 export function sanitizeHuntState(raw) {
   const base = createInitialHuntState()
-  if (!raw || typeof raw !== 'object') return base
+  if (!raw || typeof raw !== 'object' || raw.version !== HUNT_STORAGE_VERSION) return base
 
   const currentStepIndex = Number(raw.currentStepIndex)
   const unlockedCards = Array.isArray(raw.unlockedCards)
@@ -80,7 +80,7 @@ export function hasSavedHuntProgress(storage = defaultStorage()) {
     const raw = storage.getItem(HUNT_STORAGE_KEY)
     if (!raw) return false
     const parsed = JSON.parse(raw)
-    return parsed?.huntActive === true
+    return parsed?.version === HUNT_STORAGE_VERSION && parsed?.huntActive === true
   } catch {
     return false
   }

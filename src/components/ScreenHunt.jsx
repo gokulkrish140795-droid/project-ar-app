@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { createImageTargetTracker } from '../ar/createImageTargetTracker.js'
+import { formatRegistryQuote } from '../data/cardRegistry.js'
 import useHuntProgress from '../hooks/useHuntProgress.js'
 import { CH1_VAULT } from '../hunt/ch1Quest.js'
-import { theme } from '../theme'
+import { fonts, theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
 import CaptionRail from './ui/CaptionRail'
 import DeviceFrame from './ui/DeviceFrame'
 import GingerCat3D from './GingerCat3D'
-import Workbench3D from './Workbench3D'
 import AnagramWorkbench from './hunt/AnagramWorkbench'
 import CameraViewportStub from './hunt/CameraViewportStub'
 import HelpDrawer from './hunt/HelpDrawer'
@@ -71,7 +71,7 @@ export default function ScreenHunt({ onEnsureAudio }) {
     }
     setCodeError('')
     setHelpOpen(false)
-    const letter = result.card?.kind === 'letter' ? result.card.letters[0] : ''
+    const letter = result.card?.kind === 'letter' ? result.card.letters.join('') : ''
     await celebrate(letter)
   }
 
@@ -88,11 +88,12 @@ export default function ScreenHunt({ onEnsureAudio }) {
   }
 
   const isWorkbench = card?.kind === 'workbench'
+  const quote = formatRegistryQuote(card?.quote)
   const caption = state.vaultUnlocked
     ? card?.location
     : isWorkbench
       ? `Unscramble: ${CH1_VAULT}`
-      : card?.location
+      : quote || card?.location
 
   return (
     <section className="ar-hunt-screen">
@@ -110,16 +111,6 @@ export default function ScreenHunt({ onEnsureAudio }) {
           <VaultObjectArStub location={card?.location} />
         ) : isWorkbench ? (
           <>
-            <div
-              style={{
-                borderRadius: 12,
-                overflow: 'hidden',
-                border: `1px solid rgba(232, 197, 106, 0.35)`,
-                background: 'rgba(0,0,0,0.25)',
-              }}
-            >
-              <Workbench3D height={120} />
-            </div>
             <div style={{ marginTop: 10 }}>
               <AnagramWorkbench
                 workbench={state.workbench}
@@ -139,6 +130,11 @@ export default function ScreenHunt({ onEnsureAudio }) {
             <p className="ar-quest-sub" style={{ margin: '12px 0 0', fontSize: 14 }}>
               {card?.location}
             </p>
+            {quote ? (
+              <p className="ar-quest-sub" style={{ margin: '8px 0 0', fontSize: 13, fontWeight: 500 }}>
+                {quote}
+              </p>
+            ) : null}
             {flashLetter ? (
               <p
                 className="ar-quest-title"
@@ -162,7 +158,9 @@ export default function ScreenHunt({ onEnsureAudio }) {
             }}
             style={{ width: '100%', marginTop: 14, padding: '11px 14px', fontSize: 13 }}
           >
-            Can&apos;t Scan? [ ❓ Help ]
+            Can&apos;t Scan? [{' '}
+            <span style={{ fontFamily: fonts.body, fontWeight: 700 }}>❓</span> Help ]
+
           </button>
         ) : (
           <p className="ar-quest-sub" style={{ margin: '12px 0 0', fontSize: 13 }}>

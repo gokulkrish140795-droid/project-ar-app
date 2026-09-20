@@ -13,6 +13,7 @@ export default function AnagramWorkbench({
   const solvedRef = useRef(false)
   const pool = workbench?.pool || []
   const slots = workbench?.slots || []
+  const trash = workbench?.trash || []
   const spelled = slots.length > 0 && slots.every(Boolean) ? slots.map((tile) => tile.letter).join('') : ''
 
   useEffect(() => {
@@ -30,8 +31,21 @@ export default function AnagramWorkbench({
     setSelected({ type: 'pool', id: tile.id })
   }
 
+  const selectTrash = (tile) => {
+    if (selected?.type === 'trash' && selected.id === tile.id) {
+      setSelected(null)
+      return
+    }
+    if (selected && selected.type !== 'trash') {
+      onMoveTile(selected, { type: 'trash' })
+      setSelected(null)
+      return
+    }
+    setSelected({ type: 'trash', id: tile.id })
+  }
+
   const selectSlot = (index) => {
-    if (selected?.type === 'pool') {
+    if (selected?.type === 'pool' || selected?.type === 'trash') {
       onMoveTile(selected, { type: 'slot', index })
       setSelected(null)
       return
@@ -48,11 +62,10 @@ export default function AnagramWorkbench({
     if (slots[index]) setSelected({ type: 'slot', index })
   }
 
-  const returnSelected = () => {
-    if (selected?.type === 'slot') {
-      onMoveTile(selected, { type: 'pool' })
-      setSelected(null)
-    }
+  const sendSelectedTo = (to) => {
+    if (!selected) return
+    onMoveTile(selected, to)
+    setSelected(null)
   }
 
   return (
@@ -111,12 +124,34 @@ export default function AnagramWorkbench({
 
       <div className="ar-anagram-trash">
         <p style={{ margin: 0, fontSize: 12, color: 'rgba(232,240,255,0.7)' }}>{decoyNote}</p>
-        {selected?.type === 'slot' ? (
+        <div className="ar-anagram-pool" style={{ marginTop: 8 }}>
+          {trash.map((tile) => (
+            <button
+              key={tile.id}
+              type="button"
+              className={`ar-anagram-tile${selected?.type === 'trash' && selected.id === tile.id ? ' is-selected' : ''}`}
+              onClick={() => selectTrash(tile)}
+            >
+              {tile.letter}
+            </button>
+          ))}
+        </div>
+        {selected ? (
           <button
             type="button"
             className="ar-btn-3d ar-btn-3d--ghost"
             style={{ marginTop: 8, padding: '8px 12px', fontSize: 11 }}
-            onClick={returnSelected}
+            onClick={() => sendSelectedTo({ type: 'trash' })}
+          >
+            Send to trash
+          </button>
+        ) : null}
+        {selected?.type === 'slot' || selected?.type === 'trash' ? (
+          <button
+            type="button"
+            className="ar-btn-3d ar-btn-3d--ghost"
+            style={{ marginTop: 8, marginLeft: 8, padding: '8px 12px', fontSize: 11 }}
+            onClick={() => sendSelectedTo({ type: 'pool' })}
           >
             Return letter
           </button>

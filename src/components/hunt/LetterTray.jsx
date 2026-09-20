@@ -1,9 +1,7 @@
 import { fonts, theme } from '../../theme'
 
-const EMPTY_SLOTS = 9
-
 export default function LetterTray({ letters = [] }) {
-  const slots = Array.from({ length: EMPTY_SLOTS }, (_, index) => letters[index] || '')
+  const slots = letters.length > 0 ? letters : ['']
 
   return (
     <div
@@ -12,13 +10,13 @@ export default function LetterTray({ letters = [] }) {
         display: 'flex',
         flexWrap: 'wrap',
         justifyContent: 'center',
-        gap: 6,
+        gap: 5,
         marginTop: 12,
       }}
     >
       {slots.map((letter, index) => (
         <span
-          key={`slot-${index}`}
+          key={`slot-${index}-${letter || 'empty'}`}
           className={`ar-letter-capsule${letter ? '' : ' ar-letter-capsule--empty'}`}
           style={{ fontFamily: fonts.display, color: letter ? theme.velvet : undefined }}
         >
