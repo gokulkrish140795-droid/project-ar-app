@@ -5,8 +5,21 @@ import Screen2Prank from './components/Screen2Prank'
 import ScreenHunt from './components/ScreenHunt'
 import ScreenUncleHologram from './components/ScreenUncleHologram'
 import ScreenVideoMontage from './components/ScreenVideoMontage'
+import { hasSavedHuntProgress } from './hunt/storage'
 import { fonts, theme } from './theme'
 import audioEngine from './utils/audioEngine'
+
+const SCREENS = ['gateway', 'prank', 'video_montage', 'uncle_hologram', 'scavenger_hunt']
+
+function readInitialScreen() {
+  if (typeof window === 'undefined') return 'gateway'
+  if (hasSavedHuntProgress()) return 'scavenger_hunt'
+  if (import.meta.env.DEV) {
+    const phase = new URLSearchParams(window.location.search).get('phase')
+    if (SCREENS.includes(phase)) return phase
+  }
+  return 'gateway'
+}
 
 const moodForScreen = {
   gateway: 'gateway',
@@ -21,7 +34,7 @@ const moodForScreen = {
  * gateway → floo → prank → video_montage → uncle_hologram → scavenger_hunt
  */
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('gateway')
+  const [currentScreen, setCurrentScreen] = useState(readInitialScreen)
   const [lumosOn, setLumosOn] = useState(false)
   const [flooActive, setFlooActive] = useState(false)
 
@@ -142,7 +155,7 @@ export default function App() {
           <ScreenUncleHologram onEnsureAudio={ensureAudio} onContinue={handleContinueHunt} />
         )}
 
-        {currentScreen === 'scavenger_hunt' && <ScreenHunt />}
+        {currentScreen === 'scavenger_hunt' && <ScreenHunt onEnsureAudio={ensureAudio} />}
       </div>
     </div>
   )

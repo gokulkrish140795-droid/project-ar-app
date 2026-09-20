@@ -1,80 +1,174 @@
-import { useEffect, useState } from 'react'
-import { fonts, theme } from '../theme'
+import { useEffect, useRef, useState } from 'react'
+import { createImageTargetTracker } from '../ar/createImageTargetTracker.js'
+import useHuntProgress from '../hooks/useHuntProgress.js'
+import { CH1_VAULT } from '../hunt/ch1Quest.js'
+import { theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
 import CaptionRail from './ui/CaptionRail'
 import DeviceFrame from './ui/DeviceFrame'
 import GingerCat3D from './GingerCat3D'
 import Workbench3D from './Workbench3D'
+import AnagramWorkbench from './hunt/AnagramWorkbench'
+import CameraViewportStub from './hunt/CameraViewportStub'
+import HelpDrawer from './hunt/HelpDrawer'
+import LetterTray from './hunt/LetterTray'
+import VaultObjectArStub from './hunt/VaultObjectArStub'
 
-const GOLD = theme.gold
-const HINTS = [
-  'Soft places first… Ginger says check what warms your mornings.',
-  'Letters hide in plain sight. Trust the wooden anagram.',
-  'When you’re ready, the cupboard will speak.',
-]
+export default function ScreenHunt({ onEnsureAudio }) {
+  const hunt = useHuntProgress()
+  const { card, state } = hunt
+  const tryScanRef = useRef(hunt.tryScan)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [codeError, setCodeError] = useState('')
+  const [pose, setPose] = useState('search')
+  const [engineLabel, setEngineLabel] = useState('standby')
+  const [flashLetter, setFlashLetter] = useState('')
 
-export default function ScreenHunt() {
-  const [hintIdx, setHintIdx] = useState(0)
-  const [pose, setPose] = useState('idle')
+  tryScanRef.current = hunt.tryScan
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setHintIdx((i) => (i + 1) % HINTS.length)
-      setPose((p) => (p === 'idle' ? 'search' : 'idle'))
-    }, 7000)
-    return () => window.clearInterval(timer)
+    let tracker
+    let cancelled = false
+    ;(async () => {
+      tracker = await createImageTargetTracker({
+        onTargetFound: (stepNumber) => tryScanRef.current(stepNumber),
+      })
+      if (cancelled) {
+        tracker.stop()
+        return
+      }
+      tracker.start()
+      setEngineLabel(tracker.reason ? 'standby' : tracker.engine)
+    })()
+    return () => {
+      cancelled = true
+      tracker?.stop()
+    }
   }, [])
 
+  const ensureAudio = async () => {
+    if (onEnsureAudio) await onEnsureAudio()
+    else await audioEngine.unlock()
+  }
+
+  const celebrate = async (letter) => {
+    await ensureAudio()
+    audioEngine.stopAllSFXAndVoices()
+    audioEngine.playSfx(letter ? 'sfx_revelio_bell' : 'sfx_vault_alohomora')
+    if (letter) {
+      setFlashLetter(letter)
+      window.setTimeout(() => setFlashLetter(''), 1200)
+    }
+    setPose('cheer')
+    window.setTimeout(() => setPose(card?.kind === 'workbench' ? 'sit' : 'search'), 1200)
+  }
+
+  const handleBypass = async (code) => {
+    const result = hunt.tryBypass(code)
+    if (!result.ok) {
+      setCodeError("That code isn't for this step.")
+      return
+    }
+    setCodeError('')
+    setHelpOpen(false)
+    const letter = result.card?.kind === 'letter' ? result.card.letters[0] : ''
+    await celebrate(letter)
+  }
+
+  const handleSolved = async () => {
+    const result = hunt.tryAnagram()
+    if (result.ok) await celebrate('')
+  }
+
+  const handleGingerTap = async () => {
+    await ensureAudio()
+    audioEngine.playSfx('sfx_cat_purr')
+    setPose('cheer')
+    window.setTimeout(() => setPose('search'), 1200)
+  }
+
+  const isWorkbench = card?.kind === 'workbench'
+  const caption = state.vaultUnlocked
+    ? card?.location
+    : isWorkbench
+      ? `Unscramble: ${CH1_VAULT}`
+      : card?.location
+
   return (
-    <section
-      style={{
-        position: 'relative',
-        zIndex: 2,
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '72px 16px 24px',
-        fontFamily: fonts.body,
-        gap: 12,
-      }}
-    >
+    <section className="ar-hunt-screen">
       <header style={{ textAlign: 'center', width: 'min(420px, 100%)' }}>
         <p className="ar-quest-kicker" style={{ margin: 0 }}>
-          Phase 2 — WebAR Scavenger Hunt
+          Chapter 1 — Everyday Comforts
         </p>
-        <h2 className="ar-quest-title" style={{ margin: '10px 0 0', fontSize: 24 }}>
-          The Search for a Stray Heart begins.
+        <h2 className="ar-quest-title" style={{ margin: '8px 0 0', fontSize: 22 }}>
+          {state.vaultUnlocked ? card?.location : `Step ${card?.step || 1} of 10`}
         </h2>
       </header>
 
-      <DeviceFrame style={{ width: 'min(420px, 100%)', textAlign: 'center' }} float>
-        <div
-          style={{
-            borderRadius: 12,
-            overflow: 'hidden',
-            border: `1px solid rgba(232, 197, 106, 0.35)`,
-            background: 'rgba(0,0,0,0.25)',
-          }}
-        >
-          <Workbench3D height={200} />
-        </div>
-        <p className="ar-quest-sub" style={{ margin: '14px 0 0', fontSize: 14 }}>
-          Chapter 1 awaits: everyday comforts, then the wooden anagram{' '}
-          <span style={{ color: GOLD, fontWeight: 700 }}>MICROWAVECUPBOARD</span>.
-        </p>
-        <p
-          style={{
-            margin: '10px 0 0',
-            color: 'rgba(232,240,255,0.65)',
-            fontSize: 12,
-            lineHeight: 1.45,
-          }}
-        >
-          Drag decoy letters into the bin. Arrange the true ones on the desk. Camera tracking
-          arrives next.
-        </p>
+      <DeviceFrame compact style={{ width: 'min(420px, 100%)', textAlign: 'center' }}>
+        {state.vaultUnlocked ? (
+          <VaultObjectArStub location={card?.location} />
+        ) : isWorkbench ? (
+          <>
+            <div
+              style={{
+                borderRadius: 12,
+                overflow: 'hidden',
+                border: `1px solid rgba(232, 197, 106, 0.35)`,
+                background: 'rgba(0,0,0,0.25)',
+              }}
+            >
+              <Workbench3D height={120} />
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <AnagramWorkbench
+                workbench={state.workbench}
+                decoyNote={card.decoyNote}
+                vaultUnlocked={state.vaultUnlocked}
+                onMoveTile={(from, to) => {
+                  hunt.moveTile(from, to)
+                  audioEngine.play('sfx_tile_clack', { stack: true })
+                }}
+                onSolved={handleSolved}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <CameraViewportStub engineLabel={engineLabel} />
+            <p className="ar-quest-sub" style={{ margin: '12px 0 0', fontSize: 14 }}>
+              {card?.location}
+            </p>
+            {flashLetter ? (
+              <p
+                className="ar-quest-title"
+                style={{ margin: '8px 0 0', fontSize: 28, color: theme.goldBright }}
+              >
+                {flashLetter}
+              </p>
+            ) : null}
+          </>
+        )}
+
+        <LetterTray letters={state.collectedLetters} />
+
+        {!state.vaultUnlocked ? (
+          <button
+            type="button"
+            className="ar-btn-3d ar-btn-3d--rose"
+            onClick={() => {
+              setCodeError('')
+              setHelpOpen(true)
+            }}
+            style={{ width: '100%', marginTop: 14, padding: '11px 14px', fontSize: 13 }}
+          >
+            Can&apos;t Scan? [ ❓ Help ]
+          </button>
+        ) : (
+          <p className="ar-quest-sub" style={{ margin: '12px 0 0', fontSize: 13 }}>
+            {CH1_VAULT}
+          </p>
+        )}
       </DeviceFrame>
 
       <div
@@ -86,22 +180,22 @@ export default function ScreenHunt() {
         }}
       >
         <div style={{ flexShrink: 0 }}>
-          <GingerCat3D
-            pose={pose}
-            size={110}
-            onTap={() => {
-              audioEngine.playSfx('sfx_cat_purr')
-              setPose('cheer')
-              window.setTimeout(() => setPose('idle'), 1200)
-            }}
-          />
+          <GingerCat3D pose={pose} size={110} onTap={handleGingerTap} />
         </div>
         <div style={{ flex: 1, marginBottom: 8 }}>
           <CaptionRail visible speaker="Ginger">
-            {HINTS[hintIdx]}
+            {caption}
           </CaptionRail>
         </div>
       </div>
+
+      <HelpDrawer
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        onSubmit={handleBypass}
+        error={codeError}
+        stepLabel={isWorkbench ? `Unscramble: ${CH1_VAULT}` : card?.location}
+      />
     </section>
   )
 }

@@ -1,0 +1,319 @@
+{
+  "meta": {
+    "source": "Locked Project AR content bible (master step matrix in repo .cursorrules + GROK_TEAM_HANDOFF). Quotes and photo paths are not in this GitHub checkout — do not invent them.",
+    "playableChapter": 1,
+    "vaultAnagrams": {
+      "1": "MICROWAVECUPBOARD",
+      "2": "GOLDJEWELRYPOUCH",
+      "3": "UNDERSTAIRS"
+    }
+  },
+  "cards": [
+    {
+      "step": 1,
+      "chapter": 1,
+      "kind": "letter",
+      "location": "Full-Length Bedroom Mirror",
+      "letters": ["M"],
+      "decoys": [],
+      "bypass": "mirror",
+      "quote": null
+    },
+    {
+      "step": 2,
+      "chapter": 1,
+      "kind": "letter",
+      "location": "Living Room Sofa Cushion",
+      "letters": ["I"],
+      "decoys": [],
+      "bypass": "sofa",
+      "quote": null
+    },
+    {
+      "step": 3,
+      "chapter": 1,
+      "kind": "letter",
+      "location": "Work/Computer Table Monitor",
+      "letters": ["X"],
+      "decoys": [],
+      "bypass": "computer",
+      "quote": null
+    },
+    {
+      "step": 4,
+      "chapter": 1,
+      "kind": "letter",
+      "location": "Bedroom Window Curtain Fold",
+      "letters": ["O"],
+      "decoys": [],
+      "bypass": "curtain",
+      "quote": null
+    },
+    {
+      "step": 5,
+      "chapter": 1,
+      "kind": "letter",
+      "location": "Pooja Drawer / Sacred Shelf",
+      "letters": ["W"],
+      "decoys": [],
+      "bypass": "pooja",
+      "quote": null
+    },
+    {
+      "step": 6,
+      "chapter": 1,
+      "kind": "letter",
+      "location": "Cutlery Drawer (Spoon Tray)",
+      "letters": ["A"],
+      "decoys": [],
+      "bypass": "cutlery",
+      "quote": null
+    },
+    {
+      "step": 7,
+      "chapter": 1,
+      "kind": "letter",
+      "location": "Favorite Teddy Bear Plushie",
+      "letters": ["V"],
+      "decoys": [],
+      "bypass": "teddy",
+      "quote": null
+    },
+    {
+      "step": 8,
+      "chapter": 1,
+      "kind": "letter",
+      "location": "Main Bedroom Wardrobe Closet",
+      "letters": ["E"],
+      "decoys": [],
+      "bypass": "closet",
+      "quote": null
+    },
+    {
+      "step": 9,
+      "chapter": 1,
+      "kind": "letter",
+      "location": "Dining Table Chair Cushion",
+      "letters": ["C"],
+      "decoys": [],
+      "bypass": "dining",
+      "quote": null
+    },
+    {
+      "step": 10,
+      "chapter": 1,
+      "kind": "workbench",
+      "location": "Kitchen Microwave Cupboard",
+      "letters": [],
+      "decoys": [],
+      "bypass": "microwave",
+      "quote": null,
+      "vaultAnagram": "MICROWAVECUPBOARD",
+      "decoyNote": "Christchurch dust-bunnies → trash"
+    },
+    {
+      "step": 11,
+      "chapter": 2,
+      "kind": "letter",
+      "location": "Kitchen Refrigerator Door",
+      "letters": ["G"],
+      "decoys": [],
+      "bypass": "fridge",
+      "quote": null
+    },
+    {
+      "step": 12,
+      "chapter": 2,
+      "kind": "letter",
+      "location": "Sofa Throw Blanket Cover",
+      "letters": ["O"],
+      "decoys": [],
+      "bypass": "blanket",
+      "quote": null
+    },
+    {
+      "step": 13,
+      "chapter": 2,
+      "kind": "letter",
+      "location": "Bathroom Cabinet Mirror",
+      "letters": ["L"],
+      "decoys": [],
+      "bypass": "bathroom",
+      "quote": null
+    },
+    {
+      "step": 14,
+      "chapter": 2,
+      "kind": "letter",
+      "location": "Dyson Airwrap Storage Box",
+      "letters": ["D"],
+      "decoys": [],
+      "bypass": "airwrap",
+      "quote": null
+    },
+    {
+      "step": 15,
+      "chapter": 2,
+      "kind": "letter",
+      "location": "Board Game Box Stack",
+      "letters": ["J"],
+      "decoys": [],
+      "bypass": "boardgame",
+      "quote": null
+    },
+    {
+      "step": 16,
+      "chapter": 2,
+      "kind": "letter",
+      "location": "Shoe Rack / Entrance Heel",
+      "letters": ["E"],
+      "decoys": [],
+      "bypass": "shoerack",
+      "quote": null
+    },
+    {
+      "step": 17,
+      "chapter": 2,
+      "kind": "letter",
+      "location": "Wedding Photo Frame Stand",
+      "letters": ["W"],
+      "decoys": [],
+      "bypass": "wedding",
+      "quote": null
+    },
+    {
+      "step": 18,
+      "chapter": 2,
+      "kind": "letter",
+      "location": "Beauty / Skincare Cabinet",
+      "letters": ["E"],
+      "decoys": [],
+      "bypass": "skincare",
+      "quote": null
+    },
+    {
+      "step": 19,
+      "chapter": 2,
+      "kind": "letter",
+      "location": "Living Room Plant Shelf",
+      "letters": ["L"],
+      "decoys": [],
+      "bypass": "plant",
+      "quote": null
+    },
+    {
+      "step": 20,
+      "chapter": 2,
+      "kind": "workbench",
+      "location": "Wardrobe Jewelry Drawer (Gold Jewelry Pouch)",
+      "letters": [],
+      "decoys": [],
+      "bypass": "goldpouch",
+      "quote": null,
+      "vaultAnagram": "GOLDJEWELRYPOUCH",
+      "decoyNote": "Auckland wind-traps → trash"
+    },
+    {
+      "step": 21,
+      "chapter": 3,
+      "kind": "letter",
+      "location": "Underneath TV Subwoofer",
+      "letters": ["U"],
+      "decoys": ["B"],
+      "bypass": "subwoofer",
+      "quote": null
+    },
+    {
+      "step": 22,
+      "chapter": 3,
+      "kind": "letter",
+      "location": "Blue Spring Falls Photo Frame",
+      "letters": ["N"],
+      "decoys": ["G"],
+      "bypass": "bluesprings",
+      "quote": null
+    },
+    {
+      "step": 23,
+      "chapter": 3,
+      "kind": "letter",
+      "location": "Late Uncle's Photo Frame",
+      "letters": ["D"],
+      "decoys": ["J"],
+      "bypass": "uncle",
+      "quote": null
+    },
+    {
+      "step": 24,
+      "chapter": 3,
+      "kind": "letter",
+      "location": "Laundry Sliding Cabinet Shelf",
+      "letters": ["E"],
+      "decoys": ["W"],
+      "bypass": "laundry",
+      "quote": null
+    },
+    {
+      "step": 25,
+      "chapter": 3,
+      "kind": "letter",
+      "location": "Coffee Machine Base",
+      "letters": ["R", "R"],
+      "decoys": ["M"],
+      "bypass": "coffee",
+      "quote": null
+    },
+    {
+      "step": 26,
+      "chapter": 3,
+      "kind": "letter",
+      "location": "Perfume / Vanity Tray",
+      "letters": ["S", "S"],
+      "decoys": ["O"],
+      "bypass": "perfume",
+      "quote": null
+    },
+    {
+      "step": 27,
+      "chapter": 3,
+      "kind": "letter",
+      "location": "Bedside Reading Lamp",
+      "letters": ["T"],
+      "decoys": ["C"],
+      "bypass": "lamp",
+      "quote": null
+    },
+    {
+      "step": 28,
+      "chapter": 3,
+      "kind": "letter",
+      "location": "Bookshelf Favorites Row",
+      "letters": ["A"],
+      "decoys": ["V"],
+      "bypass": "bookshelf",
+      "quote": null
+    },
+    {
+      "step": 29,
+      "chapter": 3,
+      "kind": "letter",
+      "location": "Ginger's Food Area / Mat",
+      "letters": ["I"],
+      "decoys": ["H"],
+      "bypass": "ginger",
+      "quote": null
+    },
+    {
+      "step": 30,
+      "chapter": 3,
+      "kind": "workbench",
+      "location": "Under-Stairs Closet",
+      "letters": [],
+      "decoys": ["B", "G", "J", "W", "M", "O", "C", "V", "H"],
+      "bypass": "understairs",
+      "quote": null,
+      "vaultAnagram": "UNDERSTAIRS",
+      "decoyNote": "Trash decoys; spell UNDERSTAIRS"
+    }
+  ]
+}
