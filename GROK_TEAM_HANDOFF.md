@@ -1,41 +1,42 @@
 # Project AR — Full Team Handoff (Initial → Current)
 **For:** Gok Bot / Grok / any new teammate joining the birthday quest build  
-**Owner:** Gokul (software engineer)  
+**Day-to-day:** Bot (Grok) — CEO / Pepper Potts  
+**Owner (major gates):** Gokul — taste, spend, romantic go/no-go, deploy, creative upgrades Bot proposes  
 **Recipient:** Aishwarya — 30th birthday (Protocol 0510 · DOB 5 Oct 1996)  
 **Target device:** iPhone 14 · Safari  
 **Budget cap:** ~USD $200 (DIY engine/characters; spend on uncle video + prints)  
-**Status snapshot:** 20 Sep 2026 — **PR #2 merged to `main`** (`b7aa1a9`) — ScreenHunt **Ch1 shell on main**; **no Image Target training yet**
+**Status snapshot:** 20 Sep 2026 (evening NZ) — org: Bot day-to-day CEO; Ch1 shell **PR #2** + §0 note **PR #3** on `main`; print gate provisional PASS; no AR training
 
 ---
 
 ## 0. Read this first (current status)
 
-Producer snapshot after **PR #2** merge. Do **not** invent puzzle content. `DeviceFrame` / `CaptionRail` stay.
+**Org (20 Sep 2026 evening NZ).** Bot (Grok) = day-to-day CEO / Pepper Potts. AR Producer executes planning/routing **under Bot**. Gokul = major taste, spend, romantic go/no-go, deploy, and creative upgrades Bot proposes only. Bot schedules wakes (Hunt / Companion / Montage / Architect). **One Cursor job at a time.** Details: `GROK_BOT_TEAM.md`.
+
+Build snapshot after **PR #2** (Ch1 shell) + **PR #3** (§0 Ch1 note) on `main`. Do **not** invent puzzle content. Hard locks unchanged. `DeviceFrame` / `CaptionRail` stay.
 
 ### Current status
 
 | Item | Truth on `main` |
 |---|---|
-| **Ch1 hunt shell** | **On `main`.** Playable via Help → Unlock with Code → letter collect → **`MICROWAVECUPBOARD` workbench**. Persistence: `localStorage` `project-ar-hunt-v1` (v2). AAA chrome intact. |
-| **Letter payloads** | Desktop `card_registry.json` (in-repo). Cards 01–09: **MIX / CRY / OW / AVZ / EC / UP / BO / AR / DQ** (not one letter per step). |
-| **Bypasses** | Full content-bible phrases (`src/data/ch1ContentBible.js`). Short one-word forms rejected. |
-| **AR training** | **None.** `hasTrainedImageTargets()` is `false` in `src/config/ar.js`. 8th Wall / MindAR are stubs. |
-| **AR crop (B+D+E 6×4)** | **`64, 64, 1072, 1260`** on 1200×1800 (`AR_PHOTO_CROP_1200x1800`). Photograph only — **never letter capsules**. |
-| **Print gate** | **Provisional PASS** — Printicular matte 6×4 ordered. **FINAL go/no-go** when Gokul confirms physical prints scan clean. |
-| **Montage** | Real edit **LAST** (clips ~2–3 days). Placeholder YouTube OK later. Uncle Short **`ehqNWIrxr60`** plays **after montage only** (not in the reel; not from card 23). |
-| **Desktop vs GitHub** | Registry JSON is now in GitHub. **AAA local Desktop may still be ahead** for print PNGs, photos, compiler, 6×4 B+D+E art, and possibly unpushed AAA UI/app files. Do not assume GitHub has the latest print assets. |
+| **Ch1 hunt shell** | **On `main` (PR #2).** Playable via Help → Unlock with Code → letter collect → **`MICROWAVECUPBOARD` workbench**. Persistence: `localStorage` `project-ar-hunt-v1` (v2). AAA chrome intact. |
+| **AR training** | **None.** `hasTrainedImageTargets()` is `false`. 8th Wall / MindAR stubs. Crop **`64, 64, 1072, 1260`** on 1200×1800 — photo only, never letter capsules. |
+| **Print gate** | **Provisional PASS** (Printicular mats). **FINAL** when those mats scan clean → **then** Hunt AR training. |
+| **Companions** | Ginger + Mini-Me **back on board this week**, with milestones before Protocol 0510 (5 Oct). |
+| **Montage** | Real edit **LAST**. Uncle Short **`ehqNWIrxr60`** after montage only (not in the reel; not from card 23). |
+
+Ch1 payloads MIX/CRY/OW/AVZ/EC/UP/BO/AR/DQ; full bible bypasses only. Desktop may still be ahead for print PNGs / photos / compiler.
 
 ### Next (this order)
 
-1. Gokul confirms physical 6×4 prints scan clean (**FINAL** print gate).  
-2. **Then** train AR Image Targets — **photo crop only**, never letter capsules.  
-3. Montage: wait for clips; real edit last. Placeholder YT can land later. Uncle stays after montage.
+1. FINAL print gate — Printicular mats scan clean.  
+2. **Then** Hunt AR Image Target training (photo crop only).  
+3. Companion Ginger + Mini-Me this week (milestones before 5 Oct).  
+4. Montage last.
 
 ### Locked chrome (do not regress)
 
 Magical-phone AAA bar: `DeviceFrame` + `CaptionRail` (speech not on faces). Navy velvet / gold / cyan HUD. Fonts Cinzel + Source Sans 3. Tokens in `src/theme.js`. Full bar: `UI_BLUEPRINT.md`.
-
-Uncle wish is **live** (`UNCLE_WISH_YOUTUBE_ID = 'ehqNWIrxr60'`). Print fronts are AAA hybrid (navy + cream Instax + photo + gold letter capsule); train AR on the **photo rectangle only**.
 
 ---
 
