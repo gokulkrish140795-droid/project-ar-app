@@ -5,24 +5,25 @@
 **Recipient:** Aishwarya — 30th birthday (Protocol 0510 · DOB 5 Oct 1996)  
 **Target device:** iPhone 14 · Safari  
 **Budget cap:** ~USD $200 (DIY engine/characters; spend on uncle video + prints)  
-**Status snapshot:** 20 Sep 2026 (evening NZ) — org: Bot day-to-day CEO; Ch1 shell **PR #2** + §0 note **PR #3** on `main`; print gate provisional PASS; no AR training
+**Status snapshot:** 20 Sep 2026 — org: Bot day-to-day CEO; Ch1 shell on `main`; **C-G1 landed (PR #5, `23f9bdc`)**; print gate provisional PASS; Hunt AR crop **64,64,1072,1260**; companion export **held**; montage last
 
 ---
 
 ## 0. Read this first (current status)
 
-**Org (20 Sep 2026 evening NZ).** Bot (Grok) = day-to-day CEO / Pepper Potts. AR Producer executes planning/routing **under Bot**. Gokul = major taste, spend, romantic go/no-go, deploy, and creative upgrades Bot proposes only. Bot schedules wakes (Hunt / Companion / Montage / Architect). **One Cursor job at a time.** Details: `GROK_BOT_TEAM.md`.
+**Org.** Bot (Grok) = day-to-day CEO / Pepper Potts. AR Producer executes planning/routing **under Bot**. Gokul = major taste, spend, romantic go/no-go, deploy, and creative upgrades Bot proposes only. Bot schedules wakes (Hunt / Companion / Montage / Architect). **One Cursor job at a time.** Details: `GROK_BOT_TEAM.md`.
 
-Build snapshot after **PR #2** (Ch1 shell) + **PR #3** (§0 Ch1 note) on `main`. Do **not** invent puzzle content. Hard locks unchanged. `DeviceFrame` / `CaptionRail` stay.
+Build snapshot after **PR #5** (C-G1, SHA `23f9bdc`) on `main`. Do **not** invent puzzle content. Hard locks unchanged. `DeviceFrame` / `CaptionRail` stay.
 
 ### Current status
 
 | Item | Truth on `main` |
 |---|---|
-| **Ch1 hunt shell** | **On `main` (PR #2).** Playable via Help → Unlock with Code → letter collect → **`MICROWAVECUPBOARD` workbench**. Persistence: `localStorage` `project-ar-hunt-v1` (v2). AAA chrome intact. |
-| **AR training** | **None.** `hasTrainedImageTargets()` is `false`. 8th Wall / MindAR stubs. Crop **`64, 64, 1072, 1260`** on 1200×1800 — photo only, never letter capsules. |
+| **Ch1 hunt shell** | **On `main` (PR #2).** Help → Unlock with Code → letter collect → **`MICROWAVECUPBOARD` workbench**. Persistence: `localStorage` `project-ar-hunt-v1` (v2). AAA chrome intact. |
+| **AR training** | **None.** `hasTrainedImageTargets()` is `false`. 8th Wall / MindAR stubs. B+D+E 6×4 crop remains **`64, 64, 1072, 1260`** on 1200×1800 — photo only, never letter capsules. Old Instax **`36,36,558×744`** is retired (historical only). |
 | **Print gate** | **Provisional PASS** (Printicular mats). **FINAL** when those mats scan clean → **then** Hunt AR training. |
-| **Companions** | Ginger + Mini-Me **back on board this week**, with milestones before Protocol 0510 (5 Oct). |
+| **C-G1 Ginger** | **Landed (PR #5).** Drop path **`/models/ginger.glb`**. Procedural if missing. Checklist: `BLENDER_COMPANION_CHECKLIST.md` §2.1. **No `ginger.glb` binary invented.** |
+| **Companions next** | Tripo→Blender export plan **held** until Gokul walking clips or Tripo mesh + Bot greenlight. |
 | **Montage** | Real edit **LAST**. Uncle Short **`ehqNWIrxr60`** after montage only (not in the reel; not from card 23). |
 
 Ch1 payloads MIX/CRY/OW/AVZ/EC/UP/BO/AR/DQ; full bible bypasses only. Desktop may still be ahead for print PNGs / photos / compiler.
@@ -30,19 +31,13 @@ Ch1 payloads MIX/CRY/OW/AVZ/EC/UP/BO/AR/DQ; full bible bypasses only. Desktop ma
 ### Next (this order)
 
 1. FINAL print gate — Printicular mats scan clean.  
-2. **Then** Hunt AR Image Target training (photo crop only).  
-3. Companion Ginger + Mini-Me this week (milestones before 5 Oct).  
+2. **Then** Hunt AR Image Target training — photo crop **`64, 64, 1072, 1260`** only (not retired Instax `36,36,558×744`).  
+3. Companion Tripo→Blender export **held** until Gokul walking clips or Tripo mesh + Bot greenlight.  
 4. Montage last.
 
 ### Locked chrome (do not regress)
 
 Magical-phone AAA bar: `DeviceFrame` + `CaptionRail` (speech not on faces). Navy velvet / gold / cyan HUD. Fonts Cinzel + Source Sans 3. Tokens in `src/theme.js`. Full bar: `UI_BLUEPRINT.md`.
-
-### Companion / M1 — C-G1 Ginger drop-path ready (docs)
-- App drop target confirmed: `GINGER_MODEL.localUrl` → **`/models/ginger.glb`** (`public/models/ginger.glb`).
-- Until that file ships, Ginger stays **procedural** (`demoUrl: null` — no Fox). Do **not** invent a placeholder GLB.
-- Blender refs / staging: `ProjectAR-Blender/01-references/ginger-*` → `03-export/ginger.glb` → app drop. Ship-first clips: `Idle` / `Sit` / `WalkIn` (or `Walk`). Full table: `BLENDER_COMPANION_CHECKLIST.md` §2.1.
-- Hard locks unchanged: no Tripo pack into `minime.glb`; no global auto-weight; Hunt photo-AR crop is unrelated.
 
 ---
 
@@ -188,7 +183,7 @@ C:\Users\aishw\OneDrive\Desktop\Project AR\Resources - drafts\
 - Front: navy + cream Instax mat + gold letter capsules; **photo zone clean for AR**  
 - Back: navy + shared mini-me avatar + act labels (same outfit until detective/aviator renders exist)  
 - Output: `Compiled_Print_Ready_Cards_AAA/` (54 files)  
-- AR crop: **x=36, y=36, w=558, h=744** on 630×1020 canvas  
+- AR crop (legacy 630×1020 compiler, historical only): `36, 36, 558×744` — current B+D+E 6×4 crop is **`64, 64, 1072, 1260`**  
 - Note: `card_01` + `card_28` were HEIC mislabeled as JPG — converted to real JPEG for sharp
 
 ---
@@ -254,9 +249,9 @@ node project-ar-card-compiler-aaa-hybrid.mjs
 ## 9. Next actions (priority for Gok Bot + Gokul)
 
 1. **Print proof** — print 1–2 AAA pairs doublesided; verify cut size + photo uniqueness  
-2. **Hunt AR wiring** — 8th Wall (primary) / MindAR backup; train on photo crop `36,36,558,744`; letter unlock + bypass  
+2. **Hunt AR wiring** — 8th Wall (primary) / MindAR backup; train on B+D+E 6×4 photo crop **`64, 64, 1072, 1260`** (old Instax `36,36,558×744` retired); letter unlock + bypass  
 3. **Montage** — when friend/family clips arrive → CapCut/YouTube → set `MONTAGE_YOUTUBE_ID`  
-4. **Ginger** — C-G1 drop-path is ready (docs). Ship a real `public/models/ginger.glb` later, or keep procedural for birthday — do not invent a placeholder binary
+4. **Ginger** — C-G1 landed (docs). Stay procedural until a real `public/models/ginger.glb` ships — do not invent a placeholder binary. Tripo→Blender export **held** until Gokul walking clips or Tripo mesh + Bot greenlight  
 5. **Tripo deploy** — only when Gokul says deploy → pack AI clips into `minime.glb`  
 6. Optional — act-specific back outfits (detective / aviator)
 
