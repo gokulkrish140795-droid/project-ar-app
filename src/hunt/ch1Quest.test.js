@@ -10,6 +10,7 @@ import { CH1_CONTENT_BIBLE } from '../data/ch1ContentBible.js'
 import {
   applyAnagramUnlock,
   applyBypass,
+  applyImageTargetScan,
   CH1_VAULT,
   ensureWorkbench,
   moveWorkbenchTile,
@@ -136,6 +137,59 @@ test('workbench rearrange unlocks only MICROWAVECUPBOARD', () => {
   const unlock = applyAnagramUnlock(state, spelledFromSlots(state.workbench), ch1)
   assert.equal(unlock.ok, true)
   assert.equal(unlock.state.vaultUnlocked, true)
+})
+
+test('trained photo targets unlock registry letters without inventing card 11 into the Ch1 workbench', () => {
+  let state = sanitizeHuntState({ version: 2 })
+  const sideFirst = applyImageTargetScan(state, '11', ch1)
+  assert.equal(sideFirst.ok, true)
+  assert.equal(sideFirst.lettersRaw, registry.cards['11'].letters)
+  assert.deepEqual(sideFirst.letters, ['G', 'O', 'F'])
+  assert.deepEqual(sideFirst.state.collectedLetters, [])
+  assert.deepEqual(sideFirst.state.scannedTargets, ['11'])
+  assert.equal(sideFirst.state.currentStepIndex, 0)
+
+  const card01 = applyImageTargetScan(sideFirst.state, '01', ch1)
+  assert.equal(card01.ok, true)
+  assert.equal(card01.lettersRaw, 'M - I - X')
+  assert.deepEqual(card01.state.collectedLetters, ['M', 'I', 'X'])
+  assert.equal(card01.state.currentStepIndex, 1)
+  assert.deepEqual(card01.state.scannedTargets, ['11'])
+  state = card01.state
+
+  assert.equal(applyImageTargetScan(state, '01', ch1).ok, false)
+  assert.equal(applyImageTargetScan(state, '02', ch1).reason, 'untrained')
+  const repeat = applyImageTargetScan(state, '11', ch1)
+  assert.equal(repeat.ok, false)
+  assert.equal(repeat.reason, 'already')
+
+  const workbench = ensureWorkbench(state, () => 0)
+  assert.deepEqual(
+    workbench.workbench.pool.map((tile) => tile.letter).sort(),
+    ['I', 'M', 'X'],
+  )
+})
+
+test('scanned card 11 persists and Chapter 1 step ids are not stored as side targets', () => {
+  const memory = new Map()
+  const storage = {
+    getItem: (key) => (memory.has(key) ? memory.get(key) : null),
+    setItem: (key, value) => memory.set(key, String(value)),
+  }
+  const scanned = applyImageTargetScan(sanitizeHuntState({ version: 2 }), 11, ch1)
+  assert.equal(saveHuntState(scanned.state, storage), true)
+  const loaded = loadHuntState(storage)
+  assert.deepEqual(loaded.scannedTargets, ['11'])
+
+  const dirty = sanitizeHuntState({
+    version: 2,
+    scannedTargets: ['01', '11', '99', '11'],
+    collectedLetters: ['M', 'I', 'X'],
+    unlockedCards: [1],
+    currentStepIndex: 1,
+  })
+  assert.deepEqual(dirty.scannedTargets, ['11'])
+  assert.deepEqual(dirty.collectedLetters, ['M', 'I', 'X'])
 })
 
 test('AR photo crop is 64,64,1072,1260 on 1200×1800 and excludes letter capsules', () => {

@@ -23,7 +23,7 @@
 |---|---|
 | **Board** | **UNPARKED** 2026-09-23 after Gokul token reset. One Cursor job at a time. No status theater. |
 | **Ch1 hunt shell** | **On `main` (PR #2).** Help → Unlock with Code → letter collect → **`MICROWAVECUPBOARD` workbench**. Persistence: `localStorage` `project-ar-hunt-v1` (v2). AAA chrome intact. |
-| **AR training** | **None.** `hasTrainedImageTargets()` is `false`. 8th Wall / MindAR stubs. Crop **locked** **`64, 64, 1072, 1260`** on 1200×1800 — photo only, never letter capsules. Old Instax **`36,36,558×744`** is retired (historical only). |
+| **AR training** | **Cards 01 and 11 photo crops trained** (MindAR `public/ar/targets/photo-crop.mind`). `hasTrainedImageTargets()` is true. Crop **locked** **`64, 64, 1072, 1260`** on 1200×1800 — photo only. 8th Wall console payload is **not** trained; missing key falls back to MindAR and says so. Do not train from `card_registry.json` `canvas`. |
 | **Print gate** | Print pack **ordered** Printicular matte 6×4. **Physical go/no-go still pending** when Gokul picks up. Hunt Image Target training only after that scan go/no-go. |
 | **C-G1 Ginger** | **Load path landed (PR #5).** Drop path **`/models/ginger.glb`**. Checklist: `BLENDER_COMPANION_CHECKLIST.md` §2.1. |
 | **ginger.glb** | **On `main` (PR #7, SHA `7b9f8d1`).** Clips: **Idle / Sit / WalkIn**, ≤8MB. Procedural fallback **retired when the file is present**. |
@@ -36,7 +36,7 @@ Ch1 payloads MIX/CRY/OW/AVZ/EC/UP/BO/AR/DQ; full bible bypasses only. Desktop ma
 ### Queued behind Bot wakes (this order)
 
 1. Print AR scan go/no-go (Printicular mats).  
-2. Hunt Image Target training — photo crop **`64, 64, 1072, 1260`** only (not retired Instax `36,36,558×744`).  
+2. Hunt Image Targets for the remaining photo cards — same locked crop as cards 01 and 11 (`AR_PHOTO_CROP_1200x1800` only).  
 3. Transition lean (Uncle A / Floo Ember).  
 4. Montage last.
 
@@ -188,7 +188,7 @@ C:\Users\aishw\OneDrive\Desktop\Project AR\Resources - drafts\
 - Front: navy + cream Instax mat + gold letter capsules; **photo zone clean for AR**  
 - Back: navy + shared mini-me avatar + act labels (same outfit until detective/aviator renders exist)  
 - Output: `Compiled_Print_Ready_Cards_AAA/` (54 files)  
-- AR crop (legacy 630×1020 compiler, historical only): `36, 36, 558×744` — current B+D+E 6×4 crop is **`64, 64, 1072, 1260`**  
+- AR crop for current 6×4 fronts: **`64, 64, 1072, 1260`** (`AR_PHOTO_CROP_1200x1800`). Ignore `card_registry.json` `canvas` when training.  
 - Note: `card_01` + `card_28` were HEIC mislabeled as JPG — converted to real JPEG for sharp
 
 ---
@@ -258,7 +258,7 @@ node project-ar-card-compiler-aaa-hybrid.mjs
 **Board UNPARKED** 2026-09-23. One Cursor job at a time. No status theater.
 
 1. **Print AR scan go/no-go** — Printicular mats  
-2. **Hunt Image Target training** — crop **`64, 64, 1072, 1260`** (old Instax `36,36,558×744` retired)  
+2. **Hunt Image Targets** — cards 01 and 11 are trained on **`64, 64, 1072, 1260`**. Remaining cards use that same crop.  
 3. **Transition lean** — Uncle A / Floo Ember  
 4. **Montage last** — when clips arrive → CapCut/YouTube → set `MONTAGE_YOUTUBE_ID`
 

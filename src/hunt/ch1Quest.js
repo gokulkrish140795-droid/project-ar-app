@@ -1,3 +1,4 @@
+import { resolveTrainedTarget } from '../ar/resolveImageTarget.js'
 import { CH1_VAULT_ANAGRAM, getPlayableCards } from '../data/cardRegistry.js'
 
 export const CH1_VAULT = CH1_VAULT_ANAGRAM
@@ -107,6 +108,55 @@ export function applyScanCollect(state, stepNumber, cards = getPlayableCards()) 
     return { ok: false, reason: 'wrong-target', state }
   }
   return { ok: true, reason: 'scan', state: withStepUnlocked(state, card), card }
+}
+
+/**
+ * Camera path. Card ids in the Ch1 shell unlock only the current step.
+ * Trained cards outside that shell (card 11) unlock their registry letters
+ * without advancing the Chapter 1 step or mixing those letters into the workbench.
+ */
+export function applyImageTargetScan(state, cardId, cards = getPlayableCards()) {
+  const target = resolveTrainedTarget(cardId)
+  if (!target) {
+    return { ok: false, reason: 'untrained', state }
+  }
+
+  const playable = cards.find((card) => card.kind === 'letter' && card.step === target.step)
+  if (playable) {
+    const result = applyScanCollect(state, playable.step, cards)
+    return {
+      ...result,
+      cardId: target.cardId,
+      letters: playable.letters,
+      lettersRaw: playable.lettersRaw,
+    }
+  }
+
+  if (!target.letters.length) {
+    return { ok: false, reason: 'no-letters', state, cardId: target.cardId }
+  }
+  const scannedTargets = Array.isArray(state.scannedTargets) ? state.scannedTargets : []
+  if (scannedTargets.includes(target.cardId)) {
+    return {
+      ok: false,
+      reason: 'already',
+      state,
+      cardId: target.cardId,
+      letters: target.letters,
+      lettersRaw: target.lettersRaw,
+    }
+  }
+  return {
+    ok: true,
+    reason: 'scan',
+    cardId: target.cardId,
+    letters: target.letters,
+    lettersRaw: target.lettersRaw,
+    state: {
+      ...state,
+      scannedTargets: [...scannedTargets, target.cardId],
+    },
+  }
 }
 
 export function applyAnagramUnlock(state, spelled, cards = getPlayableCards()) {
