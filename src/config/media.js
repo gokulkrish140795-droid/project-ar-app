@@ -5,8 +5,12 @@
  * YouTube ID = the part after v= or /shorts/
  */
 
-/** Friends / romantic montage reel */
-export const MONTAGE_YOUTUBE_ID = ''
+/**
+ * Friends / romantic montage reel.
+ * Dummy Short until real friends/family clips:
+ * https://www.youtube.com/shorts/IeWb1Wlli0w
+ */
+export const MONTAGE_YOUTUBE_ID = 'IeWb1Wlli0w'
 
 /**
  * Uncle birthday wish (hologram screen).

@@ -17,6 +17,8 @@
 
 `ginger.glb` on `main` (PR #7, SHA `7b9f8d1`): **Idle / Sit / WalkIn**, ≤8MB. Procedural fallback **retired for Ginger when the file is present**. Do **not** invent puzzle words. Uncle after montage only. `DeviceFrame` / `CaptionRail` stay. Do **not** touch `minime.glb`.
 
+Montage uses dummy Short **IeWb1Wlli0w** until real friends/family clips; uncle still after montage.
+
 ### Current status
 
 | Item | Truth on `main` |
