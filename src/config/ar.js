@@ -1,6 +1,13 @@
+import {
+  EIGHTH_WALL_CLOUD_TRAINED,
+  MIND_TARGET_SRC,
+  TRAINED_PHOTO_TARGETS,
+} from '../ar/trainedTargets.js'
+
 /**
  * Image-target crop for current B+D+E 6×4 fronts (1200×1800).
  * Train on the photograph rectangle only — never letter capsules.
+ * card_registry.json `canvas.arSafeZone` is frozen Desktop metadata. Do not train from it.
  */
 export const AR_PHOTO_CROP_1200x1800 = Object.freeze({
   canvasWidth: 1200,
@@ -14,26 +21,20 @@ export const AR_PHOTO_CROP_1200x1800 = Object.freeze({
   exclude: 'letter-capsules',
 })
 
-/** Legacy AAA hybrid compiler canvas (630×1020). Do not use for current 6×4 fronts. */
-export const AR_PHOTO_CROP_LEGACY_630x1020 = Object.freeze({
-  canvasWidth: 630,
-  canvasHeight: 1020,
-  x: 36,
-  y: 36,
-  w: 558,
-  h: 744,
-})
-
 export const AR_ENGINE_PRIMARY = 'eighthwall'
 export const AR_ENGINE_BACKUP = 'mindar'
 export const AR_ENGINE_STUB = 'stub'
 
-export function getActiveArEngine() {
-  const flag = String(import.meta.env?.VITE_AR_ENGINE || AR_ENGINE_STUB).toLowerCase()
-  if (flag === AR_ENGINE_PRIMARY || flag === AR_ENGINE_BACKUP) return flag
-  return AR_ENGINE_STUB
+export function hasTrainedImageTargets() {
+  return TRAINED_PHOTO_TARGETS.length > 0 && Boolean(MIND_TARGET_SRC)
 }
 
-export function hasTrainedImageTargets() {
-  return false
+export function getActiveArEngine() {
+  const flag = String(import.meta.env?.VITE_AR_ENGINE || '').toLowerCase()
+  if (flag === AR_ENGINE_STUB || flag === AR_ENGINE_PRIMARY || flag === AR_ENGINE_BACKUP) {
+    return flag
+  }
+  if (!hasTrainedImageTargets()) return AR_ENGINE_STUB
+  if (EIGHTH_WALL_CLOUD_TRAINED && import.meta.env?.VITE_8THWALL_APP_KEY) return AR_ENGINE_PRIMARY
+  return AR_ENGINE_BACKUP
 }

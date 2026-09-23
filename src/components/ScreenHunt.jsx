@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createImageTargetTracker } from '../ar/createImageTargetTracker.js'
+import { lettersForScannedTargets } from '../ar/resolveImageTarget.js'
+import { getActiveArEngine, hasTrainedImageTargets } from '../config/ar.js'
 import { formatRegistryQuote } from '../data/cardRegistry.js'
 import useHuntProgress from '../hooks/useHuntProgress.js'
 import { CH1_VAULT } from '../hunt/ch1Quest.js'
@@ -21,30 +23,30 @@ export default function ScreenHunt({ onEnsureAudio }) {
   const [helpOpen, setHelpOpen] = useState(false)
   const [codeError, setCodeError] = useState('')
   const [pose, setPose] = useState('search')
-  const [engineLabel, setEngineLabel] = useState('standby')
+  const cameraReady = hasTrainedImageTargets() && getActiveArEngine() !== 'stub'
+  const [engineLabel, setEngineLabel] = useState(cameraReady ? 'tap to start' : 'standby')
   const [flashLetter, setFlashLetter] = useState('')
+  const [cameraLive, setCameraLive] = useState(false)
+  const cameraRef = useRef(null)
+  const trackerRef = useRef(null)
+  const celebrateRef = useRef(null)
 
   tryScanRef.current = hunt.tryScan
 
   useEffect(() => {
-    let tracker
-    let cancelled = false
-    ;(async () => {
-      tracker = await createImageTargetTracker({
-        onTargetFound: (stepNumber) => tryScanRef.current(stepNumber),
-      })
-      if (cancelled) {
-        tracker.stop()
-        return
-      }
-      tracker.start()
-      setEngineLabel(tracker.reason ? 'standby' : tracker.engine)
-    })()
     return () => {
-      cancelled = true
-      tracker?.stop()
+      trackerRef.current?.stop()
+      trackerRef.current = null
     }
   }, [])
+
+  useEffect(() => {
+    if (card?.kind === 'workbench' || state.vaultUnlocked) {
+      trackerRef.current?.stop()
+      trackerRef.current = null
+      setCameraLive(false)
+    }
+  }, [card?.kind, state.vaultUnlocked])
 
   const ensureAudio = async () => {
     if (onEnsureAudio) await onEnsureAudio()
@@ -80,6 +82,29 @@ export default function ScreenHunt({ onEnsureAudio }) {
     if (result.ok) await celebrate('')
   }
 
+  const handleTargetFound = async (cardId) => {
+    const result = tryScanRef.current(cardId)
+    if (!result?.ok) return
+    const letters = (result.letters || result.card?.letters || []).join('')
+    await celebrateRef.current?.(letters)
+  }
+
+  const startCamera = async () => {
+    if (trackerRef.current || !cameraRef.current) return
+    const tracker = await createImageTargetTracker({
+      container: cameraRef.current,
+      onTargetFound: (cardId) => {
+        handleTargetFound(cardId)
+      },
+    })
+    trackerRef.current = tracker
+    await tracker.start()
+    const live = tracker.status === 'live'
+    if (!live) trackerRef.current = null
+    setCameraLive(live)
+    setEngineLabel(live ? tracker.engine : 'blocked')
+  }
+
   const handleGingerTap = async () => {
     await ensureAudio()
     audioEngine.playSfx('sfx_cat_purr')
@@ -87,8 +112,11 @@ export default function ScreenHunt({ onEnsureAudio }) {
     window.setTimeout(() => setPose('search'), 1200)
   }
 
+  celebrateRef.current = celebrate
+
   const isWorkbench = card?.kind === 'workbench'
   const quote = formatRegistryQuote(card?.quote)
+  const sideLetters = lettersForScannedTargets(state.scannedTargets)
   const caption = state.vaultUnlocked
     ? card?.location
     : isWorkbench
@@ -126,7 +154,12 @@ export default function ScreenHunt({ onEnsureAudio }) {
           </>
         ) : (
           <>
-            <CameraViewportStub engineLabel={engineLabel} />
+            <CameraViewportStub
+              engineLabel={engineLabel}
+              cameraRef={cameraRef}
+              live={cameraLive}
+              onActivate={cameraReady ? startCamera : undefined}
+            />
             <p className="ar-quest-sub" style={{ margin: '12px 0 0', fontSize: 14 }}>
               {card?.location}
             </p>
@@ -147,6 +180,9 @@ export default function ScreenHunt({ onEnsureAudio }) {
         )}
 
         <LetterTray letters={state.collectedLetters} />
+        {sideLetters.length > 0 ? (
+          <LetterTray letters={sideLetters} label={`Scanned card letters ${sideLetters.join(' ')}`} />
+        ) : null}
 
         {!state.vaultUnlocked ? (
           <button

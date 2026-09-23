@@ -3,7 +3,7 @@ import { getPlayableCards } from '../data/cardRegistry.js'
 import {
   applyAnagramUnlock,
   applyBypass,
-  applyScanCollect,
+  applyImageTargetScan,
   ensureWorkbench,
   getCurrentCard,
   moveWorkbenchTile,
@@ -39,7 +39,7 @@ export default function useHuntProgress() {
   )
 
   const tryScan = useCallback(
-    (stepNumber) => commit(applyScanCollect(state, stepNumber, cards)),
+    (cardId) => commit(applyImageTargetScan(state, cardId, cards)),
     [cards, commit, state],
   )
 

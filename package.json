@@ -7,17 +7,18 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "test": "node --test src/hunt/ch1Quest.test.js",
+    "test": "node --test src/hunt/ch1Quest.test.js src/ar/imageTargets.test.js",
     "preview": "vite preview"
   },
   "dependencies": {
+    "canvas-confetti": "^1.9.2",
+    "lucide-react": "^0.344.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "three": "^0.175.0",
-    "lucide-react": "^0.344.0",
-    "canvas-confetti": "^1.9.2"
+    "three": "^0.175.0"
   },
   "devDependencies": {
+    "@msgpack/msgpack": "^3.1.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",

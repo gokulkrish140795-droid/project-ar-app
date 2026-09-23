@@ -295,6 +295,26 @@ html {
   border: 1px solid rgba(232, 197, 106, 0.35);
 }
 
+.ar-scan-camera {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ar-scan-camera video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ar-scan-stage__tick,
+.ar-scan-reticle {
+  z-index: 1;
+}
+
 .ar-scan-stage__tick {
   position: absolute;
   width: 16px;

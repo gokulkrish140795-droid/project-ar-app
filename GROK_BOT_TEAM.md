@@ -22,7 +22,7 @@ Cursor + this GitHub repo are the **single source of truth**. Grok Bots read thi
 ## On-call bots (Bot schedules wake → work → pause)
 | Bot | When |
 |---|---|
-| AR Hunt | **Queued.** Print AR scan go/no-go (Printicular mats) → Image Target training (crop `64, 64, 1072, 1260`) |
+| AR Hunt | **Cards 01 and 11 trained** on crop `64, 64, 1072, 1260` (MindAR backup; 8th Wall cloud payload still absent). Remaining photo cards queued. |
 | AR Companion | `ginger.glb` on `main` (PR #7): Idle/Sit/WalkIn, ≤8MB. Procedural fallback retired for Ginger when the file is present. Do not touch `minime.glb`. |
 | AR Montage | Friends-family montage → `MONTAGE_YOUTUBE_ID` — **last**, when clips ready |
 
