@@ -5,7 +5,7 @@ import audioEngine from '../utils/audioEngine'
 import CaptionRail from './ui/CaptionRail'
 import DeviceFrame from './ui/DeviceFrame'
 
-const LIFT_MS = 780
+const LIFT_MS = 1100
 
 /**
  * Gold Horizon Lift: the caption rail's gold rule rises and opens the reel.
@@ -47,25 +47,34 @@ export default function ScreenVideoMontage({ onContinue }) {
       return undefined
     }
 
+    // Compositor transforms, same clock. A main-thread hitch (WebGL startup)
+    // must not skip the opening.
+    const travel = end - start
+    const hold = Math.min(0.72, Math.max(0, 1 - span / Math.max(1, start - end)))
+    line.style.top = `${start}px`
+    line.style.opacity = '1'
     setPhase('lifting')
     playCue()
-    line.style.opacity = '1'
-    const t0 = performance.now()
-    let raf = 0
-    const tick = () => {
-      const p = Math.min(1, (performance.now() - t0) / LIFT_MS)
-      const eased = 1 - (1 - p) ** 2
-      const y = start + (end - start) * eased
-      const scale = Math.min(1, Math.max(0, (y - end) / span))
-      line.style.top = `${y}px`
-      line.style.opacity = p < 0.9 ? '1' : String(Math.max(0, 1 - (p - 0.9) / 0.1))
-      veil.style.transform = `scaleY(${scale})`
-      if (p < 1) raf = window.requestAnimationFrame(tick)
-      else setPhase('settled')
-    }
-    tick()
 
-    return () => window.cancelAnimationFrame(raf)
+    const lift = line.animate(
+      [
+        { transform: 'translateY(0)', opacity: 1 },
+        { transform: `translateY(${travel * 0.9}px)`, opacity: 1, offset: 0.9 },
+        { transform: `translateY(${travel}px)`, opacity: 0 },
+      ],
+      { duration: LIFT_MS, easing: 'linear', fill: 'forwards' }
+    )
+    veil.animate(
+      [
+        { transform: 'scaleY(1)', offset: 0 },
+        { transform: 'scaleY(1)', offset: hold },
+        { transform: 'scaleY(0)', offset: 1 },
+      ],
+      { duration: LIFT_MS, easing: 'linear', fill: 'forwards' }
+    )
+    lift.onfinish = () => setPhase('settled')
+
+    return () => lift.cancel()
   }, [])
 
   return (
