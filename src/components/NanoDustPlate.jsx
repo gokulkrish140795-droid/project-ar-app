@@ -142,25 +142,24 @@ export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) 
       const smokeT = smoking ? smoothstep(u / SMOKE_SHARE) : 1
       const morphT = smoking ? 0 : smoothstep((u - SMOKE_SHARE) / (1 - SMOKE_SHARE))
 
-      if (smoking) {
+      const smokeFade = smoking ? 1 : Math.max(0, 1 - morphT / 0.4)
+      if (smokeFade > 0.02) {
         const wash = ctx.createRadialGradient(w * 0.5, h * 0.82, 8, w * 0.5, h * 0.42, Math.max(w, h) * 0.62)
-        wash.addColorStop(0, `rgba(${gold.r}, ${gold.g}, ${gold.b}, ${0.42 + smokeT * 0.4})`)
-        wash.addColorStop(0.4, `rgba(${goldBright.r}, ${goldBright.g}, ${goldBright.b}, ${0.22 + smokeT * 0.28})`)
+        wash.addColorStop(0, `rgba(${gold.r}, ${gold.g}, ${gold.b}, ${(0.42 + smokeT * 0.4) * smokeFade})`)
+        wash.addColorStop(0.4, `rgba(${goldBright.r}, ${goldBright.g}, ${goldBright.b}, ${(0.22 + smokeT * 0.28) * smokeFade})`)
         wash.addColorStop(1, `rgba(${navy.r}, ${navy.g}, ${navy.b}, 0)`)
         ctx.fillStyle = wash
         ctx.fillRect(0, 0, w, h)
       }
 
       if (morphT > 0) {
-        const tint = morphT * 0.42
-        const pr = navy.r + (cyan.r - navy.r) * tint
-        const pg = navy.g + (cyan.g - navy.g) * tint
-        const pb = navy.b + (cyan.b - navy.b) * tint
         tracePlate(ctx, plate)
-        ctx.fillStyle = `rgba(${pr | 0}, ${pg | 0}, ${pb | 0}, ${0.2 + morphT * 0.75})`
+        ctx.fillStyle = `rgba(${navy.r}, ${navy.g}, ${navy.b}, ${morphT})`
         ctx.fill()
-        ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${0.35 + morphT * 0.65})`
-        ctx.lineWidth = 2.5
+        ctx.fillStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${0.12 + morphT * 0.5})`
+        ctx.fill()
+        ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${0.45 + morphT * 0.55})`
+        ctx.lineWidth = 3
         ctx.stroke()
       }
 
