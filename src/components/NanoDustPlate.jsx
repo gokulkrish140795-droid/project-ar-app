@@ -118,7 +118,7 @@ export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) 
           spin: Math.random() * Math.PI * 2,
           x1: plate.x + Math.random() * plate.w,
           y1: plate.y + Math.random() * plate.h,
-          radius: 1.3 + Math.random() * 2.2,
+          radius: 2.1 + Math.random() * 2.4,
           bright: Math.random() > 0.55,
           delay: Math.random() * 0.16,
         })
@@ -143,20 +143,24 @@ export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) 
       const morphT = smoking ? 0 : smoothstep((u - SMOKE_SHARE) / (1 - SMOKE_SHARE))
 
       if (smoking) {
-        const wash = ctx.createRadialGradient(w * 0.5, h * 0.78, 6, w * 0.5, h * 0.5, Math.max(w, h) * 0.55)
-        wash.addColorStop(0, `rgba(${gold.r}, ${gold.g}, ${gold.b}, ${0.18 + smokeT * 0.38})`)
-        wash.addColorStop(0.45, `rgba(${goldBright.r}, ${goldBright.g}, ${goldBright.b}, ${0.08 + smokeT * 0.16})`)
+        const wash = ctx.createRadialGradient(w * 0.5, h * 0.82, 8, w * 0.5, h * 0.42, Math.max(w, h) * 0.62)
+        wash.addColorStop(0, `rgba(${gold.r}, ${gold.g}, ${gold.b}, ${0.42 + smokeT * 0.4})`)
+        wash.addColorStop(0.4, `rgba(${goldBright.r}, ${goldBright.g}, ${goldBright.b}, ${0.22 + smokeT * 0.28})`)
         wash.addColorStop(1, `rgba(${navy.r}, ${navy.g}, ${navy.b}, 0)`)
         ctx.fillStyle = wash
         ctx.fillRect(0, 0, w, h)
       }
 
       if (morphT > 0) {
+        const tint = morphT * 0.42
+        const pr = navy.r + (cyan.r - navy.r) * tint
+        const pg = navy.g + (cyan.g - navy.g) * tint
+        const pb = navy.b + (cyan.b - navy.b) * tint
         tracePlate(ctx, plate)
-        ctx.fillStyle = `rgba(${navy.r}, ${navy.g}, ${navy.b}, ${morphT * 0.84})`
+        ctx.fillStyle = `rgba(${pr | 0}, ${pg | 0}, ${pb | 0}, ${0.2 + morphT * 0.75})`
         ctx.fill()
-        ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${0.15 + morphT * 0.8})`
-        ctx.lineWidth = 1.5
+        ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${0.35 + morphT * 0.65})`
+        ctx.lineWidth = 2.5
         ctx.stroke()
       }
 
@@ -165,23 +169,23 @@ export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) 
         const from = smokeAt(p, smokeT)
         let x = from.x
         let y = from.y
-        let radius = p.radius * (1.15 + smokeT * 0.35)
+        let radius = p.radius * (1.6 + smokeT * 0.7)
         const ember = p.bright ? goldBright : gold
         let cr = ember.r
         let cg = ember.g
         let cb = ember.b
-        let alpha = 0.25 + smokeT * 0.6
+        let alpha = 0.5 + smokeT * 0.45
 
         if (!smoking) {
           const local = smoothstep(Math.min(1, Math.max(0, (morphT - p.delay) / (1 - p.delay))))
           const end = smokeAt(p, 1)
           x = end.x + (p.x1 - end.x) * local
           y = end.y + (p.y1 - end.y) * local
-          radius = p.radius * (1.5 - local * 1.05)
+          radius = p.radius * (1.7 - local * 0.45)
           cr = gold.r + (cyan.r - gold.r) * local
           cg = gold.g + (cyan.g - gold.g) * local
           cb = gold.b + (cyan.b - gold.b) * local
-          alpha = 0.45 + local * 0.5
+          alpha = 0.62 + local * 0.35
         }
 
         ctx.fillStyle = `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${alpha})`
