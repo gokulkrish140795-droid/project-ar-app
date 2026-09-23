@@ -38,7 +38,7 @@ Ch1 payloads MIX/CRY/OW/AVZ/EC/UP/BO/AR/DQ; full bible bypasses only.
 
 1. Soft open: physical iPhone + print smoke.  
 2. 8th Wall cloud payload when a key exists. Crop stays **`64, 64, 1072, 1260`**, photo only.  
-3. Transition lean (Uncle A / Floo Ember).  
+3. PR #13: uncle summon is Floo smoke → nano-dust → Short; gateway and hunt use the gold ember wipe. Parked next: Letter Capsule Click, Vault Stairs (dust drift / latch click / velvet pocket), Finale (phone dim / room rise / glass soft-off). Companion bow-out and Iris/Prank stay out.  
 4. Montage last (Gokul may send a dummy video).
 
 ### Locked chrome (do not regress)
