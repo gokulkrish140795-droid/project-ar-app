@@ -21,63 +21,51 @@ export default function ScreenVideoMontage({ onContinue }) {
     const stage = stageRef.current
     const well = wellRef.current
     const rail = railRef.current
+    const line = stage?.querySelector('.ar-horizon-line')
+    const veil = stage?.querySelector('.ar-horizon-veil')
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    let timer = 0
 
     const playCue = () => {
       audioEngine.playSoftCue('horizon')
     }
 
-    if (!stage || !well || !rail || reduce) {
+    if (!stage || !well || !rail || !line || !veil || reduce) {
       setPhase('settled')
       playCue()
       return undefined
     }
 
-    const line = stage.querySelector('.ar-horizon-line')
-    const veil = stage.querySelector('.ar-horizon-veil')
     const stageBox = stage.getBoundingClientRect()
     const wellBox = well.getBoundingClientRect()
     const railBox = rail.getBoundingClientRect()
     const start = railBox.top - stageBox.top
     const end = wellBox.top - stageBox.top + 1
-    const travel = start - end
-    if (!line || !veil || travel < 12) {
+    const span = Math.max(1, wellBox.bottom - stageBox.top - end)
+    if (start - end < 12) {
       setPhase('settled')
       playCue()
       return undefined
     }
 
-    const wellBottom = wellBox.bottom - stageBox.top
-    const openAt = Math.min(0.82, Math.max(0, (start - wellBottom) / travel))
-    line.style.top = `${start}px`
-    line.style.opacity = '1'
     setPhase('lifting')
     playCue()
-
-    const lift = line.animate(
-      [
-        { transform: 'translateY(0)', opacity: 1 },
-        { transform: `translateY(${end - start}px)`, opacity: 1, offset: 0.86 },
-        { transform: `translateY(${end - start}px)`, opacity: 0 },
-      ],
-      { duration: LIFT_MS, easing: 'cubic-bezier(0.16, 0.72, 0.18, 1)', fill: 'forwards' }
-    )
-    veil.animate(
-      [
-        { transform: 'scaleY(1)', offset: 0 },
-        { transform: 'scaleY(1)', offset: openAt },
-        { transform: 'scaleY(0)', offset: 1 },
-      ],
-      { duration: LIFT_MS, easing: 'linear', fill: 'forwards' }
-    )
-    lift.onfinish = () => setPhase('settled')
-    timer = window.setTimeout(() => setPhase('settled'), LIFT_MS + 60)
-
-    return () => {
-      window.clearTimeout(timer)
-      lift.cancel()
+    line.style.opacity = '1'
+    const t0 = performance.now()
+    let raf = 0
+    const tick = () => {
+      const p = Math.min(1, (performance.now() - t0) / LIFT_MS)
+      const eased = 1 - (1 - p) ** 2
+      const y = start + (end - start) * eased
+      const scale = Math.min(1, Math.max(0, (y - end) / span))
+      line.style.top = `${y}px`
+      line.style.opacity = p < 0.9 ? '1' : String(Math.max(0, 1 - (p - 0.9) / 0.1))
+      veil.style.transform = `scaleY(${scale})`
+      if (p < 1) raf = window.requestAnimationFrame(tick)
+      else setPhase('settled')
     }
+    tick()
+
+    return () => window.cancelAnimationFrame(raf)
   }, [])
 
   return (

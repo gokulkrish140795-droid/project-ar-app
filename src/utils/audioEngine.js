@@ -131,7 +131,8 @@ class AudioEngine {
 
   /**
    * Quiet transition breath. Does not stop voices, does not duck the theme.
-   * Filtered noise only — swap the body of this method if a tiny file replaces it.
+   * Colored noise in the buffer, peak gain = the cue spec. Swap this method
+   * if a tiny royalty-safe file replaces the placeholder.
    */
   playSoftCue(kind) {
     const spec = SOFT_CUES[kind]
@@ -139,65 +140,47 @@ class AudioEngine {
 
     const ctx = this.ctx
     const now = ctx.currentTime
-    const dur = spec.ms / 1000
     const source = ctx.createBufferSource()
-    source.buffer = this._softNoise(dur, kind)
-
-    const filter = ctx.createBiquadFilter()
-    filter.Q.value = 0.45
-    if (kind === 'dust') {
-      filter.type = 'bandpass'
-      filter.frequency.setValueAtTime(2200, now)
-      filter.frequency.exponentialRampToValueAtTime(900, now + dur)
-    } else if (kind === 'horizon') {
-      filter.type = 'lowpass'
-      filter.frequency.setValueAtTime(240, now)
-      filter.frequency.exponentialRampToValueAtTime(880, now + dur * 0.75)
-    } else {
-      filter.type = 'lowpass'
-      filter.frequency.setValueAtTime(480, now)
-      filter.frequency.exponentialRampToValueAtTime(160, now + dur)
-    }
-
+    source.buffer = this._softBuffer(kind, spec.ms)
     const gain = ctx.createGain()
-    gain.gain.setValueAtTime(0.0001, now)
-    gain.gain.exponentialRampToValueAtTime(spec.peak, now + 0.018)
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur)
-
-    source.connect(filter)
-    filter.connect(gain)
+    gain.gain.value = spec.peak
+    source.connect(gain)
     gain.connect(this.master)
     source.start(now)
-    source.stop(now + dur)
+    source.stop(now + spec.ms / 1000)
     return source
   }
 
-  _softNoise(seconds, kind) {
+  _softBuffer(kind, ms) {
     const rate = this.ctx.sampleRate
-    const length = Math.max(1, Math.floor(rate * seconds))
+    const length = Math.max(1, Math.floor(rate * (ms / 1000)))
     const buffer = this.ctx.createBuffer(1, length, rate)
     const data = buffer.getChannelData(0)
-    const state = { brown: 0, pink: 0 }
+    const state = { v: 0 }
     for (let i = 0; i < length; i += 1) {
+      const t = i / (length - 1 || 1)
       const white = Math.random() * 2 - 1
+      let sample
       if (kind === 'dust') {
-        state.pink = state.pink * 0.86 + white * 0.14
-        data[i] = state.pink
+        state.v = state.v * 0.8 + white * 0.2
+        sample = state.v
+      } else if (kind === 'horizon') {
+        state.v = (state.v + white * 0.018) / 1.018
+        const brown = state.v * 3.5
+        const air = white * 0.22 + brown * 0.78
+        sample = brown * (1 - t) + air * t
       } else {
-        state.brown = (state.brown + white * 0.02) / 1.02
-        data[i] = state.brown * 3.4
+        state.v = (state.v + white * 0.01) / 1.01
+        sample = state.v * 4.2
       }
+      const attack = 0.1
+      const env = t < attack ? t / attack : (1 - (t - attack) / (1 - attack)) ** 1.35
+      data[i] = sample * env
     }
     let peak = 0
     for (let i = 0; i < length; i += 1) peak = Math.max(peak, Math.abs(data[i]))
     const scale = peak > 0 ? 1 / peak : 1
-    const fade = Math.min(48, Math.floor(length / 6))
-    for (let i = 0; i < length; i += 1) {
-      let edge = 1
-      if (i < fade) edge = i / fade
-      else if (i > length - fade) edge = (length - i) / fade
-      data[i] *= scale * edge
-    }
+    for (let i = 0; i < length; i += 1) data[i] *= scale
     return buffer
   }
 
