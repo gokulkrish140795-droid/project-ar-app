@@ -22,7 +22,7 @@ export default function ScreenHunt({ onEnsureAudio }) {
   const tryScanRef = useRef(hunt.tryScan)
   const [helpOpen, setHelpOpen] = useState(false)
   const [codeError, setCodeError] = useState('')
-  const [pose, setPose] = useState('search')
+  const [pose, setPose] = useState('sit')
   const cameraReady = hasTrainedImageTargets() && getActiveArEngine() !== 'stub'
   const [engineLabel, setEngineLabel] = useState(cameraReady ? 'tap to start' : 'standby')
   const [flashLetter, setFlashLetter] = useState('')
@@ -68,7 +68,7 @@ export default function ScreenHunt({ onEnsureAudio }) {
       window.setTimeout(() => setFlashLetter(''), 1200)
     }
     setPose('cheer')
-    window.setTimeout(() => setPose(card?.kind === 'workbench' ? 'sit' : 'search'), 1200)
+    window.setTimeout(() => setPose('sit'), 1200)
   }
 
   const handleBypass = async (code) => {
@@ -115,7 +115,7 @@ export default function ScreenHunt({ onEnsureAudio }) {
     await ensureAudio()
     audioEngine.playSfx('sfx_cat_purr')
     setPose('cheer')
-    window.setTimeout(() => setPose('search'), 1200)
+    window.setTimeout(() => setPose('sit'), 1200)
   }
 
   celebrateRef.current = celebrate
@@ -194,7 +194,7 @@ export default function ScreenHunt({ onEnsureAudio }) {
         {!state.vaultUnlocked ? (
           <button
             type="button"
-            className="ar-btn-3d ar-btn-3d--rose"
+            className="ar-btn-3d ar-btn-3d--ghost"
             onClick={() => {
               setCodeError('')
               setHelpOpen(true)
@@ -214,22 +214,13 @@ export default function ScreenHunt({ onEnsureAudio }) {
       {emberOn && <div className="ar-floo-ember" aria-hidden="true" />}
       </div>
 
-      <div
-        style={{
-          width: 'min(400px, 100%)',
-          display: 'flex',
-          alignItems: 'flex-end',
-          gap: 10,
-        }}
-      >
-        <div style={{ flexShrink: 0 }}>
-          <GingerCat3D pose={pose} size={110} onTap={handleGingerTap} />
+      <div className="ar-hunt-companion-dock">
+        <div className="ar-companion-slot">
+          <GingerCat3D pose={pose} size={104} onTap={handleGingerTap} />
         </div>
-        <div style={{ flex: 1, marginBottom: 8 }}>
-          <CaptionRail visible speaker="Ginger">
-            {caption}
-          </CaptionRail>
-        </div>
+        <CaptionRail visible speaker="Ginger">
+          {caption}
+        </CaptionRail>
       </div>
 
       <HelpDrawer

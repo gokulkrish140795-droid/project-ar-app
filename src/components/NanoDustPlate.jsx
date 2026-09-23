@@ -23,14 +23,7 @@ function smoothstep(t) {
 }
 
 function plateRect(w, h) {
-  const cap = Math.min(h, (window.innerHeight || h) * 0.52)
-  const plateH = Math.max(1, Math.min(cap, w * (16 / 9)))
-  return {
-    x: 0,
-    y: Math.max(0, (h - plateH) / 2),
-    w,
-    h: plateH,
-  }
+  return { x: 0, y: 0, w, h }
 }
 
 function tracePlate(ctx, plate) {
@@ -58,8 +51,9 @@ function smokeAt(p, s) {
 }
 
 /**
- * Gold Floo ember smoke rises, then those specks turn cyan and pack into the plate.
- * Canvas 2D, capped particle count. CSS mist plays the same two beats if the context is missing.
+ * Gold Floo ember smoke rises, then those specks turn cyan and pack into an opaque plate.
+ * Canvas 2D, capped particle count. The 2D mist plays the same two beats if the context
+ * is missing or frames stutter (Safari fallback). The plate stays opaque through assemble.
  */
 export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) {
   const canvasRef = useRef(null)
@@ -128,7 +122,23 @@ export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) 
     let geom = measure()
     if (geom.w > 1 && geom.h > 1) seed(geom.w, geom.h, geom.plate)
 
+    let slowFrames = 0
+    let frameSamples = 0
+    let prevFrame = 0
+
     const draw = (now) => {
+      if (prevFrame) {
+        frameSamples += 1
+        const dt = now - prevFrame
+        if (frameSamples > 6 && dt > 50) slowFrames += 1
+        else slowFrames = Math.max(0, slowFrames - 1)
+        if (slowFrames >= 3) {
+          layer.classList.add('is-mist-only')
+          return
+        }
+      }
+      prevFrame = now
+
       if (!start) start = now
       if (particles.length === 0) {
         geom = measure()
@@ -141,8 +151,9 @@ export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) 
       const smoking = u < SMOKE_SHARE
       const smokeT = smoking ? smoothstep(u / SMOKE_SHARE) : 1
       const morphT = smoking ? 0 : smoothstep((u - SMOKE_SHARE) / (1 - SMOKE_SHARE))
+      const plateAlpha = smoking ? 0 : Math.min(1, morphT / 0.12)
 
-      const smokeFade = smoking ? 1 : Math.max(0, 1 - morphT / 0.4)
+      const smokeFade = smoking ? 1 : Math.max(0, 1 - morphT / 0.45)
       if (smokeFade > 0.02) {
         const wash = ctx.createRadialGradient(w * 0.5, h * 0.82, 8, w * 0.5, h * 0.42, Math.max(w, h) * 0.62)
         wash.addColorStop(0, `rgba(${gold.r}, ${gold.g}, ${gold.b}, ${(0.42 + smokeT * 0.4) * smokeFade})`)
@@ -152,10 +163,12 @@ export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) 
         ctx.fillRect(0, 0, w, h)
       }
 
-      if (morphT > 0.15) {
+      if (plateAlpha > 0.01) {
+        ctx.fillStyle = `rgba(${navy.r}, ${navy.g}, ${navy.b}, ${plateAlpha})`
+        ctx.fillRect(0, 0, w, h)
         tracePlate(ctx, plate)
-        ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${(morphT - 0.15) * 0.9})`
-        ctx.lineWidth = 3
+        ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${plateAlpha})`
+        ctx.lineWidth = 2
         ctx.stroke()
       }
 

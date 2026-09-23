@@ -19,6 +19,9 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
   const [gingerPose, setGingerPose] = useState('idle')
   const dustLock = useRef(false)
   const summonedRef = useRef(false)
+  const plateTimer = useRef(0)
+
+  useEffect(() => () => window.clearTimeout(plateTimer.current), [])
 
   useEffect(() => {
     let cancelled = false
@@ -71,9 +74,10 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
   const resolveDust = () => {
     if (summonedRef.current) return
     summonedRef.current = true
-    setDusting(false)
     setSummoned(true)
     setGingerPose('sit')
+    // Plate stays mounted under the Short. arShortIn fades the Short 0→1 over 200ms.
+    plateTimer.current = window.setTimeout(() => setDusting(false), 280)
   }
 
   const summon = async () => {
@@ -156,38 +160,18 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
           </h1>
         </header>
 
-        <div
-          style={{
-            position: 'relative',
-            width: 'min(360px, 94vw)',
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 16,
-          }}
-        >
+        <div className={`ar-summon-stage${dusting || summoned ? ' is-plate' : ''}`}>
           {dusting && <NanoDustPlate onDone={resolveDust} />}
 
           {summoned ? (
-            <div
-              className="ar-holo-panel"
-              style={{
-                width: '100%',
-                aspectRatio: '9 / 16',
-                maxHeight: '52vh',
-                position: 'relative',
-                zIndex: 1,
-              }}
-            >
+            <div className="ar-holo-panel ar-holo-reveal">
               {UNCLE_WISH_YOUTUBE_ID ? (
                 <iframe
                   title="Uncle birthday wish"
                   src={`https://www.youtube.com/embed/${UNCLE_WISH_YOUTUBE_ID}?autoplay=1&playsinline=1&rel=0`}
                   allow="autoplay; encrypted-media; fullscreen"
                   allowFullScreen
-                  style={{ width: '100%', height: '100%', border: 'none', minHeight: 280 }}
+                  style={{ width: '100%', height: '100%', border: 'none' }}
                 />
               ) : UNCLE_WISH_URL ? (
                 <video
@@ -209,7 +193,7 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
                     justifyContent: 'center',
                     padding: 24,
                     textAlign: 'center',
-                    minHeight: 280,
+                    height: '100%',
                   }}
                 >
                   <p className="ar-quest-kicker" style={{ margin: 0 }}>
@@ -223,7 +207,7 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
                 </div>
               )}
             </div>
-          ) : (
+          ) : !dusting ? (
             <div style={{ textAlign: 'center', animation: 'arStageIn 0.75s ease both' }}>
               <GingerCat3D
                 pose={gingerPose}
@@ -243,7 +227,7 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
                 Tap Ginger to summon
               </p>
             </div>
-          )}
+          ) : null}
         </div>
 
         <div
