@@ -2,28 +2,28 @@
 
 Cursor + this GitHub repo are the **single source of truth**. Grok Bots read this file and `GROK_TEAM_HANDOFF.md`; they do not keep a parallel plan.
 
-**Org (21 Sep 2026 — BOARD PARKED)**
+**Org (23 Sep 2026 NZ — BOARD UNPARKED)**
 
 | Seat | Role |
 |---|---|
-| **Bot (Grok)** | Day-to-day **CEO / Pepper Potts**. Integrator, Cursor bridge. Board **PARKED** until Gokul reopens after weekly token reset (~2 days). |
+| **Bot (Grok) `8357d67c`** | Day-to-day **CEO / Pepper Potts** (replaces prior Bot `cd3c9309` as of 2026-09-23 NZ). Integrator, Cursor bridge. |
 | **AR Producer** | Executes planning/routing **under Bot**. Checklists, hard-rule gate, update `GROK_TEAM_HANDOFF.md` after GitHub lands. |
-| **Gokul** | Major **taste**, **spend**, **romantic go/no-go**, **deploy**. Not day-to-day routing. |
+| **Gokul** | Major **taste**, **spend**, **go-no-go**, **deploy** only. Not day-to-day routing. |
 
-**Chat: this/that only. Hourly status PAUSED.** Resume phrase: **`continue Project AR Ginger`** / **`continue Project AR`**. Do not schedule wakes until unparked. **One Cursor job at a time.**
+**One Cursor job at a time. No status theater.** Queued work waits for a Bot wake.
 
 ## Standing bots
 | Bot | Role |
 |---|---|
-| Bot (Grok) | Day-to-day CEO / Pepper Potts. Wakes others; romantic/gift-feel with Gokul on major gates only |
+| Bot (Grok) `8357d67c` | Day-to-day CEO / Pepper Potts. Wakes others; Gokul only on major taste / spend / go-no-go / deploy |
 | AR Producer | Plans, checklists, hard-rule gate, routing — **under Bot** |
 | AR Architect | UI / transitions / SFX / AAA mobile-browser design advice within locked React+Vite+Three.js+WebAR; research proposals; no core-concept changes. Wake when Bot schedules |
 
 ## On-call bots (Bot schedules wake → work → pause)
 | Bot | When |
 |---|---|
-| AR Hunt | **Paused.** After unpark: physical print AR scan go/no-go → Image Target training (crop `64, 64, 1072, 1260`) |
-| AR Companion | **Paused.** `ginger.glb` on `main` (Idle/Sit/WalkIn, PR #7). Next: Mini-Me polish / Tripo clips after unpark |
+| AR Hunt | **Queued.** Print AR scan go/no-go (Printicular mats) → Image Target training (crop `64, 64, 1072, 1260`) |
+| AR Companion | `ginger.glb` on `main` (PR #7): Idle/Sit/WalkIn, ≤8MB. Procedural fallback retired for Ginger when the file is present. Do not touch `minime.glb`. |
 | AR Montage | Friends-family montage → `MONTAGE_YOUTUBE_ID` — **last**, when clips ready |
 
 ## Cursor cloud agents
@@ -38,4 +38,4 @@ Every coding session: read `GROK_TEAM_HANDOFF.md` §0 + this file first. **One C
 6. Do not global auto-weight Tripo skin; keep GLBs ≤ ~6–8 MB.
 
 ## Channel
-Grok team room: **Project AR**. **Chat: this/that only.** Hourly status **PAUSED**. Board **PARKED** until Gokul reopens (`continue Project AR Ginger` / `continue Project AR`). Ping Gokul only for major taste, spend, romantic go/no-go, deploy.
+Grok team room: **Project AR**. **No status theater.** Board **UNPARKED** 2026-09-23 after Gokul token reset. Ping Gokul only for major taste, spend, go-no-go, deploy.
