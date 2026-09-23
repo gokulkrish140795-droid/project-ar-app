@@ -601,12 +601,8 @@ html {
   display: block;
 }
 
-.ar-nano-mist {
-  display: none;
-}
-
 /* 1.9s matches SUMMON_RESOLVE_MS (700ms Floo smoke + 1200ms nano plate). */
-.ar-nano-dust-layer.is-mist-only .ar-nano-mist {
+.ar-nano-mist {
   display: block;
   position: absolute;
   left: 50%;
@@ -622,7 +618,7 @@ html {
   animation: arSummonResolve 1.9s linear both;
 }
 
-.ar-nano-dust-layer.is-mist-only .ar-nano-mist::after {
+.ar-nano-mist::after {
   content: '';
   position: absolute;
   inset: -8%;

@@ -152,13 +152,9 @@ export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) 
         ctx.fillRect(0, 0, w, h)
       }
 
-      if (morphT > 0) {
+      if (morphT > 0.15) {
         tracePlate(ctx, plate)
-        ctx.fillStyle = `rgba(${navy.r}, ${navy.g}, ${navy.b}, ${morphT})`
-        ctx.fill()
-        ctx.fillStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${0.12 + morphT * 0.5})`
-        ctx.fill()
-        ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${0.45 + morphT * 0.55})`
+        ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${(morphT - 0.15) * 0.9})`
         ctx.lineWidth = 3
         ctx.stroke()
       }
