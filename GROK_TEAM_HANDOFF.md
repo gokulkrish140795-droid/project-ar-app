@@ -1,44 +1,43 @@
 # Project AR — Full Team Handoff (Initial → Current)
 **For:** Gok Bot / Grok / any new teammate joining the birthday quest build  
-**Day-to-day:** Bot (Grok) `8357d67c` — CEO / Pepper Potts (replaces `cd3c9309`, 2026-09-23 NZ)  
+**Day-to-day:** Thala `8357d67c` — CEO / Pepper Potts (this id was called Bot; replaced Bot `cd3c9309`, 2026-09-23 NZ)  
 **Owner (major gates):** Gokul — taste, spend, go-no-go, deploy only  
 **Recipient:** Aishwarya — 30th birthday (Protocol 0510 · DOB 5 Oct 1996)  
 **Target device:** iPhone 14 · Safari  
 **Budget cap:** ~USD $200 (DIY engine/characters; spend on uncle video + prints)  
-**Status snapshot:** 23 Sep 2026 NZ — **BOARD UNPARKED** after Gokul token reset. CEO / Pepper Potts = Bot `8357d67c` (was `cd3c9309`). Producer under Bot; Gokul = taste / spend / go-no-go / deploy. One Cursor job at a time; no status theater. `ginger.glb` on `main` (PR #7: Idle/Sit/WalkIn, ≤8MB; procedural fallback retired when file present). Queued behind Bot wakes: print AR scan go/no-go (Printicular mats) → Hunt training crop `64,64,1072,1260` → transition lean (Uncle A / Floo Ember) → Montage last
+**Status snapshot:** 23 Sep 2026 NZ — **BOARD UNPARKED**. CEO / Pepper Potts = **Thala** `8357d67c`. Producer under Thala. AR Lead Game Tester `6efc9173` (former AR Montage). Gokul = taste / spend / go-no-go / deploy. One Cursor at a time; short acks in Project AR only. `ginger.glb` on `main`. Hunt PR #10 `9224231` (cards 01+11). Soft open: iPhone + print smoke; 8th Wall when a key exists. Montage last.
 
 ---
 
 ## 0. Read this first (current status)
 
-**BOARD UNPARKED** 2026-09-23 (NZ) after Gokul token reset. **One Cursor job at a time. No status theater.** Queued work waits for a Bot wake.
+**BOARD UNPARKED** 2026-09-23 (NZ). **One Cursor job at a time. No status theater.** Short acks in the **Project AR** room only. Queued work waits for a Thala wake.
 
-**Org.** Day-to-day CEO / Pepper Potts = Bot (Grok) **`8357d67c`** (replaces prior Bot `cd3c9309`, 2026-09-23 NZ). AR Producer routes **under Bot**. Gokul = major taste, spend, go-no-go, deploy only. Details: `GROK_BOT_TEAM.md`.
+**Org.** Day-to-day CEO / Pepper Potts = **Thala** `8357d67c` (this id was called Bot; it replaced Bot `cd3c9309`). AR Producer routes **under Thala**. Gokul = taste, spend, go-no-go, deploy only. **AR Lead Game Tester** `6efc9173` (former AR Montage seat) reports to Thala + AR Producer: AAA playtest gate on iPhone Safari; gaps → consult Architect → short improvement batch via Thala for Gokul approve/reject. No Cursor unless woken. Montage/media packing is not this role. Real montage still **last** (Gokul may send a dummy video). Details: `GROK_BOT_TEAM.md`.
 
-`ginger.glb` on `main` (PR #7, SHA `7b9f8d1`): **Idle / Sit / WalkIn**, ≤8MB. Procedural fallback **retired for Ginger when the file is present**. Do **not** invent puzzle content. Hard locks unchanged. `DeviceFrame` / `CaptionRail` stay. Do **not** touch `minime.glb`.
+`ginger.glb` on `main` (PR #7, SHA `7b9f8d1`): **Idle / Sit / WalkIn**, ≤8MB. Procedural fallback **retired for Ginger when the file is present**. Do **not** invent puzzle words. Uncle after montage only. `DeviceFrame` / `CaptionRail` stay. Do **not** touch `minime.glb`.
 
 ### Current status
 
 | Item | Truth on `main` |
 |---|---|
-| **Board** | **UNPARKED** 2026-09-23 after Gokul token reset. One Cursor job at a time. No status theater. |
-| **Ch1 hunt shell** | **On `main` (PR #2).** Help → Unlock with Code → letter collect → **`MICROWAVECUPBOARD` workbench**. Persistence: `localStorage` `project-ar-hunt-v1` (v2). AAA chrome intact. |
-| **AR training** | **Cards 01 and 11 photo crops trained** (MindAR `public/ar/targets/photo-crop.mind`). `hasTrainedImageTargets()` is true. Crop **locked** **`64, 64, 1072, 1260`** on 1200×1800 — photo only. 8th Wall console payload is **not** trained; missing key falls back to MindAR and says so. Do not train from `card_registry.json` `canvas`. |
-| **Print gate** | Print pack **ordered** Printicular matte 6×4. **Physical go/no-go still pending** when Gokul picks up. Hunt Image Target training only after that scan go/no-go. |
-| **C-G1 Ginger** | **Load path landed (PR #5).** Drop path **`/models/ginger.glb`**. Checklist: `BLENDER_COMPANION_CHECKLIST.md` §2.1. |
-| **ginger.glb** | **On `main` (PR #7, SHA `7b9f8d1`).** Clips: **Idle / Sit / WalkIn**, ≤8MB. Procedural fallback **retired when the file is present**. |
-| **Transitions** | Lean **queued, not built:** Uncle **A** / Floo **Ember**. |
-| **Uncle** | Short **`ehqNWIrxr60` live** (after montage only; not in the reel; not from card 23). |
-| **Montage** | Real edit **LAST**, when clips ready. |
+| **Board** | **UNPARKED**. One Cursor at a time. Short acks in Project AR only. |
+| **Ch1 hunt shell** | **On `main` (PR #2).** Help → Unlock with Code → letter collect → **`MICROWAVECUPBOARD`**. `localStorage` `project-ar-hunt-v1` (v2). |
+| **Hunt camera** | **PR #10 merged** (SHA `9224231`). Image Targets + ScreenHunt camera for **cards 01 + 11**. |
+| **AR crop** | Still **`64, 64, 1072, 1260`** on 1200×1800 — photo only, never letter capsules. |
+| **Soft open** | Physical iPhone + print smoke. 8th Wall cloud payload when a key exists. |
+| **ginger.glb** | **On `main` (PR #7, `7b9f8d1`).** Idle / Sit / WalkIn, ≤8MB. Procedural fallback retired when the file is present. |
+| **Uncle** | Short **`ehqNWIrxr60`** after montage only (not in the reel; not from card 23). |
+| **Montage** | Real edit **LAST**. Gokul may send a dummy video. Not the Lead Game Tester seat. |
 
-Ch1 payloads MIX/CRY/OW/AVZ/EC/UP/BO/AR/DQ; full bible bypasses only. Desktop may still be ahead for print PNGs / photos / compiler.
+Ch1 payloads MIX/CRY/OW/AVZ/EC/UP/BO/AR/DQ; full bible bypasses only.
 
-### Queued behind Bot wakes (this order)
+### Queued behind Thala wakes
 
-1. Print AR scan go/no-go (Printicular mats).  
-2. Hunt Image Targets for the remaining photo cards — same locked crop as cards 01 and 11 (`AR_PHOTO_CROP_1200x1800` only).  
+1. Soft open: physical iPhone + print smoke.  
+2. 8th Wall cloud payload when a key exists. Crop stays **`64, 64, 1072, 1260`**, photo only.  
 3. Transition lean (Uncle A / Floo Ember).  
-4. Montage last.
+4. Montage last (Gokul may send a dummy video).
 
 ### Locked chrome (do not regress)
 
@@ -76,7 +75,7 @@ gateway (accept / No-trap — AAA chrome, no scroll clutter)
 | Kiss prank | `prank` | Built — AAA chrome |
 | Montage | `video_montage` | Shell ready — **`MONTAGE_YOUTUBE_ID` empty** |
 | Uncle | `uncle_hologram` | **Live** — Short `ehqNWIrxr60` |
-| Hunt | `scavenger_hunt` | **Placeholder UI** — camera AR not wired |
+| Hunt | `scavenger_hunt` | **Cards 01 + 11** Image Targets + ScreenHunt camera on `main` (PR #10 `9224231`). Soft open: iPhone + print smoke |
 | Finale | look-up | Planned |
 
 ---
@@ -112,7 +111,7 @@ C:\Users\aishw\OneDrive\Desktop\Project AR\project-ar-app\project-ar-app\
 | `src/components/Screen2Prank.jsx` | Kiss prank |
 | `src/components/ScreenVideoMontage.jsx` | Friends/family video |
 | `src/components/ScreenUncleHologram.jsx` | Uncle wish Short |
-| `src/components/ScreenHunt.jsx` | Hunt UI (**placeholder** — AR next) |
+| `src/components/ScreenHunt.jsx` | Hunt UI — camera for cards **01 + 11** (PR #10) |
 | `src/config/media.js` | YouTube IDs (uncle live; montage blank) |
 | `src/config/companionModels.js` | GLB URLs + clipAliases |
 | `src/utils/gltfCharacter.js` | Load GLB, poses, **SkeletonUtils.clone**, driveFace |
@@ -244,27 +243,27 @@ node project-ar-card-compiler-aaa-hybrid.mjs
 | `ginger.glb` | **On `main` (PR #7, `7b9f8d1`)** — Idle / Sit / WalkIn, ≤8MB; procedural fallback retired when file present |
 | Transitions | Lean **queued, not built** (Uncle A / Floo Ember) |
 | Uncle YouTube Short | **Live** `ehqNWIrxr60` |
-| Montage YouTube / clips | **LAST** — when clips ready |
-| Hunt camera / 8th Wall / MindAR | **Not wired** — train only after physical print AR scan go/no-go |
+| Montage YouTube / clips | **LAST** — Gokul may send a dummy video. Not the Lead Game Tester seat |
+| Hunt camera | **PR #10 merged** (`9224231`) — cards **01 + 11**. Crop `64, 64, 1072, 1260` photo-only. Soft open: iPhone + print smoke; 8th Wall when a key exists |
 | AAA print PNGs (54) | **Ready** in `Compiled_Print_Ready_Cards_AAA/` |
-| Physical Printicular matte 6×4 | **Ordered** — physical go/no-go pending pickup |
-| Board | **UNPARKED** 2026-09-23 after Gokul token reset |
+| Physical Printicular matte 6×4 | **Soft open** — physical iPhone + print smoke |
+| Board | **UNPARKED** 2026-09-23. CEO = Thala `8357d67c` |
 | Detective/Finale back outfits | Optional later (same avatar now) |
 
 ---
 
-## 9. Next actions (queued behind Bot wakes)
+## 9. Next actions (queued behind Thala wakes)
 
-**Board UNPARKED** 2026-09-23. One Cursor job at a time. No status theater.
+**Board UNPARKED** 2026-09-23. One Cursor job at a time. Short acks in Project AR only.
 
-1. **Print AR scan go/no-go** — Printicular mats  
-2. **Hunt Image Targets** — cards 01 and 11 are trained on **`64, 64, 1072, 1260`**. Remaining cards use that same crop.  
+1. **Soft open** — physical iPhone + print smoke  
+2. **8th Wall cloud payload** when a key exists — crop **`64, 64, 1072, 1260`** photo-only (cards 01+11 already on `main`, PR #10 `9224231`)  
 3. **Transition lean** — Uncle A / Floo Ember  
-4. **Montage last** — when clips arrive → CapCut/YouTube → set `MONTAGE_YOUTUBE_ID`
+4. **Montage last** — Gokul may send a dummy video. Not the Lead Game Tester seat
 
 ---
 
-## 10. Hard rules for any bot (including Gok Bot)
+## 10. Hard rules for any bot (including Thala)
 
 1. Do **not** invent puzzle words, vault anagrams, letter payloads, or uncle dialogue — content bible / Gokul only  
 2. Do **not** overwrite `minime.glb` with Tripo AI pack without explicit **deploy**  
@@ -302,4 +301,4 @@ C:\Users\aishw\OneDrive\Desktop\ProjectAR-Blender\
 
 ## 12. One-paragraph elevator pitch
 
-Project AR is Aishwarya’s 30th-birthday private quest: a romantic React/Three.js “Heart Reliquary” phone experience with **AAA magical-device UI** (navy/gold/cyan HUD), stylized Mini-Me + Ginger (`ginger.glb` Idle/Sit/WalkIn on `main`), kiss prank, friends/family montage (clips pending — last), uncle’s Tamil YouTube Short wish (`ehqNWIrxr60`), then a 30-step Instax-card WebAR hunt ending with “look up.” Printicular mats are ordered; physical AR scan go/no-go is still pending. Queued behind Bot wakes: that scan go/no-go, Hunt Image Target training (crop `64,64,1072,1260`), transition lean (Uncle A / Floo Ember), then montage last. Board unparked 2026-09-23.
+Project AR is Aishwarya’s 30th-birthday private quest: a romantic React/Three.js “Heart Reliquary” phone experience with **AAA magical-device UI** (navy/gold/cyan HUD), stylized Mini-Me + Ginger (`ginger.glb` Idle/Sit/WalkIn on `main`), kiss prank, friends/family montage (still last; Gokul may send a dummy video), uncle’s Tamil YouTube Short wish (`ehqNWIrxr60`, after montage only), then a 30-step Instax-card WebAR hunt ending with “look up.” Cards 01+11 Image Targets and the ScreenHunt camera are on `main` (PR #10, `9224231`); crop stays `64,64,1072,1260` photo-only. Soft open: physical iPhone + print smoke, then 8th Wall cloud payload when a key exists. Day-to-day CEO is Thala `8357d67c`. Board unparked 2026-09-23.
