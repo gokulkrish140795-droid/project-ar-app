@@ -17,7 +17,7 @@
 
 `ginger.glb` on `main` (PR #7, SHA `7b9f8d1`): **Idle / Sit / WalkIn**, ≤8MB. Procedural fallback **retired for Ginger when the file is present**. Do **not** invent puzzle words. Uncle after montage only. `DeviceFrame` / `CaptionRail` stay. Do **not** touch `minime.glb`.
 
-Montage uses dummy Short **IeWb1Wlli0w** until real friends/family clips; uncle still after montage.
+Montage uses dummy Short **IeWb1Wlli0w** until real friends/family clips; uncle still after montage. Uncle summon: Floo smoke morphs into nano-dust, then the Short; gateway Floo and hunt step swaps use a gold ember wipe.
 
 ### Current status
 
@@ -38,7 +38,7 @@ Ch1 payloads MIX/CRY/OW/AVZ/EC/UP/BO/AR/DQ; full bible bypasses only.
 
 1. Soft open: physical iPhone + print smoke.  
 2. 8th Wall cloud payload when a key exists. Crop stays **`64, 64, 1072, 1260`**, photo only.  
-3. Transition lean (Uncle A / Floo Ember).  
+3. PR #13: uncle summon is Floo smoke → nano-dust → Short; gateway and hunt use the gold ember wipe. Parked next: Letter Capsule Click, Vault Stairs (dust drift / latch click / velvet pocket), Finale (phone dim / room rise / glass soft-off). Companion bow-out and Iris/Prank stay out.  
 4. Montage last (Gokul may send a dummy video).
 
 ### Locked chrome (do not regress)

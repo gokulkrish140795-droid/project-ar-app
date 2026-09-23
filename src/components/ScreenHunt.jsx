@@ -26,10 +26,12 @@ export default function ScreenHunt({ onEnsureAudio }) {
   const cameraReady = hasTrainedImageTargets() && getActiveArEngine() !== 'stub'
   const [engineLabel, setEngineLabel] = useState(cameraReady ? 'tap to start' : 'standby')
   const [flashLetter, setFlashLetter] = useState('')
+  const [emberOn, setEmberOn] = useState(false)
   const [cameraLive, setCameraLive] = useState(false)
   const cameraRef = useRef(null)
   const trackerRef = useRef(null)
   const celebrateRef = useRef(null)
+  const emberTimer = useRef(null)
 
   tryScanRef.current = hunt.tryScan
 
@@ -37,6 +39,7 @@ export default function ScreenHunt({ onEnsureAudio }) {
     return () => {
       trackerRef.current?.stop()
       trackerRef.current = null
+      window.clearTimeout(emberTimer.current)
     }
   }, [])
 
@@ -54,6 +57,9 @@ export default function ScreenHunt({ onEnsureAudio }) {
   }
 
   const celebrate = async (letter) => {
+    setEmberOn(true)
+    window.clearTimeout(emberTimer.current)
+    emberTimer.current = window.setTimeout(() => setEmberOn(false), 520)
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playSfx(letter ? 'sfx_revelio_bell' : 'sfx_vault_alohomora')
@@ -134,7 +140,8 @@ export default function ScreenHunt({ onEnsureAudio }) {
         </h2>
       </header>
 
-      <DeviceFrame compact style={{ width: 'min(420px, 100%)', textAlign: 'center' }}>
+      <div className="ar-hunt-frame-swap">
+      <DeviceFrame compact style={{ width: '100%', textAlign: 'center' }}>
         {state.vaultUnlocked ? (
           <VaultObjectArStub location={card?.location} />
         ) : isWorkbench ? (
@@ -204,6 +211,8 @@ export default function ScreenHunt({ onEnsureAudio }) {
           </p>
         )}
       </DeviceFrame>
+      {emberOn && <div className="ar-floo-ember" aria-hidden="true" />}
+      </div>
 
       <div
         style={{

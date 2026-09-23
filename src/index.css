@@ -509,16 +509,124 @@ html {
   bottom: 0;
 }
 
-.ar-floo-veil {
+.ar-hunt-frame-swap {
+  position: relative;
+  width: min(420px, 100%);
+}
+
+.ar-floo-veil,
+.ar-floo-ember-wipe {
   position: fixed;
   inset: 0;
   z-index: 30;
   pointer-events: none;
+  overflow: hidden;
+  background-color: var(--ar-velvet);
+  animation: arFlooEmberCover 1.6s linear both;
+}
+
+.ar-floo-veil::before,
+.ar-floo-ember-wipe::before,
+.ar-floo-veil::after,
+.ar-floo-ember-wipe::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.ar-floo-veil::before,
+.ar-floo-ember-wipe::before {
+  inset: -12% -20%;
+  background: linear-gradient(
+    102deg,
+    transparent 0%,
+    rgba(232, 197, 106, 0.18) 30%,
+    rgba(255, 231, 168, 0.92) 46%,
+    rgba(232, 197, 106, 0.62) 58%,
+    rgba(11, 18, 32, 0.35) 76%,
+    transparent 100%
+  );
+  animation: arFlooEmberSweep 1.6s ease-in-out both;
+}
+
+.ar-floo-veil::after,
+.ar-floo-ember-wipe::after {
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 231, 168, 0.95) 0 1.2px, transparent 1.9px),
+    radial-gradient(circle, rgba(232, 197, 106, 0.85) 0 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(255, 243, 200, 0.7) 0 0.8px, transparent 1.5px);
+  background-size: 54px 70px, 86px 46px, 38px 92px;
+  background-position: 0 36px, 18px 0, 8px 22px;
+  animation: arFlooEmberRise 1.6s linear both;
+}
+
+.ar-floo-ember {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 16px;
   background:
-    radial-gradient(ellipse at 50% 55%, rgba(61, 220, 151, 0.35), transparent 55%),
-    radial-gradient(circle at 50% 50%, rgba(232, 197, 106, 0.2), transparent 40%),
-    rgba(6, 11, 20, 0.35);
-  animation: arFlooPulse 1.6s ease-in-out;
+    linear-gradient(180deg, rgba(11, 18, 32, 0.28), rgba(11, 18, 32, 0.78)),
+    radial-gradient(ellipse at 50% 100%, rgba(232, 197, 106, 0.72), transparent 62%);
+  animation: arFlooEmberLocal 0.52s ease-in-out both;
+}
+
+.ar-floo-ember::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 231, 168, 0.95) 0 1.2px, transparent 1.9px),
+    radial-gradient(circle, rgba(232, 197, 106, 0.88) 0 1px, transparent 1.7px);
+  background-size: 34px 46px, 52px 30px;
+  animation: arFlooEmberRise 0.52s linear both;
+}
+
+.ar-nano-dust-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ar-nano-dust {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 1.9s matches SUMMON_RESOLVE_MS (700ms Floo smoke + 1200ms nano plate). */
+.ar-nano-mist {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  max-height: 52vh;
+  border-radius: 8px;
+  background:
+    radial-gradient(ellipse at 50% 80%, rgba(255, 231, 168, 0.75), transparent 42%),
+    radial-gradient(ellipse at 50% 70%, rgba(232, 197, 106, 0.45), transparent 55%),
+    rgba(11, 18, 32, 0.15);
+  animation: arSummonResolve 1.9s linear both;
+}
+
+.ar-nano-mist::after {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  background-image:
+    radial-gradient(circle, rgba(255, 231, 168, 0.95) 0 1.2px, transparent 1.9px),
+    radial-gradient(circle, rgba(232, 197, 106, 0.85) 0 1px, transparent 1.7px);
+  background-size: 36px 48px, 54px 32px;
+  animation: arSummonEmberToDust 1.9s linear both;
 }
 
 .ar-summon-bloom {
@@ -529,15 +637,96 @@ html {
   animation: arSummonBloom 0.9s ease-out both;
 }
 
-@keyframes arFlooPulse {
+@keyframes arFlooEmberCover {
   0% {
     opacity: 0;
   }
-  35% {
+  14% {
     opacity: 1;
   }
   100% {
-    opacity: 0.85;
+    opacity: 1;
+  }
+}
+
+@keyframes arFlooEmberSweep {
+  0% {
+    transform: translateX(-68%);
+  }
+  100% {
+    transform: translateX(28%);
+  }
+}
+
+@keyframes arFlooEmberRise {
+  0% {
+    transform: translateY(16%);
+    opacity: 0.15;
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-24%);
+    opacity: 1;
+  }
+}
+
+@keyframes arFlooEmberLocal {
+  0% {
+    opacity: 1;
+  }
+  48% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes arSummonResolve {
+  0% {
+    transform: translate(-50%, -20%) scale(0.72);
+    opacity: 0.35;
+    filter: blur(16px);
+    background:
+      radial-gradient(ellipse at 50% 90%, rgba(255, 231, 168, 0.2), transparent 40%),
+      rgba(11, 18, 32, 0);
+  }
+  36% {
+    transform: translate(-50%, -42%) scale(1.12);
+    opacity: 0.95;
+    filter: blur(8px);
+    background:
+      radial-gradient(ellipse at 50% 62%, rgba(255, 231, 168, 0.8), transparent 46%),
+      radial-gradient(ellipse at 40% 48%, rgba(232, 197, 106, 0.45), transparent 50%),
+      rgba(11, 18, 32, 0.25);
+  }
+  100% {
+    transform: translate(-50%, -58%) scale(1);
+    opacity: 1;
+    filter: blur(0);
+    background:
+      radial-gradient(circle at 50% 40%, rgba(126, 240, 255, 0.42), transparent 52%),
+      var(--ar-velvet);
+    box-shadow: inset 0 0 0 1.5px rgba(126, 240, 255, 0.85);
+  }
+}
+
+@keyframes arSummonEmberToDust {
+  0% {
+    opacity: 0.2;
+    transform: translateY(22%);
+    filter: blur(1px);
+  }
+  36% {
+    opacity: 1;
+    transform: translateY(-6%);
+  }
+  100% {
+    opacity: 0.15;
+    transform: translateY(-18%) scale(0.86);
+    filter: blur(0);
   }
 }
 
