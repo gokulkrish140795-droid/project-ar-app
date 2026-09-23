@@ -602,18 +602,35 @@ html {
 }
 
 .ar-nano-mist {
+  display: none;
+}
+
+/* 1.9s matches SUMMON_RESOLVE_MS (700ms Floo smoke + 1200ms nano plate). */
+.ar-nano-dust-layer.is-mist-only .ar-nano-mist {
+  display: block;
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 58%;
   width: 100%;
   aspect-ratio: 9 / 16;
   max-height: 52vh;
   border-radius: 8px;
   background:
-    radial-gradient(circle at 28% 36%, rgba(126, 240, 255, 0.55), transparent 46%),
-    radial-gradient(circle at 72% 64%, rgba(232, 197, 106, 0.4), transparent 42%),
-    var(--ar-velvet);
-  animation: arNanoMist 1.5s ease-in both;
+    radial-gradient(ellipse at 50% 80%, rgba(255, 231, 168, 0.75), transparent 42%),
+    radial-gradient(ellipse at 50% 70%, rgba(232, 197, 106, 0.45), transparent 55%),
+    rgba(11, 18, 32, 0.15);
+  animation: arSummonResolve 1.9s linear both;
+}
+
+.ar-nano-dust-layer.is-mist-only .ar-nano-mist::after {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  background-image:
+    radial-gradient(circle, rgba(255, 231, 168, 0.95) 0 1.2px, transparent 1.9px),
+    radial-gradient(circle, rgba(232, 197, 106, 0.85) 0 1px, transparent 1.7px);
+  background-size: 36px 48px, 54px 32px;
+  animation: arSummonEmberToDust 1.9s linear both;
 }
 
 .ar-summon-bloom {
@@ -671,15 +688,48 @@ html {
   }
 }
 
-@keyframes arNanoMist {
+@keyframes arSummonResolve {
   0% {
-    transform: translate(-50%, -50%) scale(1.28);
-    opacity: 0.2;
-    filter: blur(14px);
+    transform: translate(-50%, -20%) scale(0.72);
+    opacity: 0.35;
+    filter: blur(16px);
+    background:
+      radial-gradient(ellipse at 50% 90%, rgba(255, 231, 168, 0.2), transparent 40%),
+      rgba(11, 18, 32, 0);
+  }
+  36% {
+    transform: translate(-50%, -42%) scale(1.12);
+    opacity: 0.95;
+    filter: blur(8px);
+    background:
+      radial-gradient(ellipse at 50% 62%, rgba(255, 231, 168, 0.8), transparent 46%),
+      radial-gradient(ellipse at 40% 48%, rgba(232, 197, 106, 0.45), transparent 50%),
+      rgba(11, 18, 32, 0.25);
   }
   100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.92;
+    transform: translate(-50%, -58%) scale(1);
+    opacity: 1;
+    filter: blur(0);
+    background:
+      radial-gradient(circle at 50% 40%, rgba(126, 240, 255, 0.42), transparent 52%),
+      var(--ar-velvet);
+    box-shadow: inset 0 0 0 1.5px rgba(126, 240, 255, 0.85);
+  }
+}
+
+@keyframes arSummonEmberToDust {
+  0% {
+    opacity: 0.2;
+    transform: translateY(22%);
+    filter: blur(1px);
+  }
+  36% {
+    opacity: 1;
+    transform: translateY(-6%);
+  }
+  100% {
+    opacity: 0.15;
+    transform: translateY(-18%) scale(0.86);
     filter: blur(0);
   }
 }

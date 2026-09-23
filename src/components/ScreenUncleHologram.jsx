@@ -83,6 +83,7 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playLayered(['sfx_spell_quest', 'sfx_soft_chime'])
     setGingerPose('cheer')
+    // Floo smoke, then nano-dust plate. The Short mounts only in resolveDust.
     setDusting(true)
   }
 

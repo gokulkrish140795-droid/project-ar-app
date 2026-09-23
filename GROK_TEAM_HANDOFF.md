@@ -17,7 +17,7 @@
 
 `ginger.glb` on `main` (PR #7, SHA `7b9f8d1`): **Idle / Sit / WalkIn**, ≤8MB. Procedural fallback **retired for Ginger when the file is present**. Do **not** invent puzzle words. Uncle after montage only. `DeviceFrame` / `CaptionRail` stay. Do **not** touch `minime.glb`.
 
-Montage uses dummy Short **IeWb1Wlli0w** until real friends/family clips; uncle still after montage. Uncle summon densifies nano-dust into the plate, then the Short; gateway Floo and hunt step swaps use a gold ember wipe.
+Montage uses dummy Short **IeWb1Wlli0w** until real friends/family clips; uncle still after montage. Uncle summon: Floo smoke morphs into nano-dust, then the Short; gateway Floo and hunt step swaps use a gold ember wipe.
 
 ### Current status
 

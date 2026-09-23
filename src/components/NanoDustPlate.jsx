@@ -1,9 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { theme } from '../theme'
 
-/** Assemble window. Short starts only after this resolves. */
-export const NANO_DUST_MS = 1500
-const PARTICLE_CAP = 560
+/** Floo smoke first, then the same specks densify into the hologram plate. */
+export const FLOO_SMOKE_MS = 700
+export const NANO_DUST_MS = 1200
+export const SUMMON_RESOLVE_MS = FLOO_SMOKE_MS + NANO_DUST_MS
+const PARTICLE_CAP = 520
+const SMOKE_SHARE = FLOO_SMOKE_MS / SUMMON_RESOLVE_MS
 
 function hexToRgb(hex) {
   const h = hex.replace('#', '')
@@ -46,18 +49,27 @@ function tracePlate(ctx, plate) {
   ctx.closePath()
 }
 
+function smokeAt(p, s) {
+  const swirl = Math.sin(p.spin + s * 5.4) * p.swirl * s
+  return {
+    x: p.x0 + swirl,
+    y: p.y0 - p.rise * s,
+  }
+}
+
 /**
- * Cyan/gold mist that densifies into the hologram plate.
- * Canvas 2D, capped particle count. CSS mist underneath if the context is missing.
+ * Gold Floo ember smoke rises, then those specks turn cyan and pack into the plate.
+ * Canvas 2D, capped particle count. CSS mist plays the same two beats if the context is missing.
  */
-export default function NanoDustPlate({ onDone, duration = NANO_DUST_MS }) {
+export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) {
   const canvasRef = useRef(null)
   const doneRef = useRef(onDone)
   doneRef.current = onDone
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return undefined
+    const layer = canvas?.parentElement
+    if (!canvas || !layer) return undefined
 
     const ctx = canvas.getContext('2d', { alpha: true })
     let raf = 0
@@ -70,18 +82,22 @@ export default function NanoDustPlate({ onDone, duration = NANO_DUST_MS }) {
     }
 
     if (!ctx) {
+      layer.classList.add('is-mist-only')
       const id = window.setTimeout(finish, duration)
-      return () => window.clearTimeout(id)
+      return () => {
+        window.clearTimeout(id)
+        layer.classList.remove('is-mist-only')
+      }
     }
 
     const cyan = hexToRgb(theme.holo)
     const gold = hexToRgb(theme.gold)
+    const goldBright = hexToRgb(theme.goldBright)
     const navy = hexToRgb(theme.velvet)
     const particles = []
 
     const measure = () => {
-      const host = canvas.parentElement
-      const rect = host?.getBoundingClientRect()
+      const rect = layer.getBoundingClientRect()
       const w = Math.max(1, rect?.width || 0)
       const h = Math.max(1, rect?.height || 0)
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -95,13 +111,16 @@ export default function NanoDustPlate({ onDone, duration = NANO_DUST_MS }) {
       particles.length = 0
       for (let i = 0; i < PARTICLE_CAP; i += 1) {
         particles.push({
-          x0: Math.random() * w,
-          y0: Math.random() * h,
+          x0: w * (0.32 + Math.random() * 0.36),
+          y0: h * (0.7 + Math.random() * 0.3),
+          rise: h * (0.22 + Math.random() * 0.48),
+          swirl: (Math.random() - 0.5) * w * 0.62,
+          spin: Math.random() * Math.PI * 2,
           x1: plate.x + Math.random() * plate.w,
           y1: plate.y + Math.random() * plate.h,
-          radius: 0.7 + Math.random() * 1.7,
-          gold: Math.random() > 0.62,
-          delay: Math.random() * 0.22,
+          radius: 1.3 + Math.random() * 2.2,
+          bright: Math.random() > 0.55,
+          delay: Math.random() * 0.16,
         })
       }
     }
@@ -115,31 +134,63 @@ export default function NanoDustPlate({ onDone, duration = NANO_DUST_MS }) {
         geom = measure()
         if (geom.w > 1 && geom.h > 1) seed(geom.w, geom.h, geom.plate)
       }
-      const t = Math.min(1, (now - start) / duration)
+      const u = Math.min(1, (now - start) / duration)
       const { w, h, plate } = geom
       ctx.clearRect(0, 0, w, h)
 
-      const dens = smoothstep(Math.min(1, t / 0.88))
-      tracePlate(ctx, plate)
-      ctx.fillStyle = `rgba(${navy.r}, ${navy.g}, ${navy.b}, ${0.08 + dens * 0.78})`
-      ctx.fill()
-      ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${0.12 + dens * 0.8})`
-      ctx.lineWidth = 1.5
-      ctx.stroke()
+      const smoking = u < SMOKE_SHARE
+      const smokeT = smoking ? smoothstep(u / SMOKE_SHARE) : 1
+      const morphT = smoking ? 0 : smoothstep((u - SMOKE_SHARE) / (1 - SMOKE_SHARE))
+
+      if (smoking) {
+        const wash = ctx.createRadialGradient(w * 0.5, h * 0.78, 6, w * 0.5, h * 0.5, Math.max(w, h) * 0.55)
+        wash.addColorStop(0, `rgba(${gold.r}, ${gold.g}, ${gold.b}, ${0.18 + smokeT * 0.38})`)
+        wash.addColorStop(0.45, `rgba(${goldBright.r}, ${goldBright.g}, ${goldBright.b}, ${0.08 + smokeT * 0.16})`)
+        wash.addColorStop(1, `rgba(${navy.r}, ${navy.g}, ${navy.b}, 0)`)
+        ctx.fillStyle = wash
+        ctx.fillRect(0, 0, w, h)
+      }
+
+      if (morphT > 0) {
+        tracePlate(ctx, plate)
+        ctx.fillStyle = `rgba(${navy.r}, ${navy.g}, ${navy.b}, ${morphT * 0.84})`
+        ctx.fill()
+        ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${0.15 + morphT * 0.8})`
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+      }
 
       for (let i = 0; i < particles.length; i += 1) {
         const p = particles[i]
-        const local = smoothstep(Math.min(1, Math.max(0, (t - p.delay) / (1 - p.delay))))
-        const x = p.x0 + (p.x1 - p.x0) * local
-        const y = p.y0 + (p.y1 - p.y0) * local
-        const rgb = p.gold ? gold : cyan
-        ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.2 + local * 0.75})`
+        const from = smokeAt(p, smokeT)
+        let x = from.x
+        let y = from.y
+        let radius = p.radius * (1.15 + smokeT * 0.35)
+        const ember = p.bright ? goldBright : gold
+        let cr = ember.r
+        let cg = ember.g
+        let cb = ember.b
+        let alpha = 0.25 + smokeT * 0.6
+
+        if (!smoking) {
+          const local = smoothstep(Math.min(1, Math.max(0, (morphT - p.delay) / (1 - p.delay))))
+          const end = smokeAt(p, 1)
+          x = end.x + (p.x1 - end.x) * local
+          y = end.y + (p.y1 - end.y) * local
+          radius = p.radius * (1.5 - local * 1.05)
+          cr = gold.r + (cyan.r - gold.r) * local
+          cg = gold.g + (cyan.g - gold.g) * local
+          cb = gold.b + (cyan.b - gold.b) * local
+          alpha = 0.45 + local * 0.5
+        }
+
+        ctx.fillStyle = `rgba(${cr | 0}, ${cg | 0}, ${cb | 0}, ${alpha})`
         ctx.beginPath()
-        ctx.arc(x, y, p.radius * (1.35 - local * 0.55), 0, Math.PI * 2)
+        ctx.arc(x, y, Math.max(0.6, radius), 0, Math.PI * 2)
         ctx.fill()
       }
 
-      if (t < 1) {
+      if (u < 1) {
         raf = window.requestAnimationFrame(draw)
       } else {
         finish()
