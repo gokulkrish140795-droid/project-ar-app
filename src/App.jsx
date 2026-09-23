@@ -65,6 +65,7 @@ export default function App() {
     if (flooActive || currentScreen !== 'gateway') return
 
     setFlooActive(true)
+    audioEngine.playSoftCue('ember')
     window.setTimeout(() => {
       setCurrentScreen('prank')
       setFlooActive(false)

@@ -1,3 +1,5 @@
+import { BGM_BED_GAIN, SOFT_CUES } from './softCues.js'
+
 const AUDIO_BASE = '/audio'
 
 class AudioEngine {
@@ -34,7 +36,7 @@ class AudioEngine {
       this.analyser.fftSize = 256
       this.analyser.smoothingTimeConstant = 0.72
 
-      this.bgmGain.gain.value = 0.32
+      this.bgmGain.gain.value = BGM_BED_GAIN
       this.sfxGain.gain.value = 0.9
       this.voiceGain.gain.value = 1
       this.master.gain.value = this.muted ? 0 : 1
@@ -124,7 +126,79 @@ class AudioEngine {
 
   _unduckBgm() {
     if (!this.bgmGain || !this.ctx) return
-    this.bgmGain.gain.setTargetAtTime(0.32, this.ctx.currentTime, 0.2)
+    this.bgmGain.gain.setTargetAtTime(BGM_BED_GAIN, this.ctx.currentTime, 0.2)
+  }
+
+  /**
+   * Quiet transition breath. Does not stop voices, does not duck the theme.
+   * Filtered noise only — swap the body of this method if a tiny file replaces it.
+   */
+  playSoftCue(kind) {
+    const spec = SOFT_CUES[kind]
+    if (!spec || !this.unlocked || !this.ctx || !this.master) return null
+
+    const ctx = this.ctx
+    const now = ctx.currentTime
+    const dur = spec.ms / 1000
+    const source = ctx.createBufferSource()
+    source.buffer = this._softNoise(dur, kind)
+
+    const filter = ctx.createBiquadFilter()
+    filter.Q.value = 0.45
+    if (kind === 'dust') {
+      filter.type = 'bandpass'
+      filter.frequency.setValueAtTime(2200, now)
+      filter.frequency.exponentialRampToValueAtTime(900, now + dur)
+    } else if (kind === 'horizon') {
+      filter.type = 'lowpass'
+      filter.frequency.setValueAtTime(240, now)
+      filter.frequency.exponentialRampToValueAtTime(880, now + dur * 0.75)
+    } else {
+      filter.type = 'lowpass'
+      filter.frequency.setValueAtTime(480, now)
+      filter.frequency.exponentialRampToValueAtTime(160, now + dur)
+    }
+
+    const gain = ctx.createGain()
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(spec.peak, now + 0.018)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur)
+
+    source.connect(filter)
+    filter.connect(gain)
+    gain.connect(this.master)
+    source.start(now)
+    source.stop(now + dur)
+    return source
+  }
+
+  _softNoise(seconds, kind) {
+    const rate = this.ctx.sampleRate
+    const length = Math.max(1, Math.floor(rate * seconds))
+    const buffer = this.ctx.createBuffer(1, length, rate)
+    const data = buffer.getChannelData(0)
+    const state = { brown: 0, pink: 0 }
+    for (let i = 0; i < length; i += 1) {
+      const white = Math.random() * 2 - 1
+      if (kind === 'dust') {
+        state.pink = state.pink * 0.86 + white * 0.14
+        data[i] = state.pink
+      } else {
+        state.brown = (state.brown + white * 0.02) / 1.02
+        data[i] = state.brown * 3.4
+      }
+    }
+    let peak = 0
+    for (let i = 0; i < length; i += 1) peak = Math.max(peak, Math.abs(data[i]))
+    const scale = peak > 0 ? 1 / peak : 1
+    const fade = Math.min(48, Math.floor(length / 6))
+    for (let i = 0; i < length; i += 1) {
+      let edge = 1
+      if (i < fade) edge = i / fade
+      else if (i > length - fade) edge = (length - i) / fade
+      data[i] *= scale * edge
+    }
+    return buffer
   }
 
   async play(name, {

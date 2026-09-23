@@ -63,6 +63,7 @@ export default function ScreenHunt({ onEnsureAudio }) {
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playSfx(letter ? 'sfx_revelio_bell' : 'sfx_vault_alohomora')
+    audioEngine.playSoftCue('ember')
     if (letter) {
       setFlashLetter(letter)
       window.setTimeout(() => setFlashLetter(''), 1200)

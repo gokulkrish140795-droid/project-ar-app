@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "test": "node --test src/hunt/ch1Quest.test.js src/ar/imageTargets.test.js",
+    "test": "node --test src/hunt/ch1Quest.test.js src/ar/imageTargets.test.js src/utils/softCues.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

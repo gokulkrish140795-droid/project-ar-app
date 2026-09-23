@@ -4,7 +4,7 @@ import { fonts, theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
 import CaptionRail from './ui/CaptionRail'
 import GingerCat3D from './GingerCat3D'
-import NanoDustPlate from './NanoDustPlate'
+import NanoDustPlate, { FLOO_SMOKE_MS } from './NanoDustPlate'
 
 const COACH =
   'Find a clear wall, love. I’ll project uncle’s wish into the air — or tap me to summon it.'
@@ -19,6 +19,9 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
   const [gingerPose, setGingerPose] = useState('idle')
   const dustLock = useRef(false)
   const summonedRef = useRef(false)
+  const dustCueRef = useRef(0)
+
+  useEffect(() => () => window.clearTimeout(dustCueRef.current), [])
 
   useEffect(() => {
     let cancelled = false
@@ -82,6 +85,11 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playLayered(['sfx_spell_quest', 'sfx_soft_chime'])
+    audioEngine.playSoftCue('ember')
+    window.clearTimeout(dustCueRef.current)
+    dustCueRef.current = window.setTimeout(() => {
+      audioEngine.playSoftCue('dust')
+    }, FLOO_SMOKE_MS)
     setGingerPose('cheer')
     // Floo smoke, then nano-dust plate. The Short mounts only in resolveDust.
     setDusting(true)

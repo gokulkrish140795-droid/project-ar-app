@@ -4,12 +4,13 @@ export default function CaptionRail({
   visible = true,
   speaker = '',
   style = {},
+  className = '',
 }) {
   if (!visible || !children) return null
 
   return (
     <div
-      className="ar-caption-rail"
+      className={['ar-caption-rail', className].filter(Boolean).join(' ')}
       role="status"
       aria-live="polite"
       style={style}
