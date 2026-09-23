@@ -4,6 +4,7 @@ import { fonts, theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
 import CaptionRail from './ui/CaptionRail'
 import GingerCat3D from './GingerCat3D'
+import NanoDustPlate from './NanoDustPlate'
 
 const COACH =
   'Find a clear wall, love. I’ll project uncle’s wish into the air — or tap me to summon it.'
@@ -14,8 +15,10 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
   const [camReady, setCamReady] = useState(false)
   const [camDenied, setCamDenied] = useState(false)
   const [summoned, setSummoned] = useState(false)
-  const [bloom, setBloom] = useState(false)
+  const [dusting, setDusting] = useState(false)
   const [gingerPose, setGingerPose] = useState('idle')
+  const dustLock = useRef(false)
+  const summonedRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -52,24 +55,35 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
     }
   }, [])
 
+  useEffect(() => {
+    if (!summoned) return undefined
+    const el = videoRef.current
+    if (!el?.play) return undefined
+    el.play().catch(() => {})
+    return undefined
+  }, [summoned])
+
   const ensureAudio = async () => {
     if (onEnsureAudio) await onEnsureAudio()
     else await audioEngine.unlock()
   }
 
+  const resolveDust = () => {
+    if (summonedRef.current) return
+    summonedRef.current = true
+    setDusting(false)
+    setSummoned(true)
+    setGingerPose('sit')
+  }
+
   const summon = async () => {
-    if (summoned) return
+    if (summoned || dustLock.current) return
+    dustLock.current = true
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playLayered(['sfx_spell_quest', 'sfx_soft_chime'])
-    setBloom(true)
     setGingerPose('cheer')
-    window.setTimeout(() => setBloom(false), 900)
-    setSummoned(true)
-    setGingerPose('sit')
-    window.setTimeout(() => {
-      videoRef.current?.play?.().catch(() => {})
-    }, 200)
+    setDusting(true)
   }
 
   const handleEnded = () => {
@@ -118,7 +132,6 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
         />
       )}
 
-      {bloom && <div className="ar-summon-bloom" aria-hidden="true" style={{ zIndex: 3 }} />}
 
       <div
         style={{
@@ -144,6 +157,7 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
 
         <div
           style={{
+            position: 'relative',
             width: 'min(360px, 94vw)',
             flex: 1,
             display: 'flex',
@@ -153,6 +167,8 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
             gap: 16,
           }}
         >
+          {dusting && <NanoDustPlate onDone={resolveDust} />}
+
           {summoned ? (
             <div
               className="ar-holo-panel"
@@ -160,13 +176,14 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
                 width: '100%',
                 aspectRatio: '9 / 16',
                 maxHeight: '52vh',
-                animation: 'arStageIn 0.7s ease both',
+                position: 'relative',
+                zIndex: 1,
               }}
             >
               {UNCLE_WISH_YOUTUBE_ID ? (
                 <iframe
                   title="Uncle birthday wish"
-                  src={`https://www.youtube.com/embed/${UNCLE_WISH_YOUTUBE_ID}?autoplay=1&rel=0`}
+                  src={`https://www.youtube.com/embed/${UNCLE_WISH_YOUTUBE_ID}?autoplay=1&playsinline=1&rel=0`}
                   allow="autoplay; encrypted-media; fullscreen"
                   allowFullScreen
                   style={{ width: '100%', height: '100%', border: 'none', minHeight: 280 }}
@@ -178,7 +195,6 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
                   poster={UNCLE_WISH_POSTER || undefined}
                   controls
                   playsInline
-                  autoPlay
                   onEnded={handleEnded}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />

@@ -14,6 +14,7 @@ export const theme = {
   floo: '#3DDC97',
   firefly: '#B8F26E',
   cream: '#F4F7FF',
+  holo: '#7EF0FF',
   hud: 'rgba(10, 18, 32, 0.72)',
   hudBorder: 'rgba(232, 197, 106, 0.55)',
 }
@@ -27,6 +28,7 @@ export const themeHex = {
   coral: 0xff6b8a,
   wax: 0xc41e2a,
   floo: 0x3ddc97,
+  holo: 0x7ef0ff,
   firefly: 0xb8f26e,
   stone: 0x1a2438,
   stoneLite: 0x2a3a55,

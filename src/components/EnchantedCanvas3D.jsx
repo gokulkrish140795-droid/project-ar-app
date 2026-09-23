@@ -673,7 +673,7 @@ export default function EnchantedCanvas3D({
     const flooGeo = new THREE.BufferGeometry()
     flooGeo.setAttribute('position', new THREE.BufferAttribute(flooPos, 3))
     const flooMat = new THREE.PointsMaterial({
-      color: 0x50dc78,
+      color: GOLD,
       size: 0.12,
       transparent: true,
       opacity: 0.9,
@@ -697,7 +697,7 @@ export default function EnchantedCanvas3D({
     const flooRing = new THREE.Mesh(
       new THREE.TorusGeometry(1.8, 0.08, 12, 48),
       new THREE.MeshBasicMaterial({
-        color: 0x50dc78,
+        color: GOLD,
         transparent: true,
         opacity: 0,
         blending: THREE.AdditiveBlending,
@@ -739,7 +739,7 @@ export default function EnchantedCanvas3D({
         bg: new THREE.Color(0x0c1422),
       },
     }
-    const flooFogColor = new THREE.Color(0x0a2a18)
+    const flooFogColor = new THREE.Color(0x2a2110)
     const baseFogColor = new THREE.Color(VELVET)
 
     const spawnLumos = (x, y, z, burst = 4) => {
@@ -895,7 +895,7 @@ export default function EnchantedCanvas3D({
           arr[i * 3 + 2] = Math.sin(p.angle) * p.radius * 0.55 - flooBlend * 1.5
         }
         flooPoints.geometry.attributes.position.needsUpdate = true
-        flooMat.color.setHex(Math.sin(t * 8) > 0 ? 0x50dc78 : GOLD)
+        flooMat.color.setHex(Math.sin(t * 8) > 0 ? themeHex.goldBright : GOLD)
         flooMat.size = 0.1 + flooBlend * 0.08
         scene.fog.color.copy(baseFogColor).lerp(flooFogColor, flooBlend * 0.5)
       } else {

@@ -103,7 +103,7 @@ export default function App() {
         <EnchantedCanvas3D lumosOn={lumosOn} flooActive={flooActive} mood={mood} />
       )}
 
-      {flooActive && <div className="ar-floo-veil" aria-hidden="true" />}
+      {flooActive && <div className="ar-floo-veil ar-floo-ember-wipe" aria-hidden="true" />}
 
       <button
         type="button"
