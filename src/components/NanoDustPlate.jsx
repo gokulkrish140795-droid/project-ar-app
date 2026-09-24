@@ -164,7 +164,7 @@ export default function NanoDustPlate({ onDone, duration = SUMMON_RESOLVE_MS }) 
       }
 
       if (plateAlpha > 0.01) {
-        ctx.fillStyle = `rgba(${navy.r}, ${navy.g}, ${navy.b}, ${plateAlpha})`
+        ctx.fillStyle = `rgba(20, 32, 51, ${plateAlpha})`
         ctx.fillRect(0, 0, w, h)
         tracePlate(ctx, plate)
         ctx.strokeStyle = `rgba(${cyan.r}, ${cyan.g}, ${cyan.b}, ${plateAlpha})`
