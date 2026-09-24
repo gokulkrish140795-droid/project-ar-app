@@ -57,10 +57,10 @@ export const GINGER_MODEL = {
   targetHeight: 1.05,
   offsetY: -0.35,
   /**
-   * Blender: Sit/Idle face is −X. +π/2 turns that chest toward a camera on +Z.
-   * −π/2 is the rear. Do not flip this sign to chase a bad lens.
+   * C bake faces +Z. Camera sits on +Z, so yaw stays 0.
+   * +π/2 turns this bake to the rear or the side.
    */
-  yaw: Math.PI / 2,
+  yaw: 0,
   /**
    * Sit/Idle skinning is larger than the bind box, and recentering that box
    * before yaw slides the fox out of the square slot. Frame the posed mesh
@@ -73,7 +73,7 @@ export const GINGER_MODEL = {
     fov: 32,
     position: [0, 0.62, 4.7],
     lookAt: [0, 0.62, 0],
-    fill: 0.78,
+    fill: 0.72,
     clips: ['sit', 'idle'],
   },
   /** Prefer exact Blender Action names from BLENDER_COMPANION_CHECKLIST.md */
