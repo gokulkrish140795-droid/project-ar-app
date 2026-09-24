@@ -5,8 +5,8 @@ import DeviceFrame from './ui/DeviceFrame'
 import RoomProjector from './ui/RoomProjector'
 
 export default function ScreenVideoMontage({ onContinue }) {
-  const leave = () => {
-    releaseRoomCamera()
+  const leave = async () => {
+    await releaseRoomCamera()
     onContinue?.()
   }
 

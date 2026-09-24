@@ -26,8 +26,8 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
     setSummoned(true)
   }
 
-  const leave = () => {
-    releaseRoomCamera()
+  const leave = async () => {
+    await releaseRoomCamera()
     onContinue?.()
   }
 

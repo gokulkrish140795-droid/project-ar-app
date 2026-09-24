@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { acquireRoomCamera, releaseRoomCamera } from '../../utils/roomCamera'
+import { acquireRoomCamera, bindRoomVideo, releaseRoomCamera } from '../../utils/roomCamera'
 import { disposeObject3D, disposeRenderer } from '../../utils/threeDispose'
 
 /**
@@ -21,23 +21,23 @@ export default function RoomProjector({
 
   useEffect(() => {
     const video = cameraRef.current
+    bindRoomVideo(video)
     let cancelled = false
     ;(async () => {
       try {
         const stream = await acquireRoomCamera()
         if (cancelled) {
-          releaseRoomCamera()
+          await releaseRoomCamera()
           return
         }
         if (video) {
           video.srcObject = stream
           await video.play().catch(() => {})
         }
-      } catch {
-        if (!cancelled) {
-          releaseRoomCamera()
-          deniedRef.current?.()
-        }
+      } catch (error) {
+        if (cancelled || error?.code === 'superseded') return
+        await releaseRoomCamera()
+        deniedRef.current?.()
       }
     })()
     return () => {

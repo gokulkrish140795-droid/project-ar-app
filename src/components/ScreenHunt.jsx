@@ -7,6 +7,7 @@ import useHuntProgress from '../hooks/useHuntProgress.js'
 import { CH1_VAULT } from '../hunt/ch1Quest.js'
 import { markHuntReached } from '../hunt/storage.js'
 import { fonts, theme } from '../theme'
+import { releaseRoomCamera } from '../utils/roomCamera'
 import audioEngine from '../utils/audioEngine'
 import MiniMeAvatar3D from './MiniMeAvatar3D'
 import CaptionRail from './ui/CaptionRail'
@@ -92,6 +93,8 @@ export default function ScreenHunt({ onEnsureAudio }) {
   }
 
   const startCamera = async () => {
+    if (trackerRef.current || !cameraRef.current) return
+    await releaseRoomCamera()
     if (trackerRef.current || !cameraRef.current) return
     const tracker = await createImageTargetTracker({
       container: cameraRef.current,
