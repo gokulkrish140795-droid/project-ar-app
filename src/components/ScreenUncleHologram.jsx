@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { UNCLE_WISH_YOUTUBE_ID } from '../config/media'
+import { UNCLE_WISH_URL } from '../config/media'
 import audioEngine from '../utils/audioEngine'
 import { releaseRoomCamera } from '../utils/roomCamera'
 import CaptionRail from './ui/CaptionRail'
@@ -35,8 +35,7 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
     <section className="ar-beat ar-projector-screen">
       <RoomProjector
         playing={summoned}
-        youtubeId={UNCLE_WISH_YOUTUBE_ID}
-        title="Uncle’s wish"
+        videoUrl={UNCLE_WISH_URL}
         onDenied={() => setCamDenied(true)}
       />
 
@@ -50,7 +49,7 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
       </DeviceFrame>
 
       <div className="ar-beat__dock">
-        <CaptionRail visible speaker="Ginger">
+        <CaptionRail visible speaker="Gokul-Mage">
           {summoned
             ? 'There — hold steady. Let his words find you.'
             : camDenied

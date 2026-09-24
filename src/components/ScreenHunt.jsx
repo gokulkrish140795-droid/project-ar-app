@@ -26,13 +26,10 @@ export default function ScreenHunt({ onEnsureAudio }) {
   const cameraReady = hasTrainedImageTargets() && getActiveArEngine() !== 'stub'
   const [engineLabel, setEngineLabel] = useState(cameraReady ? 'tap to start' : 'standby')
   const [flashLetter, setFlashLetter] = useState('')
-  const [emberOn, setEmberOn] = useState(false)
   const [cameraLive, setCameraLive] = useState(false)
   const cameraRef = useRef(null)
   const trackerRef = useRef(null)
   const celebrateRef = useRef(null)
-  const emberTimer = useRef(null)
-
   tryScanRef.current = hunt.tryScan
 
   useEffect(() => {
@@ -40,7 +37,6 @@ export default function ScreenHunt({ onEnsureAudio }) {
     return () => {
       trackerRef.current?.stop()
       trackerRef.current = null
-      window.clearTimeout(emberTimer.current)
     }
   }, [])
 
@@ -56,9 +52,6 @@ export default function ScreenHunt({ onEnsureAudio }) {
   }
 
   const celebrate = async (letter) => {
-    setEmberOn(true)
-    window.clearTimeout(emberTimer.current)
-    emberTimer.current = window.setTimeout(() => setEmberOn(false), 520)
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playSfx(letter ? 'sfx_revelio_bell' : 'sfx_vault_alohomora')
@@ -142,25 +135,22 @@ export default function ScreenHunt({ onEnsureAudio }) {
       : quote || card?.location
 
   return (
-    <section className="ar-hunt-screen">
+    <section className={`ar-hunt-screen${puzzling ? ' ar-hunt-screen--puzzle' : ''}`}>
       {!puzzling && <div className="ar-hunt-camera-full" ref={cameraRef} />}
-      {!puzzling && !cameraLive && (
-        <button type="button" className="ar-hunt-scan-open" onClick={() => startCamera()}>
-          Aim at the photograph
-        </button>
-      )}
 
-      <DeviceFrame compact className="ar-beat__mast">
-        <p className="ar-quest-kicker" style={{ margin: 0 }}>
-          Chapter 1 — Everyday Comforts
-        </p>
-        <h2 className="ar-quest-title" style={{ margin: '8px 0 0', fontSize: 22 }}>
-          {`Step ${card?.step || 1} of 10`}
-        </h2>
-      </DeviceFrame>
+      <div className="ar-hunt-top">
+        <DeviceFrame compact>
+          <p className="ar-quest-kicker" style={{ margin: 0 }}>
+            Chapter 1 — Everyday Comforts
+          </p>
+          <h2 className="ar-quest-title" style={{ margin: '6px 0 0', fontSize: 20 }}>
+            {`Step ${card?.step || 1} of 10`}
+          </h2>
+        </DeviceFrame>
+      </div>
 
-      <div className="ar-hunt-hud">
-        {puzzling ? (
+      {puzzling ? (
+        <div className="ar-hunt-puzzle">
           <DeviceFrame compact style={{ width: '100%', textAlign: 'center' }}>
             <AnagramWorkbench
               workbench={state.workbench}
@@ -173,52 +163,60 @@ export default function ScreenHunt({ onEnsureAudio }) {
               onSolved={handleSolved}
             />
           </DeviceFrame>
-        ) : (
-          <DeviceFrame compact style={{ width: '100%', textAlign: 'center' }}>
-            {state.vaultUnlocked ? <VaultObjectArStub location={card?.location} /> : null}
-            {flashLetter ? (
-              <p className="ar-quest-title" style={{ margin: '8px 0 0', fontSize: 28, color: theme.goldBright }}>
-                {flashLetter}
-              </p>
-            ) : null}
-            <LetterTray letters={state.collectedLetters} />
-            {sideLetters.length > 0 ? (
-              <LetterTray letters={sideLetters} label={`Scanned card letters ${sideLetters.join(' ')}`} />
-            ) : null}
-            {!state.vaultUnlocked ? (
-              <button
-                type="button"
-                className="ar-btn-3d ar-btn-3d--ghost"
-                onClick={() => {
-                  setCodeError('')
-                  setHelpOpen(true)
-                }}
-                style={{ width: '100%', marginTop: 14, padding: '11px 14px', fontSize: 13 }}
-              >
-                Can&apos;t Scan? [{' '}
-                <span style={{ fontFamily: fonts.body, fontWeight: 700 }}>❓</span> Help ]
-              </button>
-            ) : (
-              <p className="ar-quest-sub" style={{ margin: '12px 0 0', fontSize: 13 }}>
-                {CH1_VAULT}
-              </p>
-            )}
-          </DeviceFrame>
-        )}
-        {emberOn && <div className="ar-floo-ember" aria-hidden="true" />}
-      </div>
-
-      {showGuide && (
-        <div className="ar-hunt-guide">
-          <MiniMeAvatar3D size={132} pose="peek" />
+        </div>
+      ) : (
+        <div className="ar-hunt-bottom">
+          {state.vaultUnlocked ? <VaultObjectArStub location={card?.location} /> : null}
+          {flashLetter ? (
+            <p className="ar-quest-title" style={{ margin: 0, fontSize: 28, color: theme.goldBright }}>
+              {flashLetter}
+            </p>
+          ) : null}
+          <LetterTray letters={state.collectedLetters} />
+          {sideLetters.length > 0 ? (
+            <LetterTray letters={sideLetters} label={`Scanned card letters ${sideLetters.join(' ')}`} />
+          ) : null}
+          {!cameraLive ? (
+            <button type="button" className="ar-btn-3d ar-btn-3d--gold" onClick={() => startCamera()}>
+              Aim at the photograph
+            </button>
+          ) : null}
+          {!state.vaultUnlocked ? (
+            <button
+              type="button"
+              className="ar-btn-3d ar-btn-3d--ghost"
+              onClick={() => {
+                setCodeError('')
+                setHelpOpen(true)
+              }}
+            >
+              Can&apos;t Scan? [{' '}
+              <span style={{ fontFamily: fonts.body, fontWeight: 700 }}>❓</span> Help ]
+            </button>
+          ) : (
+            <p className="ar-quest-sub" style={{ margin: 0, fontSize: 13 }}>
+              {CH1_VAULT}
+            </p>
+          )}
+          <CaptionRail visible speaker="Gokul-Mage">
+            {caption}
+          </CaptionRail>
         </div>
       )}
 
-      <div className="ar-hunt-companion-dock">
-        <CaptionRail visible speaker="Gokul-Mage">
-          {caption}
-        </CaptionRail>
-      </div>
+      {puzzling && (
+        <div className="ar-hunt-bottom">
+          <CaptionRail visible speaker="Gokul-Mage">
+            {caption}
+          </CaptionRail>
+        </div>
+      )}
+
+      {showGuide && (
+        <div className="ar-hunt-guide">
+          <MiniMeAvatar3D size={120} pose="peek" />
+        </div>
+      )}
 
       <HelpDrawer
         open={helpOpen}

@@ -1,4 +1,4 @@
-import { MONTAGE_YOUTUBE_ID } from '../config/media'
+import { MONTAGE_VIDEO_URL } from '../config/media'
 import { releaseRoomCamera } from '../utils/roomCamera'
 import CaptionRail from './ui/CaptionRail'
 import DeviceFrame from './ui/DeviceFrame'
@@ -12,11 +12,7 @@ export default function ScreenVideoMontage({ onContinue }) {
 
   return (
     <section className="ar-beat ar-projector-screen">
-      <RoomProjector
-        playing
-        youtubeId={MONTAGE_YOUTUBE_ID}
-        title="Intro Romantic Video Montage"
-      />
+      <RoomProjector playing loop videoUrl={MONTAGE_VIDEO_URL} />
 
       <DeviceFrame compact className="ar-beat__mast">
         <p className="ar-quest-kicker" style={{ margin: 0 }}>

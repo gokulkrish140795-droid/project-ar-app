@@ -70,6 +70,10 @@ export function createRoomCamera(open = openEnvironmentCamera) {
     acquire() {
       const ticket = ++epoch
       return run(async () => {
+        const previous = current
+        current = null
+        stopTracks(previous)
+        await tracksEnded(previous)
         const stream = await open()
         if (ticket !== epoch) {
           stopTracks(stream)

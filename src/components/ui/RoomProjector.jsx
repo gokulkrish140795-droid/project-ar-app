@@ -4,14 +4,13 @@ import { acquireRoomCamera, bindRoomVideo, releaseRoomCamera } from '../../utils
 import { disposeObject3D, disposeRenderer } from '../../utils/threeDispose'
 
 /**
- * Phone as a projector: live camera fills the room, and the clip sits in
- * camera space. The HUD around it stays DeviceFrame / CaptionRail.
+ * Live camera underlay. When a direct clip is playing, it is a video texture
+ * on a floor plane in camera space — no iframe, no plate, no frame.
  */
 export default function RoomProjector({
   playing = false,
-  youtubeId = '',
   videoUrl = '',
-  title = '',
+  loop = false,
   onDenied,
 }) {
   const cameraRef = useRef(null)
@@ -49,30 +48,76 @@ export default function RoomProjector({
 
   useEffect(() => {
     const mount = worldRef.current
-    if (!mount || !playing) return undefined
+    if (!mount || !playing || !videoUrl) return undefined
+
+    const clip = document.createElement('video')
+    clip.muted = true
+    clip.defaultMuted = true
+    clip.playsInline = true
+    clip.setAttribute('playsinline', '')
+    clip.setAttribute('webkit-playsinline', '')
+    clip.loop = loop
+    clip.preload = 'auto'
+    clip.crossOrigin = 'anonymous'
+    clip.src = videoUrl
+    clip.style.cssText = 'position:absolute;width:2px;height:2px;opacity:0;pointer-events:none;'
+    mount.appendChild(clip)
 
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 20)
-    camera.position.set(0, 0, 3.2)
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 30)
+    camera.position.set(0, 1.45, 1.85)
+    camera.lookAt(0, 0.02, -0.55)
+
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
     renderer.setClearColor(0x000000, 0)
     mount.appendChild(renderer.domElement)
 
-    const frame = new THREE.Mesh(
-      new THREE.RingGeometry(0.72, 0.78, 48),
-      new THREE.MeshBasicMaterial({
-        color: 0x7ef0ff,
-        transparent: true,
-        opacity: 0.85,
-        side: THREE.DoubleSide,
-      })
-    )
-    frame.position.set(0, 0.05, 0)
-    scene.add(frame)
-    const glow = new THREE.PointLight(0xe8c56a, 0.8, 6, 2)
-    glow.position.set(0, 0.2, 1.2)
-    scene.add(glow)
+    const texture = new THREE.VideoTexture(clip)
+    texture.colorSpace = THREE.SRGBColorSpace
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      toneMapped: false,
+    })
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 1.28), material)
+    plane.rotation.x = -Math.PI / 2
+    plane.position.set(0, 0, -0.72)
+    plane.visible = false
+    scene.add(plane)
+
+    const fit = () => {
+      const width = clip.videoWidth || 9
+      const height = clip.videoHeight || 16
+      const depth = 1.22
+      const span = depth * (width / height)
+      plane.geometry.dispose()
+      plane.geometry = new THREE.PlaneGeometry(span, depth)
+    }
+
+    const reveal = () => {
+      if (!clip.videoWidth) return
+      fit()
+      plane.visible = true
+      material.opacity = 1
+    }
+
+    clip.addEventListener('loadedmetadata', reveal)
+    clip.addEventListener('playing', reveal)
+
+    const play = async () => {
+      try {
+        clip.muted = false
+        await clip.play()
+      } catch {
+        clip.muted = true
+        await clip.play().catch(() => {})
+      }
+    }
+    play()
 
     let raf = 0
     const resize = () => {
@@ -83,44 +128,31 @@ export default function RoomProjector({
       renderer.setSize(width, height)
     }
     resize()
-    const clock = new THREE.Clock()
     const tick = () => {
-      const t = clock.getElapsedTime()
-      frame.rotation.z = t * 0.15
-      frame.position.y = 0.05 + Math.sin(t * 0.8) * 0.03
+      texture.needsUpdate = true
       renderer.render(scene, camera)
       raf = window.requestAnimationFrame(tick)
     }
     tick()
     window.addEventListener('resize', resize)
+
     return () => {
       window.cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
+      clip.pause()
+      clip.removeAttribute('src')
+      clip.load()
+      clip.remove()
+      texture.dispose()
       disposeObject3D(scene)
       disposeRenderer(renderer)
     }
-  }, [playing])
+  }, [playing, videoUrl, loop])
 
   return (
     <div className="ar-projector">
       <video ref={cameraRef} className="ar-projector__camera" muted playsInline autoPlay />
       <div ref={worldRef} className="ar-projector__world" />
-      {playing ? (
-        <div className="ar-projector__plate">
-          {youtubeId ? (
-            <iframe
-              title={title || 'Projection'}
-              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&playsinline=1&rel=0`}
-              allow="autoplay; encrypted-media; fullscreen"
-              allowFullScreen
-            />
-          ) : videoUrl ? (
-            <video src={videoUrl} autoPlay playsInline controls />
-          ) : (
-            <p className="ar-quest-sub">{title}</p>
-          )}
-        </div>
-      ) : null}
     </div>
   )
 }

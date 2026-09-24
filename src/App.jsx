@@ -79,8 +79,8 @@ export default function App() {
     setFlooActive(true)
     window.setTimeout(() => {
       goTo('video_montage')
-      setFlooActive(false)
-    }, 900)
+      window.setTimeout(() => setFlooActive(false), 420)
+    }, 40)
   }
 
   const handleContinueToHologram = () => {
@@ -151,16 +151,7 @@ export default function App() {
         {lumosOn ? 'Lumos Audio' : 'Nox Audio'}
       </button>
 
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          opacity: flooActive ? 0.25 : 1,
-          filter: flooActive ? 'blur(3px) saturate(1.4)' : 'none',
-          transition: 'opacity 0.45s ease, filter 0.45s ease',
-          transform: 'none',
-        }}
-      >
+      <div key={currentScreen} className="ar-stage-fade">
         {currentScreen === 'gateway' && (
           <Screen1Gateway
             onEnsureAudio={ensureAudio}

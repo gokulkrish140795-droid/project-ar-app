@@ -38,8 +38,9 @@ test('MindAR barrier waits until an in-flight projector camera is stopped', asyn
     mindReady = true
   })()
 
-  await Promise.resolve()
+  for (let i = 0; i < 8 && !resolveOpen; i += 1) await Promise.resolve()
   assert.equal(mindReady, false)
+  assert.equal(typeof resolveOpen, 'function')
 
   resolveOpen({ getTracks: () => [track] })
   await mind

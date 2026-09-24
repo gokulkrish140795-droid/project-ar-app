@@ -107,7 +107,7 @@ export default function useCompanionDirector({
     busyRef.current = true
     setMiniPose('peek')
     setGingerPose('leap')
-    setSpeech('Nice try, my love! Ginger and I say only YES works! 😜')
+    setSpeech('Nice try, my love! Only YES works! 😜')
     setShowSpeech(true)
     setLipTalking(true)
     await audioEngine.playVoiceOrChirp('voice_no_nice_try')

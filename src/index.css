@@ -379,33 +379,65 @@ body::before {
   inset: 0;
   z-index: 1;
   overflow: hidden;
-  background: var(--ar-velvet-deep);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
 }
 
 .ar-hunt-camera-full video {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.ar-hunt-scan-open {
+.ar-hunt-top {
   position: fixed;
-  inset: 0;
-  z-index: 2;
-  border: 0;
-  background: transparent;
-  color: var(--ar-gold-bright);
-  font-family: var(--ar-font-display);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-size: 12px;
+  top: calc(58px + env(safe-area-inset-top, 0px));
+  left: max(12px, env(safe-area-inset-left, 0px));
+  right: max(12px, env(safe-area-inset-right, 0px));
+  z-index: 4;
+  width: auto;
+  pointer-events: none;
 }
 
-.ar-hunt-hud {
+.ar-hunt-top .ar-device-frame {
+  pointer-events: auto;
+  padding: 10px 12px;
+}
+
+.ar-hunt-bottom {
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left, 0px));
+  right: max(12px, env(safe-area-inset-right, 0px));
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.ar-hunt-bottom .ar-btn-3d {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.ar-hunt-bottom .ar-letter-tray {
+  margin-top: 0;
+}
+
+.ar-hunt-screen--puzzle {
+  justify-content: flex-end;
+}
+
+.ar-hunt-puzzle {
   position: relative;
   z-index: 3;
   width: min(420px, 100%);
-  margin-top: auto;
+  margin: auto 0;
 }
 
 .ar-hunt-guide {
@@ -421,7 +453,7 @@ body::before {
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background: var(--ar-velvet-deep);
+  background: transparent;
 }
 
 .ar-projector__camera,
@@ -438,30 +470,6 @@ body::before {
 
 .ar-projector__world {
   pointer-events: none;
-}
-
-.ar-projector__plate {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: min(88vw, 520px);
-  aspect-ratio: 9 / 16;
-  max-height: 64vh;
-  transform: translate(-50%, -54%) perspective(900px) rotateX(7deg);
-  border: 1px solid rgba(126, 240, 255, 0.8);
-  box-shadow:
-    0 28px 70px rgba(0, 0, 0, 0.4),
-    0 0 36px rgba(126, 240, 255, 0.22);
-  background: rgba(8, 14, 26, 0.18);
-  overflow: hidden;
-}
-
-.ar-projector__plate iframe,
-.ar-projector__plate video {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
 }
 
 .ar-projector-screen .ar-beat__mast,
@@ -877,8 +885,8 @@ body::before {
   z-index: 30;
   pointer-events: none;
   overflow: hidden;
-  background-color: var(--ar-velvet);
-  animation: arFlooEmberCover 1.6s linear both;
+  background-color: transparent;
+  animation: arFlooEmberCover 0.42s ease both;
 }
 
 .ar-floo-veil::before,
@@ -902,7 +910,7 @@ body::before {
     rgba(11, 18, 32, 0.35) 76%,
     transparent 100%
   );
-  animation: arFlooEmberSweep 1.6s ease-in-out both;
+  animation: arFlooEmberSweep 0.42s ease-in-out both;
 }
 
 .ar-floo-veil::after,
@@ -911,7 +919,7 @@ body::before {
   background-image: radial-gradient(circle, rgba(255, 231, 168, 0.55) 0 10px, transparent 28px);
   background-size: 140px 160px;
   filter: blur(6px);
-  animation: arFlooEmberRise 1.6s linear both;
+  animation: arFlooEmberRise 0.42s linear both;
 }
 
 .ar-floo-ember {
@@ -990,10 +998,27 @@ body::before {
   0% {
     opacity: 0;
   }
-  14% {
+  30% {
     opacity: 1;
   }
   100% {
+    opacity: 0;
+  }
+}
+
+.ar-stage-fade {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  min-height: 100dvh;
+  animation: arScreenIn 0.28s ease both;
+}
+
+@keyframes arScreenIn {
+  from {
+    opacity: 0.4;
+  }
+  to {
     opacity: 1;
   }
 }
