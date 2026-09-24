@@ -57,21 +57,21 @@ export const GINGER_MODEL = {
   targetHeight: 1.05,
   offsetY: -0.35,
   /**
-   * Camera sits on +Z, level with the chest. Phone frames at that lens:
-   * −π/2, 0, and π show the side or the rear; +π/2 puts chest and muzzle
-   * toward the viewer (idle straight on, sit a front three-quarter).
+   * Blender: Sit/Idle face is −X. +π/2 turns that chest toward a camera on +Z.
+   * −π/2 is the rear. Do not flip this sign to chase a bad lens.
    */
   yaw: Math.PI / 2,
   /**
    * Sit/Idle skinning is larger than the bind box, and recentering that box
    * before yaw slides the fox out of the square slot. Frame the posed mesh
    * to this camera (targetHeight / offsetY apply only if `view` is absent).
+   * Camera Y matches lookAt so the lens is level with the Sit chest (y 0.5).
    * fill is the share of the square frustum the silhouette may occupy.
    */
   view: {
     fov: 32,
-    position: [0, 0.48, 3.55],
-    lookAt: [0, 0.48, 0],
+    position: [0, 0.5, 3.55],
+    lookAt: [0, 0.5, 0],
     fill: 0.84,
     clips: ['sit', 'idle'],
   },
