@@ -5,7 +5,7 @@ import Screen2Prank from './components/Screen2Prank'
 import ScreenHunt from './components/ScreenHunt'
 import ScreenUncleHologram from './components/ScreenUncleHologram'
 import ScreenVideoMontage from './components/ScreenVideoMontage'
-import { readInitialScreen, popScreen, pushScreen } from './flow/screenFlow'
+import { previousScreen, readInitialScreen, SCREEN_FLOW } from './flow/screenFlow'
 import { canContinueSavedHunt } from './hunt/storage'
 import { fonts, theme } from './theme'
 import audioEngine from './utils/audioEngine'
@@ -31,24 +31,25 @@ const moodForScreen = {
  * gateway → floo → prank → video_montage → uncle_hologram → scavenger_hunt
  */
 export default function App() {
-  const [history, setHistory] = useState(() => [readBootScreen()])
+  const [currentScreen, setCurrentScreen] = useState(readBootScreen)
   const [lumosOn, setLumosOn] = useState(false)
   const [flooActive, setFlooActive] = useState(false)
   const [resumeHunt, setResumeHunt] = useState(() => canContinueSavedHunt())
-  const currentScreen = history[history.length - 1]
-  const canGoBack = history.length > 1 && !flooActive
+  const canGoBack = SCREEN_FLOW.indexOf(currentScreen) > 0 && !flooActive
 
   useEffect(() => {
     if (currentScreen === 'gateway') setResumeHunt(canContinueSavedHunt())
   }, [currentScreen])
 
   const goTo = (screen) => {
-    setHistory((prev) => pushScreen(prev, screen))
+    if (!SCREEN_FLOW.includes(screen)) return
+    setCurrentScreen(screen)
   }
 
   const goBack = () => {
     if (flooActive) return
-    setHistory((prev) => popScreen(prev))
+    const prev = previousScreen(currentScreen)
+    if (prev) setCurrentScreen(prev)
   }
 
   const ensureAudio = useCallback(async () => {

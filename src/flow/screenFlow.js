@@ -1,6 +1,7 @@
 /**
- * Locked production order. There is no separate letter screen in this build;
- * Back walks the screens the player actually opened.
+ * Locked production order:
+ * gateway → prank → video_montage → uncle_hologram → scavenger_hunt
+ * Back always steps to the previous screen in this list.
  */
 export const SCREEN_FLOW = [
   'gateway',
@@ -23,15 +24,9 @@ export function readInitialScreen({ isDev = false, search = '' } = {}) {
   return 'gateway'
 }
 
-export function pushScreen(history, screen) {
-  const prev = Array.isArray(history) && history.length > 0 ? history : ['gateway']
-  if (!SCREEN_FLOW.includes(screen)) return prev
-  if (prev[prev.length - 1] === screen) return prev
-  return [...prev, screen]
-}
-
-export function popScreen(history) {
-  const prev = Array.isArray(history) && history.length > 0 ? history : ['gateway']
-  if (prev.length <= 1) return prev
-  return prev.slice(0, -1)
+/** Previous beat in the locked flow. Gateway has none. */
+export function previousScreen(screen) {
+  const index = SCREEN_FLOW.indexOf(screen)
+  if (index <= 0) return null
+  return SCREEN_FLOW[index - 1]
 }
