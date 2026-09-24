@@ -65,6 +65,99 @@ export async function resolveCompanionGltf(modelConfig) {
   return null
 }
 
+function skinnedWorldBox(root) {
+  root.updateMatrixWorld(true)
+  const box = new THREE.Box3()
+  const v = new THREE.Vector3()
+  root.traverse((obj) => {
+    if (!obj.isSkinnedMesh) return
+    const position = obj.geometry?.attributes?.position
+    if (!position) return
+    for (let i = 0; i < position.count; i += 1) {
+      obj.getVertexPosition(i, v)
+      v.applyMatrix4(obj.matrixWorld)
+      box.expandByPoint(v)
+    }
+  })
+  return box
+}
+
+function boneWorld(root, boneName) {
+  let found = null
+  root.traverse((obj) => {
+    if (!found && obj.name === boneName) found = obj
+  })
+  if (!found) return null
+  return found.getWorldPosition(new THREE.Vector3())
+}
+
+function findClip(clipsByName, aliases) {
+  for (const alias of aliases) {
+    const key = String(alias).toLowerCase()
+    if (clipsByName[key]) return clipsByName[key]
+    const hit = Object.entries(clipsByName).find(([name]) => name.includes(key))
+    if (hit) return hit[1]
+  }
+  return null
+}
+
+/**
+ * Scale and center a skinned rest pose so Sit/Idle fit the companion camera.
+ * Yaw must already be applied. Bind-pose Box3 is not used: it underestimates
+ * the posed fox and, once yawed, leaves the body left of the lens.
+ */
+function frameSkinnedPoses(model, mixer, clipsByName, config) {
+  const view = config.view
+  const box = new THREE.Box3()
+  const anchorSamples = []
+  for (const name of view.clips || ['idle']) {
+    const clip = findClip(clipsByName, config.clipAliases?.[name] || [name])
+    if (!clip) continue
+    const action = mixer.clipAction(clip)
+    action.reset().setLoop(THREE.LoopRepeat, Infinity).play()
+    for (const frac of [0.25, 0.55, 0.8]) {
+      mixer.setTime(Math.max(clip.duration * frac, 0.001))
+      const sample = skinnedWorldBox(model)
+      if (!sample.isEmpty()) box.union(sample)
+      if (name === 'sit') {
+        // Muzzle/eyes, not the sternum. A chest aim leaves the dipped head
+        // high in the slot so the paws and belly fill the frame.
+        const eyes = boneWorld(model, 'tripoHead_6') || boneWorld(model, 'tripoHead_2')
+        if (eyes) anchorSamples.push(eyes.y)
+      }
+    }
+    action.stop()
+  }
+  mixer.stopAllAction()
+  if (box.isEmpty()) return null
+
+  const size = new THREE.Vector3()
+  const center = new THREE.Vector3()
+  box.getSize(size)
+  box.getCenter(center)
+  const cam = new THREE.Vector3().fromArray(view.position)
+  const look = new THREE.Vector3().fromArray(view.lookAt)
+  const distance = Math.max(cam.distanceTo(look), 0.001)
+  const fov = THREE.MathUtils.degToRad(view.fov || 32)
+  const visible = 2 * Math.tan(fov / 2) * distance
+  const span = Math.max(size.x, size.y, 0.001)
+  const scale = (visible * (view.fill ?? 0.72)) / span
+  const anchorY = anchorSamples.length
+    ? anchorSamples.reduce((sum, y) => sum + y, 0) / anchorSamples.length
+    : center.y
+  model.scale.setScalar(scale)
+  // XZ stays on the posed center. Y parks the Sit muzzle on the level lens.
+  model.position.set(
+    look.x - center.x * scale,
+    look.y - anchorY * scale,
+    look.z - center.z * scale,
+  )
+  return {
+    footY: look.y + (box.min.y - anchorY) * scale,
+    width: size.x * scale,
+  }
+}
+
 function fitModel(model, targetHeight) {
   const box = new THREE.Box3().setFromObject(model)
   const size = new THREE.Vector3()
@@ -123,17 +216,30 @@ export function createGltfCompanion(gltf, config) {
     }
   })
 
-  fitModel(model, config.targetHeight || 1.4)
-  model.position.y += config.offsetY || 0
-  // Face the camera by default (Mixamo often faces +Z; our avatar cams look from +Z)
-  if (config.yaw !== undefined) model.rotation.y = config.yaw
-  root.add(model)
-
   const mixer = new THREE.AnimationMixer(model)
   const clipsByName = {}
   for (const clip of gltf.animations || []) {
     clipsByName[clip.name.toLowerCase()] = clip
   }
+
+  let framed = null
+  if (config.view) {
+    // Yaw first, then fit the posed silhouette to the square camera.
+    if (config.yaw !== undefined) model.rotation.y = config.yaw
+    model.scale.setScalar(1)
+    model.position.set(0, 0, 0)
+    framed = frameSkinnedPoses(model, mixer, clipsByName, config)
+    if (!framed) {
+      fitModel(model, config.targetHeight || 1.4)
+      model.position.y += config.offsetY || 0
+    }
+  } else {
+    fitModel(model, config.targetHeight || 1.4)
+    model.position.y += config.offsetY || 0
+    // Face the camera by default (Mixamo often faces +Z; our avatar cams look from +Z)
+    if (config.yaw !== undefined) model.rotation.y = config.yaw
+  }
+  root.add(model)
 
   const mouth =
     findNamedBone(model, ['mouth', 'jaw', 'chin']) ||
@@ -277,7 +383,8 @@ export function createGltfCompanion(gltf, config) {
     new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.2 })
   )
   shadow.rotation.x = -Math.PI / 2
-  shadow.position.y = 0.01
+  shadow.position.y = framed ? framed.footY + 0.01 : 0.01
+  if (framed) shadow.scale.setScalar(Math.min(1, Math.max(0.45, framed.width / 1.6)))
   root.add(shadow)
 
   return {

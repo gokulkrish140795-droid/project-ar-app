@@ -245,9 +245,15 @@ export default function GingerCat3D({
     let disposed = false
     let raf = 0
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 20)
-    camera.position.set(0, 0.45, 2.85)
-    camera.lookAt(0, 0.25, 0)
+    const view = GINGER_MODEL.view
+    const camera = new THREE.PerspectiveCamera(view?.fov ?? 34, 1, 0.05, 30)
+    if (view?.position) {
+      camera.position.set(view.position[0], view.position[1], view.position[2])
+    } else {
+      camera.position.set(0, 0.45, 2.85)
+    }
+    if (view?.lookAt) camera.lookAt(view.lookAt[0], view.lookAt[1], view.lookAt[2])
+    else camera.lookAt(0, 0.25, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
@@ -255,7 +261,7 @@ export default function GingerCat3D({
     renderer.setClearColor(0x000000, 0)
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.1
+    renderer.toneMappingExposure = 1.35
     mount.appendChild(renderer.domElement)
 
     scene.add(new THREE.AmbientLight(0xfff0dd, 0.6))
@@ -299,8 +305,9 @@ export default function GingerCat3D({
 
       if (companion?.isGltf) {
         applyRootStaging(companion.root, p, localT, t)
-        // Fox model faces +Z oddly — nudge yaw for cuteness
-        companion.model.rotation.y = p === 'walkIn' || p === 'leap' ? Math.PI : Math.PI * 0.15
+        // Applied after the mixer so Idle/Sit clips cannot yaw the chest away.
+        // GINGER_MODEL.yaw faces the camera; search glance stays on the root.
+        companion.model.rotation.y = GINGER_MODEL.yaw ?? 0
       } else if (companion?.root) {
         animateProceduralGinger(companion.root, p, localT, t)
       }
