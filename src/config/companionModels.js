@@ -65,14 +65,15 @@ export const GINGER_MODEL = {
    * Sit/Idle skinning is larger than the bind box, and recentering that box
    * before yaw slides the fox out of the square slot. Frame the posed mesh
    * to this camera (targetHeight / offsetY apply only if `view` is absent).
-   * Camera Y matches lookAt so the lens is level with the Sit chest (y 0.5).
-   * fill is the share of the square frustum the silhouette may occupy.
+   * Camera Y matches lookAt. The lens is level with the Sit muzzle, not the
+   * sternum, so a dipped head stays in the square slot. fill is the share of
+   * the frustum the silhouette may occupy.
    */
   view: {
     fov: 32,
-    position: [0, 0.5, 3.55],
-    lookAt: [0, 0.5, 0],
-    fill: 0.84,
+    position: [0, 0.62, 4.7],
+    lookAt: [0, 0.62, 0],
+    fill: 0.78,
     clips: ['sit', 'idle'],
   },
   /** Prefer exact Blender Action names from BLENDER_COMPANION_CHECKLIST.md */

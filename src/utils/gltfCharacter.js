@@ -120,10 +120,10 @@ function frameSkinnedPoses(model, mixer, clipsByName, config) {
       const sample = skinnedWorldBox(model)
       if (!sample.isEmpty()) box.union(sample)
       if (name === 'sit') {
-        // Chest only. Averaging in the head lifts the aim above the sternum
-        // and the level camera looks down onto the belly.
-        const chest = boneWorld(model, 'tripoSpine_2') || boneWorld(model, 'tripoSpine_0')
-        if (chest) anchorSamples.push(chest.y)
+        // Muzzle/eyes, not the sternum. A chest aim leaves the dipped head
+        // high in the slot so the paws and belly fill the frame.
+        const eyes = boneWorld(model, 'tripoHead_6') || boneWorld(model, 'tripoHead_2')
+        if (eyes) anchorSamples.push(eyes.y)
       }
     }
     action.stop()
@@ -146,7 +146,7 @@ function frameSkinnedPoses(model, mixer, clipsByName, config) {
     ? anchorSamples.reduce((sum, y) => sum + y, 0) / anchorSamples.length
     : center.y
   model.scale.setScalar(scale)
-  // XZ stays on the posed center. Y parks the Sit chest on the level lens.
+  // XZ stays on the posed center. Y parks the Sit muzzle on the level lens.
   model.position.set(
     look.x - center.x * scale,
     look.y - anchorY * scale,
