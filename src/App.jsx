@@ -1,24 +1,21 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import EnchantedCanvas3D from './components/EnchantedCanvas3D'
 import Screen1Gateway from './components/Screen1Gateway'
 import Screen2Prank from './components/Screen2Prank'
 import ScreenHunt from './components/ScreenHunt'
 import ScreenUncleHologram from './components/ScreenUncleHologram'
 import ScreenVideoMontage from './components/ScreenVideoMontage'
-import { hasSavedHuntProgress } from './hunt/storage'
+import { previousScreen, readInitialScreen, SCREEN_FLOW } from './flow/screenFlow'
+import { canContinueSavedHunt } from './hunt/storage'
 import { fonts, theme } from './theme'
 import audioEngine from './utils/audioEngine'
 
-const SCREENS = ['gateway', 'prank', 'video_montage', 'uncle_hologram', 'scavenger_hunt']
-
-function readInitialScreen() {
+function readBootScreen() {
   if (typeof window === 'undefined') return 'gateway'
-  if (hasSavedHuntProgress()) return 'scavenger_hunt'
-  if (import.meta.env.DEV) {
-    const phase = new URLSearchParams(window.location.search).get('phase')
-    if (SCREENS.includes(phase)) return phase
-  }
-  return 'gateway'
+  return readInitialScreen({
+    isDev: import.meta.env.DEV,
+    search: window.location.search,
+  })
 }
 
 const moodForScreen = {
@@ -34,9 +31,26 @@ const moodForScreen = {
  * gateway → floo → prank → video_montage → uncle_hologram → scavenger_hunt
  */
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState(readInitialScreen)
+  const [currentScreen, setCurrentScreen] = useState(readBootScreen)
   const [lumosOn, setLumosOn] = useState(false)
   const [flooActive, setFlooActive] = useState(false)
+  const [resumeHunt, setResumeHunt] = useState(() => canContinueSavedHunt())
+  const canGoBack = SCREEN_FLOW.indexOf(currentScreen) > 0 && !flooActive
+
+  useEffect(() => {
+    if (currentScreen === 'gateway') setResumeHunt(canContinueSavedHunt())
+  }, [currentScreen])
+
+  const goTo = (screen) => {
+    if (!SCREEN_FLOW.includes(screen)) return
+    setCurrentScreen(screen)
+  }
+
+  const goBack = () => {
+    if (flooActive) return
+    const prev = previousScreen(currentScreen)
+    if (prev) setCurrentScreen(prev)
+  }
 
   const ensureAudio = useCallback(async () => {
     await audioEngine.unlock()
@@ -66,24 +80,29 @@ export default function App() {
 
     setFlooActive(true)
     window.setTimeout(() => {
-      setCurrentScreen('prank')
+      goTo('prank')
       setFlooActive(false)
     }, 1600)
   }
 
   const handleKiss = () => {
     if (currentScreen !== 'prank') return
-    setCurrentScreen('video_montage')
+    goTo('video_montage')
   }
 
   const handleContinueToHologram = () => {
     if (currentScreen !== 'video_montage') return
-    setCurrentScreen('uncle_hologram')
+    goTo('uncle_hologram')
   }
 
   const handleContinueHunt = () => {
     if (currentScreen !== 'uncle_hologram') return
-    setCurrentScreen('scavenger_hunt')
+    goTo('scavenger_hunt')
+  }
+
+  const handleResumeHunt = () => {
+    if (currentScreen !== 'gateway' || !canContinueSavedHunt()) return
+    goTo('scavenger_hunt')
   }
 
   const mood = moodForScreen[currentScreen] || 'gateway'
@@ -104,6 +123,17 @@ export default function App() {
       )}
 
       {flooActive && <div className="ar-floo-veil ar-floo-ember-wipe" aria-hidden="true" />}
+
+      {canGoBack && (
+        <button
+          type="button"
+          onClick={goBack}
+          aria-label="Back"
+          className="ar-btn-3d ar-btn-3d--ghost ar-nav-back"
+        >
+          Back
+        </button>
+      )}
 
       <button
         type="button"
@@ -140,7 +170,12 @@ export default function App() {
         }}
       >
         {currentScreen === 'gateway' && (
-          <Screen1Gateway onEnsureAudio={ensureAudio} onComplete={handleAcceptQuest} />
+          <Screen1Gateway
+            onEnsureAudio={ensureAudio}
+            onComplete={handleAcceptQuest}
+            canContinueHunt={resumeHunt}
+            onContinueHunt={handleResumeHunt}
+          />
         )}
 
         {currentScreen === 'prank' && (

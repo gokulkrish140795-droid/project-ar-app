@@ -299,6 +299,17 @@ html {
   z-index: 1;
 }
 
+.ar-nav-back {
+  position: fixed;
+  top: 18px;
+  left: max(18px, env(safe-area-inset-left, 0px));
+  z-index: 40;
+  padding: 8px 14px;
+  color: var(--ar-gold);
+  letter-spacing: 1.2px;
+  font-size: 11px;
+}
+
 .ar-letter-capsule {
   width: 32px;
   height: 32px;

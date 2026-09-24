@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { GINGER_MODEL } from '../config/companionModels'
+import { GINGER_3D_PARKED, GINGER_MODEL } from '../config/companionModels'
 import audioEngine from '../utils/audioEngine'
 import {
   applyRootStaging,
@@ -227,7 +227,7 @@ function animateProceduralGinger(ginger, pose, localT, t) {
   }
 }
 
-export default function GingerCat3D({
+function GingerCat3DScene({
   pose = 'idle',
   size = 120,
   onTap,
@@ -245,15 +245,18 @@ export default function GingerCat3D({
     let disposed = false
     let raf = 0
     const scene = new THREE.Scene()
-    const view = GINGER_MODEL.view
+    const view = GINGER_3D_PARKED ? null : GINGER_MODEL.view
     const camera = new THREE.PerspectiveCamera(view?.fov ?? 34, 1, 0.05, 30)
-    if (view?.position) {
+    if (GINGER_3D_PARKED) {
+      camera.position.set(0, 0.38, 2.05)
+      camera.lookAt(0, 0.28, 0)
+    } else if (view?.position) {
       camera.position.set(view.position[0], view.position[1], view.position[2])
+      if (view.lookAt) camera.lookAt(view.lookAt[0], view.lookAt[1], view.lookAt[2])
     } else {
       camera.position.set(0, 0.45, 2.85)
+      camera.lookAt(0, 0.25, 0)
     }
-    if (view?.lookAt) camera.lookAt(view.lookAt[0], view.lookAt[1], view.lookAt[2])
-    else camera.lookAt(0, 0.25, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
@@ -283,12 +286,14 @@ export default function GingerCat3D({
     const procedural = buildProceduralGinger()
     mountCompanion({ root: procedural, isGltf: false })
 
-    resolveCompanionGltf(GINGER_MODEL).then((resolved) => {
-      if (disposed || !resolved) return
-      const gltfCompanion = createGltfCompanion(resolved.gltf, resolved.config)
-      mountCompanion(gltfCompanion)
-      gltfCompanion.playPose('idle')
-    })
+    if (!GINGER_3D_PARKED) {
+      resolveCompanionGltf(GINGER_MODEL).then((resolved) => {
+        if (disposed || !resolved) return
+        const gltfCompanion = createGltfCompanion(resolved.gltf, resolved.config)
+        mountCompanion(gltfCompanion)
+        gltfCompanion.playPose('idle')
+      })
+    }
 
     const tick = () => {
       if (disposed) return
@@ -345,6 +350,7 @@ export default function GingerCat3D({
     <button
       type="button"
       aria-label="Ginger the cat"
+      data-ginger-parked={GINGER_3D_PARKED ? 'true' : undefined}
       onClick={handleTap}
       style={{
         position: 'relative',
@@ -382,4 +388,8 @@ export default function GingerCat3D({
       ))}
     </button>
   )
+}
+
+export default function GingerCat3D(props) {
+  return <GingerCat3DScene {...props} />
 }

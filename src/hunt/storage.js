@@ -1,6 +1,7 @@
 import registry from '../data/card_registry.json' with { type: 'json' }
 
 export const HUNT_STORAGE_KEY = 'project-ar-hunt-v1'
+export const HUNT_REACHED_KEY = 'project-ar-hunt-reached-v1'
 export const HUNT_STORAGE_VERSION = 2
 
 function defaultStorage() {
@@ -103,4 +104,60 @@ export function hasSavedHuntProgress(storage = defaultStorage()) {
   } catch {
     return false
   }
+}
+
+function readHuntRecord(storage) {
+  if (!storage) return null
+  try {
+    const raw = storage.getItem(HUNT_STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+/** True when the saved record is more than the blank step-0 blob the hunt writes on mount. */
+export function huntRecordHasProgress(record) {
+  if (!record || record.version !== HUNT_STORAGE_VERSION) return false
+  if (Number(record.currentStepIndex) > 0) return true
+  if (record.vaultUnlocked) return true
+  if (Array.isArray(record.unlockedCards) && record.unlockedCards.length > 0) return true
+  if (Array.isArray(record.collectedLetters) && record.collectedLetters.length > 0) return true
+  if (Array.isArray(record.scannedTargets) && record.scannedTargets.length > 0) return true
+  if (record.workbench && typeof record.workbench === 'object') return true
+  return false
+}
+
+/** Set only when the hunt screen actually mounts, never on a cold boot. */
+export function markHuntReached(storage = defaultStorage()) {
+  if (!storage) return false
+  try {
+    storage.setItem(HUNT_REACHED_KEY, '1')
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function hasReachedHunt(storage = defaultStorage()) {
+  if (!storage) return false
+  try {
+    return storage.getItem(HUNT_REACHED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Continue is offered only for a real save the player earned:
+ * the hunt key is present, and they either reached the hunt in play
+ * or the record itself has moved past a blank step 0.
+ * A default blob written by the old auto-open is not enough.
+ */
+export function canContinueSavedHunt(storage = defaultStorage()) {
+  if (!hasSavedHuntProgress(storage)) return false
+  if (hasReachedHunt(storage)) return true
+  return huntRecordHasProgress(readHuntRecord(storage))
 }
