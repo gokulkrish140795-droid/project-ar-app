@@ -82,6 +82,15 @@ function skinnedWorldBox(root) {
   return box
 }
 
+function boneWorld(root, boneName) {
+  let found = null
+  root.traverse((obj) => {
+    if (!found && obj.name === boneName) found = obj
+  })
+  if (!found) return null
+  return found.getWorldPosition(new THREE.Vector3())
+}
+
 function findClip(clipsByName, aliases) {
   for (const alias of aliases) {
     const key = String(alias).toLowerCase()
@@ -100,6 +109,7 @@ function findClip(clipsByName, aliases) {
 function frameSkinnedPoses(model, mixer, clipsByName, config) {
   const view = config.view
   const box = new THREE.Box3()
+  const anchorSamples = []
   for (const name of view.clips || ['idle']) {
     const clip = findClip(clipsByName, config.clipAliases?.[name] || [name])
     if (!clip) continue
@@ -109,6 +119,12 @@ function frameSkinnedPoses(model, mixer, clipsByName, config) {
       mixer.setTime(Math.max(clip.duration * frac, 0.001))
       const sample = skinnedWorldBox(model)
       if (!sample.isEmpty()) box.union(sample)
+      if (name === 'sit') {
+        const chest = boneWorld(model, 'tripoSpine_2') || boneWorld(model, 'tripoSpine_0')
+        const head = boneWorld(model, 'tripoHead_2') || boneWorld(model, 'tripoHead_0')
+        if (chest && head) anchorSamples.push((chest.y + head.y) * 0.5)
+        else if (chest) anchorSamples.push(chest.y)
+      }
     }
     action.stop()
   }
@@ -126,14 +142,18 @@ function frameSkinnedPoses(model, mixer, clipsByName, config) {
   const visible = 2 * Math.tan(fov / 2) * distance
   const span = Math.max(size.x, size.y, 0.001)
   const scale = (visible * (view.fill ?? 0.72)) / span
+  const anchorY = anchorSamples.length
+    ? anchorSamples.reduce((sum, y) => sum + y, 0) / anchorSamples.length
+    : center.y
   model.scale.setScalar(scale)
+  // XZ stays on the posed center. Y parks the Sit chest/eyes on the level lens.
   model.position.set(
     look.x - center.x * scale,
-    look.y - center.y * scale,
+    look.y - anchorY * scale,
     look.z - center.z * scale,
   )
   return {
-    footY: look.y + (box.min.y - center.y) * scale,
+    footY: look.y + (box.min.y - anchorY) * scale,
     width: size.x * scale,
   }
 }
