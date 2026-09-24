@@ -1,4 +1,5 @@
 import { AR_PHOTO_CROP_1200x1800, hasTrainedImageTargets } from '../../config/ar.js'
+import { releaseRoomCamera } from '../../utils/roomCamera.js'
 import { cardIdForTargetIndex, MIND_TARGET_SRC, TRAINED_PHOTO_TARGETS } from '../trainedTargets.js'
 import { createStubTracker } from './stubEngine.js'
 
@@ -16,6 +17,7 @@ function cameraConstraints() {
 }
 
 async function openCamera() {
+  await releaseRoomCamera()
   if (!navigator.mediaDevices?.getUserMedia) {
     throw new Error('camera API missing')
   }
@@ -51,6 +53,7 @@ export async function createMindArTracker({ onTargetFound, container } = {}) {
     crop: AR_PHOTO_CROP_1200x1800,
     async start() {
       if (running) return this
+      await releaseRoomCamera()
       try {
         video = document.createElement('video')
         video.setAttribute('autoplay', '')

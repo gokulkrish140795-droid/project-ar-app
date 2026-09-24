@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import EnchantedCanvas3D from './components/EnchantedCanvas3D'
 import Screen1Gateway from './components/Screen1Gateway'
-import Screen2Prank from './components/Screen2Prank'
 import ScreenHunt from './components/ScreenHunt'
 import ScreenUncleHologram from './components/ScreenUncleHologram'
 import ScreenVideoMontage from './components/ScreenVideoMontage'
@@ -20,7 +19,6 @@ function readBootScreen() {
 
 const moodForScreen = {
   gateway: 'gateway',
-  prank: 'prank',
   video_montage: 'video',
   uncle_hologram: 'video',
   scavenger_hunt: 'hunt',
@@ -28,7 +26,7 @@ const moodForScreen = {
 
 /**
  * Master production state machine:
- * gateway → floo → prank → video_montage → uncle_hologram → scavenger_hunt
+ * gateway → floo → video_montage → uncle_hologram → scavenger_hunt
  */
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState(readBootScreen)
@@ -80,14 +78,9 @@ export default function App() {
 
     setFlooActive(true)
     window.setTimeout(() => {
-      goTo('prank')
-      setFlooActive(false)
-    }, 1600)
-  }
-
-  const handleKiss = () => {
-    if (currentScreen !== 'prank') return
-    goTo('video_montage')
+      goTo('video_montage')
+      window.setTimeout(() => setFlooActive(false), 420)
+    }, 40)
   }
 
   const handleContinueToHologram = () => {
@@ -106,7 +99,7 @@ export default function App() {
   }
 
   const mood = moodForScreen[currentScreen] || 'gateway'
-  const hideAtmosphere = currentScreen === 'uncle_hologram'
+  const hideAtmosphere = currentScreen !== 'gateway'
 
   return (
     <div
@@ -124,6 +117,13 @@ export default function App() {
 
       {flooActive && <div className="ar-floo-veil ar-floo-ember-wipe" aria-hidden="true" />}
 
+      <div className="ar-phone-bezel" aria-hidden="true">
+        <span className="ar-phone-bezel__tick tl" />
+        <span className="ar-phone-bezel__tick tr" />
+        <span className="ar-phone-bezel__tick bl" />
+        <span className="ar-phone-bezel__tick br" />
+      </div>
+
       {canGoBack && (
         <button
           type="button"
@@ -140,35 +140,18 @@ export default function App() {
         onClick={toggleLumos}
         aria-pressed={lumosOn}
         aria-label={lumosOn ? 'Nox Audio' : 'Lumos Audio'}
-        className={lumosOn ? 'ar-btn-3d ar-btn-3d--gold' : 'ar-btn-3d ar-btn-3d--ghost'}
+        className={`${lumosOn ? 'ar-btn-3d ar-btn-3d--gold' : 'ar-btn-3d ar-btn-3d--ghost'} ar-nav-lumos`}
         style={{
-          position: 'fixed',
-          top: 18,
-          right: 18,
-          zIndex: 40,
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          padding: '8px 14px',
           color: lumosOn ? theme.velvet : theme.gold,
-          letterSpacing: 1.2,
-          fontSize: 11,
-          fontFamily: fonts.display,
         }}
       >
         {lumosOn ? 'Lumos Audio' : 'Nox Audio'}
       </button>
 
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          opacity: flooActive ? 0.25 : 1,
-          filter: flooActive ? 'blur(3px) saturate(1.4)' : 'none',
-          transition: 'opacity 0.45s ease, filter 0.45s ease',
-          transform: flooActive ? 'scale(1.04) rotateZ(1deg)' : 'none',
-        }}
-      >
+      <div key={currentScreen} className="ar-stage-fade">
         {currentScreen === 'gateway' && (
           <Screen1Gateway
             onEnsureAudio={ensureAudio}
@@ -176,10 +159,6 @@ export default function App() {
             canContinueHunt={resumeHunt}
             onContinueHunt={handleResumeHunt}
           />
-        )}
-
-        {currentScreen === 'prank' && (
-          <Screen2Prank onEnsureAudio={ensureAudio} onKiss={handleKiss} />
         )}
 
         {currentScreen === 'video_montage' && (

@@ -3,13 +3,14 @@ export default function CaptionRail({
   children,
   visible = true,
   speaker = '',
+  className = '',
   style = {},
 }) {
   if (!visible || !children) return null
 
   return (
     <div
-      className="ar-caption-rail"
+      className={`ar-caption-rail ${className}`.trim()}
       role="status"
       aria-live="polite"
       style={style}

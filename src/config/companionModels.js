@@ -48,13 +48,6 @@ export const MINIME_MODEL = {
   },
 }
 
-/**
- * W1 park. ginger.glb reads tiny and from the rear.
- * While this is true, Ginger stays the procedural companion and the GLB is not loaded.
- * No flat stand-in. R4 owns facing. Do not change yaw here, and do not replace minime.glb.
- */
-export const GINGER_3D_PARKED = true
-
 export const GINGER_MODEL = {
   id: 'ginger',
   /** C-G1 drop target: public/models/ginger.glb. Missing file → procedural (do not invent a placeholder). */

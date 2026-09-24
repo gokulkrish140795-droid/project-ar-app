@@ -70,9 +70,6 @@ export default function AnagramWorkbench({
 
   return (
     <div>
-      <p className="ar-quest-kicker" style={{ margin: 0, textAlign: 'center' }}>
-        Wooden anagram
-      </p>
       <p
         className="ar-quest-title"
         style={{ margin: '6px 0 0', fontSize: 15, textAlign: 'center', letterSpacing: 0.12 }}

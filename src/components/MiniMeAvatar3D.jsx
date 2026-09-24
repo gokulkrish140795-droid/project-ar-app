@@ -330,13 +330,15 @@ export default function MiniMeAvatar3D({
     let disposed = false
     let raf = 0
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 20)
-    camera.position.set(0, 0.72, 3.15)
-    camera.lookAt(0, 0.55, 0)
+    const frameW = size
+    const frameH = Math.round(size * 1.35)
+    const camera = new THREE.PerspectiveCamera(28, frameW / frameH, 0.1, 40)
+    camera.position.set(0, 0.9, 4.2)
+    camera.lookAt(0, 0.85, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
-    renderer.setSize(size, size + 24)
+    renderer.setSize(frameW, frameH)
     renderer.setClearColor(0x000000, 0)
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.ACESFilmicToneMapping
@@ -361,10 +363,31 @@ export default function MiniMeAvatar3D({
     let blinkAge = 0
     const clock = new THREE.Clock()
 
+    const frameFullFigure = (root) => {
+      root.updateMatrixWorld(true)
+      const box = new THREE.Box3().setFromObject(root)
+      if (box.isEmpty()) return
+      const boxSize = new THREE.Vector3()
+      const center = new THREE.Vector3()
+      box.getSize(boxSize)
+      box.getCenter(center)
+      const margin = 0.72
+      const vFov = THREE.MathUtils.degToRad(camera.fov)
+      const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect)
+      const distY = boxSize.y / 2 / Math.tan(vFov / 2)
+      const distX = boxSize.x / 2 / Math.tan(hFov / 2)
+      const dist = Math.max(distX, distY) / margin
+      camera.position.set(center.x, center.y, center.z + dist)
+      camera.lookAt(center.x, center.y, center.z)
+      camera.updateProjectionMatrix()
+    }
+
     const mountCompanion = (node) => {
       if (companion?.root) scene.remove(companion.root)
       companion = node
-      scene.add(node.root || node)
+      const root = node.root || node
+      scene.add(root)
+      frameFullFigure(root)
       lastPose = ''
     }
 
@@ -435,7 +458,10 @@ export default function MiniMeAvatar3D({
   }, [size])
 
   return (
-    <div style={{ position: 'relative', width: size, height: size + 24, flexShrink: 0 }}>
+    <div
+      className="ar-minime-slot"
+      style={{ position: 'relative', width: size, height: Math.round(size * 1.35), flexShrink: 0, overflow: 'visible' }}
+    >
       <button
         type="button"
         onClick={onFaceTap}
@@ -450,7 +476,10 @@ export default function MiniMeAvatar3D({
           cursor: onFaceTap && !disabled ? 'pointer' : 'default',
         }}
       >
-        <div ref={mountRef} style={{ width: size, height: size + 24, pointerEvents: 'none' }} />
+        <div
+          ref={mountRef}
+          style={{ width: size, height: Math.round(size * 1.35), pointerEvents: 'none', overflow: 'visible' }}
+        />
       </button>
     </div>
   )

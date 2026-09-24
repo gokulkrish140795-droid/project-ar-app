@@ -1,284 +1,93 @@
-import { useEffect, useRef, useState } from 'react'
-import { UNCLE_WISH_POSTER, UNCLE_WISH_URL, UNCLE_WISH_YOUTUBE_ID } from '../config/media'
-import { fonts, theme } from '../theme'
+import { useState } from 'react'
+import { UNCLE_WISH_URL } from '../config/media'
 import audioEngine from '../utils/audioEngine'
+import { releaseRoomCamera } from '../utils/roomCamera'
 import CaptionRail from './ui/CaptionRail'
-import GingerCat3D from './GingerCat3D'
-import NanoDustPlate from './NanoDustPlate'
+import DeviceFrame from './ui/DeviceFrame'
+import RoomProjector from './ui/RoomProjector'
 
 const COACH =
   'Find a clear wall, love. I’ll project uncle’s wish into the air — or tap me to summon it.'
 
 export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
-  const videoRef = useRef(null)
-  const streamRef = useRef(null)
-  const [camReady, setCamReady] = useState(false)
-  const [camDenied, setCamDenied] = useState(false)
   const [summoned, setSummoned] = useState(false)
-  const [dusting, setDusting] = useState(false)
-  const [gingerPose, setGingerPose] = useState('idle')
-  const dustLock = useRef(false)
-  const summonedRef = useRef(false)
-  const plateTimer = useRef(0)
-
-  useEffect(() => () => window.clearTimeout(plateTimer.current), [])
-
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        if (!navigator.mediaDevices?.getUserMedia) {
-          if (!cancelled) setCamDenied(true)
-          return
-        }
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
-          audio: false,
-        })
-        if (cancelled) {
-          stream.getTracks().forEach((t) => t.stop())
-          return
-        }
-        streamRef.current = stream
-        const el = document.getElementById('ar-uncle-cam')
-        if (el) {
-          el.srcObject = stream
-          await el.play().catch(() => {})
-        }
-        setCamReady(true)
-      } catch {
-        if (!cancelled) setCamDenied(true)
-      }
-    })()
-
-    return () => {
-      cancelled = true
-      streamRef.current?.getTracks().forEach((t) => t.stop())
-      streamRef.current = null
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!summoned) return undefined
-    const el = videoRef.current
-    if (!el?.play) return undefined
-    el.play().catch(() => {})
-    return undefined
-  }, [summoned])
+  const [camDenied, setCamDenied] = useState(false)
 
   const ensureAudio = async () => {
     if (onEnsureAudio) await onEnsureAudio()
     else await audioEngine.unlock()
   }
 
-  const resolveDust = () => {
-    if (summonedRef.current) return
-    summonedRef.current = true
-    setSummoned(true)
-    setGingerPose('sit')
-    // Plate stays mounted under the Short. arShortIn fades the Short 0→1 over 200ms.
-    plateTimer.current = window.setTimeout(() => setDusting(false), 280)
-  }
-
   const summon = async () => {
-    if (summoned || dustLock.current) return
-    dustLock.current = true
+    if (summoned) return
     await ensureAudio()
     audioEngine.stopAllSFXAndVoices()
     audioEngine.playLayered(['sfx_spell_quest', 'sfx_soft_chime'])
-    setGingerPose('cheer')
-    // Floo smoke, then nano-dust plate. The Short mounts only in resolveDust.
-    setDusting(true)
+    setSummoned(true)
   }
 
-  const handleEnded = () => {
-    setGingerPose('cheer')
+  const leave = async () => {
+    await releaseRoomCamera()
+    onContinue?.()
   }
 
   return (
-    <section
-      className="ar-letterbox"
-      style={{
-        position: 'relative',
-        zIndex: 2,
-        minHeight: '100vh',
-        overflow: 'hidden',
-        fontFamily: fonts.body,
-        color: theme.cream,
-      }}
-    >
-      <video
-        id="ar-uncle-cam"
-        muted
-        playsInline
-        autoPlay
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          opacity: camReady ? 1 : 0,
-          transition: 'opacity 0.6s ease',
-          zIndex: 0,
-        }}
+    <section className="ar-beat ar-projector-screen">
+      <RoomProjector
+        playing={summoned}
+        videoUrl={UNCLE_WISH_URL}
+        onDenied={() => setCamDenied(true)}
       />
-      {!camReady && (
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 0,
-            background:
-              'radial-gradient(ellipse at 50% 40%, rgba(30, 50, 70, 0.9), rgba(6, 11, 20, 0.98))',
-          }}
-        />
-      )}
 
+      <DeviceFrame compact className="ar-beat__mast">
+        <p className="ar-quest-kicker" style={{ margin: 0 }}>
+          Patronus Projection
+        </p>
+        <h1 className="ar-quest-title" style={{ margin: '8px 0 0', fontSize: 22 }}>
+          A wish from beyond the veil
+        </h1>
+      </DeviceFrame>
 
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '88px 16px 28px',
-          gap: 16,
-        }}
-      >
-        <header style={{ textAlign: 'center', animation: 'arTitleIn 0.6s ease both' }}>
-          <p className="ar-quest-kicker" style={{ margin: 0 }}>
-            Patronus Projection
-          </p>
-          <h1 className="ar-quest-title" style={{ margin: '8px 0 0', fontSize: 22 }}>
-            A wish from beyond the veil
-          </h1>
-        </header>
+      <div className="ar-beat__dock">
+        <CaptionRail visible speaker="Gokul-Mage">
+          {summoned
+            ? 'There — hold steady. Let his words find you.'
+            : camDenied
+              ? 'No camera needed, love. Press play when you’re ready.'
+              : COACH}
+        </CaptionRail>
 
-        <div className={`ar-summon-stage${dusting || summoned ? ' is-plate' : ''}`}>
-          {dusting && <NanoDustPlate onDone={resolveDust} />}
-
-          {summoned ? (
-            <div className="ar-holo-panel ar-holo-reveal">
-              {UNCLE_WISH_YOUTUBE_ID ? (
-                <iframe
-                  title="Uncle birthday wish"
-                  src={`https://www.youtube.com/embed/${UNCLE_WISH_YOUTUBE_ID}?autoplay=1&playsinline=1&rel=0`}
-                  allow="autoplay; encrypted-media; fullscreen"
-                  allowFullScreen
-                  style={{ width: '100%', height: '100%', border: 'none' }}
-                />
-              ) : UNCLE_WISH_URL ? (
-                <video
-                  ref={videoRef}
-                  src={UNCLE_WISH_URL}
-                  poster={UNCLE_WISH_POSTER || undefined}
-                  controls
-                  playsInline
-                  onEnded={handleEnded}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : (
-                <div
-                  className="ar-holo-placeholder"
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 24,
-                    textAlign: 'center',
-                    height: '100%',
-                  }}
-                >
-                  <p className="ar-quest-kicker" style={{ margin: 0 }}>
-                    Hologram projected
-                  </p>
-                  <p className="ar-quest-sub" style={{ margin: '12px 0 0', fontSize: 14 }}>
-                    Uncle’s wish will appear here. Paste a YouTube ID into{' '}
-                    <code style={{ color: theme.gold }}>UNCLE_WISH_YOUTUBE_ID</code> when you have
-                    it — no local file needed.
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : !dusting ? (
-            <div style={{ textAlign: 'center', animation: 'arStageIn 0.75s ease both' }}>
-              <GingerCat3D
-                pose={gingerPose}
-                size={180}
-                onTap={summon}
-                heartsOnTap={false}
-              />
-              <p
-                style={{
-                  margin: '8px 0 0',
-                  fontSize: 12,
-                  letterSpacing: 1,
-                  color: 'rgba(126, 240, 255, 0.85)',
-                  fontFamily: fonts.display,
-                }}
-              >
-                Tap Ginger to summon
-              </p>
-            </div>
-          ) : null}
-        </div>
-
-        <div
-          style={{
-            width: 'min(400px, 100%)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-            alignItems: 'center',
-          }}
-        >
-          <CaptionRail visible speaker="Ginger">
-            {summoned
-              ? 'There — hold steady. Let his words find you.'
-              : camDenied
-                ? 'No camera needed, love. Press play when you’re ready.'
-                : COACH}
-          </CaptionRail>
-
-          {!summoned && (
-            <>
-              <button
-                type="button"
-                className="ar-btn-3d ar-btn-3d--holo"
-                onClick={summon}
-                style={{ width: '100%', padding: '13px 16px', fontSize: 14 }}
-              >
-                Summon the wish
-              </button>
-              <button
-                type="button"
-                className="ar-btn-3d ar-btn-3d--ghost"
-                onClick={summon}
-                style={{ width: '100%', padding: '11px 16px', fontSize: 13 }}
-              >
-                Play uncle’s wish
-              </button>
-            </>
-          )}
-
-          {summoned && (
+        {!summoned && (
+          <>
             <button
               type="button"
               className="ar-btn-3d ar-btn-3d--gold"
-              onClick={onContinue}
+              onClick={summon}
               style={{ width: '100%', padding: '13px 16px', fontSize: 14 }}
             >
-              Continue the quest
+              Summon the wish
             </button>
-          )}
-        </div>
+            <button
+              type="button"
+              className="ar-btn-3d ar-btn-3d--ghost"
+              onClick={summon}
+              style={{ width: '100%', padding: '11px 16px', fontSize: 13 }}
+            >
+              Play uncle’s wish
+            </button>
+          </>
+        )}
+
+        {summoned && (
+          <button
+            type="button"
+            className="ar-btn-3d ar-btn-3d--gold"
+            onClick={leave}
+            style={{ width: '100%', padding: '13px 16px', fontSize: 14 }}
+          >
+            Continue the quest
+          </button>
+        )}
       </div>
     </section>
   )

@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import useCompanionDirector from '../hooks/useCompanionDirector'
-import { fonts, theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
 import CaptionRail from './ui/CaptionRail'
-import GingerCat3D from './GingerCat3D'
+import DeviceFrame from './ui/DeviceFrame'
 import MiniMeAvatar3D from './MiniMeAvatar3D'
-
-const CREAM = theme.cream
 
 function randomTrapPosition(stage, button, avoid) {
   const pad = 18
@@ -131,7 +128,6 @@ export default function Screen1Gateway({
   }, [trapping, noPos])
 
   const miniPose = trapping ? 'peek' : companions.miniPose
-  const gingerPose = trapping ? 'leap' : companions.gingerPose
 
   const trapButton = (extraStyle = {}) => (
     <button
@@ -159,36 +155,11 @@ export default function Screen1Gateway({
       }}
     >
       No, thanks 😜
-      {trapping && extraStyle.position === 'absolute' && (
-        <span
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: -92,
-            transform: 'translateX(-50%)',
-            pointerEvents: 'none',
-          }}
-        >
-          <GingerCat3D pose="leap" size={88} heartsOnTap={false} />
-        </span>
-      )}
     </button>
   )
 
   return (
-    <section
-      ref={stageRef}
-      style={{
-        position: 'relative',
-        zIndex: 2,
-        width: '100%',
-        minHeight: '100vh',
-        overflow: 'hidden',
-        background: 'transparent',
-        color: CREAM,
-        fontFamily: fonts.body,
-      }}
-    >
+    <section ref={stageRef} className="ar-beat">
       <style>
         {`
           @keyframes yarnArc3d {
@@ -203,51 +174,22 @@ export default function Screen1Gateway({
         `}
       </style>
 
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '72px 16px 28px',
-          gap: 12,
-        }}
-      >
-        <header
-          style={{
-            width: 'min(520px, 100%)',
-            textAlign: 'center',
-            animation: 'arTitleIn 0.7s ease both',
-          }}
+      <DeviceFrame compact className="ar-beat__mast" style={{ animation: 'arTitleIn 0.7s ease both' }}>
+        <p className="ar-quest-kicker" style={{ margin: 0 }}>
+          Hogwarts Secret Protocol 0510
+        </p>
+        <h1
+          className="ar-quest-title"
+          style={{ margin: '10px 0 0', fontSize: 'clamp(22px, 5.5vw, 32px)' }}
         >
-          <p className="ar-quest-kicker" style={{ margin: 0 }}>
-            Hogwarts Secret Protocol 0510
-          </p>
-          <h1
-            className="ar-quest-title"
-            style={{ margin: '10px 0 0', fontSize: 'clamp(22px, 5.5vw, 34px)' }}
-          >
-            THE SEARCH FOR A STRAY HEART
-          </h1>
-          <p className="ar-quest-sub" style={{ margin: '12px auto 0', maxWidth: 360, fontSize: 15 }}>
-            Thirty years of magic, and today begins your greatest quest yet!
-          </p>
-        </header>
+          THE SEARCH FOR A STRAY HEART
+        </h1>
+        <p className="ar-quest-sub" style={{ margin: '12px auto 0', maxWidth: 340, fontSize: 15 }}>
+          Thirty years of magic, and today begins your greatest quest yet!
+        </p>
+      </DeviceFrame>
 
-        <div
-          style={{
-            position: 'relative',
-            width: 'min(420px, 100%)',
-            minHeight: 250,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-            animation: 'arStageIn 0.85s cubic-bezier(0.2, 1.1, 0.3, 1) both',
-          }}
-        >
+      <div className="ar-beat__stage" style={{ animation: 'arStageIn 0.85s cubic-bezier(0.2, 1.1, 0.3, 1) both' }}>
           <div
             className="ar-stage-glow"
             aria-hidden="true"
@@ -276,10 +218,7 @@ export default function Screen1Gateway({
               gap: 2,
             }}
           >
-            <MiniMeAvatar3D size={220} pose={miniPose} peek={trapping} talking={companions.lipTalking} />
-            <div style={{ marginLeft: -36, marginBottom: 8 }}>
-              <GingerCat3D pose={gingerPose} size={170} />
-            </div>
+            <MiniMeAvatar3D size={168} pose={miniPose} peek={trapping} talking={companions.lipTalking} />
           </div>
           {companions.yarnVisible && (
             <span
@@ -291,7 +230,7 @@ export default function Screen1Gateway({
                 width: 20,
                 height: 20,
                 borderRadius: '50%',
-                background: 'radial-gradient(circle at 30% 30%, #FFF3B0, #E8C56A 60%, #8A6A12)',
+                background: 'radial-gradient(circle at 30% 30%, #ffe7a8, #e8c56a 62%, #0b1220)',
                 boxShadow: '0 0 16px rgba(232, 197, 106, 0.7)',
                 animation: 'yarnArc3d 0.7s ease forwards',
                 zIndex: 2,
@@ -300,16 +239,7 @@ export default function Screen1Gateway({
           )}
         </div>
 
-        <div
-          style={{
-            width: 'min(400px, 100%)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-            alignItems: 'center',
-            animation: 'arTitleIn 0.75s ease 0.12s both',
-          }}
-        >
+      <div className="ar-beat__dock" style={{ animation: 'arTitleIn 0.75s ease 0.12s both' }}>
           <CaptionRail
             visible={companions.showSpeech && !!companions.speech}
             speaker="Gokul-Mage"
@@ -345,7 +275,6 @@ export default function Screen1Gateway({
               Continue hunt
             </button>
           )}
-        </div>
       </div>
 
       {noPos &&
