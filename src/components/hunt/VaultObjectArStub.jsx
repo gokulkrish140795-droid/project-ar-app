@@ -5,15 +5,7 @@ export default function VaultObjectArStub({ location }) {
   const stub = createVaultObjectArStub({ vault: location })
 
   return (
-    <div
-      className="ar-holo-panel"
-      style={{
-        marginTop: 12,
-        padding: 14,
-        textAlign: 'center',
-        transform: 'none',
-      }}
-    >
+    <div className="ar-reliquary-plate">
       <p className="ar-quest-kicker" style={{ margin: 0 }}>
         Object AR placeholder
       </p>

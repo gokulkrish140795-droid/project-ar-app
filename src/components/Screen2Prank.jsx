@@ -8,8 +8,6 @@ import GingerCat3D from './GingerCat3D'
 import MiniMeAvatar3D from './MiniMeAvatar3D'
 
 const GOLD = theme.gold
-const PARCHMENT = theme.parchmentSoft
-const CORAL = theme.coral
 const STEPS = [10, 45, 72, 88, 99]
 
 export default function Screen2Prank({ onKiss, onEnsureAudio }) {
@@ -46,7 +44,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
       particleCount: 70,
       spread: 70,
       origin,
-      colors: [GOLD, CORAL, '#FFFFFF', PARCHMENT],
+      colors: [GOLD, theme.holo, theme.cream, theme.goldBright],
       shapes: ['heart'],
       scalar: 1.05,
     })
@@ -82,7 +80,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
           }
           @keyframes meterGlow3d {
             0%, 100% { box-shadow: 0 0 12px rgba(232, 197, 106, 0.3); }
-            50% { box-shadow: 0 0 28px rgba(255, 107, 138, 0.55); }
+            50% { box-shadow: 0 0 28px rgba(126, 240, 255, 0.45); }
           }
           @keyframes popupIn3d {
             from { opacity: 0; transform: translateY(18px); }
@@ -125,8 +123,8 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
                 height: '100%',
                 borderRadius: 8,
                 background: frozen
-                  ? 'linear-gradient(90deg, #E8C56A, #FF6B8A, #FFB4C4)'
-                  : 'linear-gradient(90deg, #8A6A12, #E8C56A, #FFF0C2)',
+                  ? 'linear-gradient(90deg, #e8c56a, #7ef0ff)'
+                  : 'linear-gradient(90deg, #0b1220, #e8c56a, #7ef0ff)',
                 backgroundSize: '200% 100%',
                 animation: frozen ? 'none' : 'arShimmer 2.4s linear infinite',
                 transition: 'width 0.35s ease',
@@ -141,7 +139,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
             fontSize: 22,
             fontWeight: 700,
             fontFamily: fonts.display,
-            color: frozen ? CORAL : GOLD,
+            color: frozen ? theme.holo : GOLD,
             animation: frozen ? 'freezeBlink3d 0.9s ease-in-out infinite' : 'none',
           }}
         >

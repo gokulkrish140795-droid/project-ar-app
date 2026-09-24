@@ -248,7 +248,7 @@ export default function Screen1Gateway({
                 width: 20,
                 height: 20,
                 borderRadius: '50%',
-                background: 'radial-gradient(circle at 30% 30%, #FFF3B0, #E8C56A 60%, #8A6A12)',
+                background: 'radial-gradient(circle at 30% 30%, #ffe7a8, #e8c56a 62%, #0b1220)',
                 boxShadow: '0 0 16px rgba(232, 197, 106, 0.7)',
                 animation: 'yarnArc3d 0.7s ease forwards',
                 zIndex: 2,
