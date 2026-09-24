@@ -61,6 +61,19 @@ export const GINGER_MODEL = {
    * −π/2 turns chest and face toward the viewer (idle, sit, search, cheer).
    */
   yaw: -Math.PI / 2,
+  /**
+   * Sit/Idle skinning is larger than the bind box, and recentering that box
+   * before yaw slides the fox out of the square slot. Frame the posed mesh
+   * to this camera (targetHeight / offsetY apply only if `view` is absent).
+   * fill is the share of the square frustum the silhouette may occupy.
+   */
+  view: {
+    fov: 32,
+    position: [0, 0.46, 3.45],
+    lookAt: [0, 0.46, 0],
+    fill: 0.88,
+    clips: ['sit', 'idle'],
+  },
   /** Prefer exact Blender Action names from BLENDER_COMPANION_CHECKLIST.md */
   clipAliases: {
     idle: ['idle', 'survey', 'wait'],
