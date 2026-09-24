@@ -299,6 +299,36 @@ html {
   z-index: 1;
 }
 
+.ar-companion-slot--parked {
+  width: 56px;
+  height: 56px;
+  min-height: 56px;
+  flex-basis: 56px;
+}
+
+.ar-nav-back {
+  position: fixed;
+  top: 18px;
+  left: max(18px, env(safe-area-inset-left, 0px));
+  z-index: 40;
+  padding: 8px 14px;
+  color: var(--ar-gold);
+  letter-spacing: 1.2px;
+  font-size: 11px;
+}
+
+.ar-ginger-park {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+  flex: 0 0 auto;
+}
+
 .ar-letter-capsule {
   width: 32px;
   height: 32px;

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { GINGER_MODEL } from '../config/companionModels'
+import { GINGER_3D_PARKED, GINGER_MODEL } from '../config/companionModels'
+import GingerPark from './GingerPark'
 import audioEngine from '../utils/audioEngine'
 import {
   applyRootStaging,
@@ -227,7 +228,7 @@ function animateProceduralGinger(ginger, pose, localT, t) {
   }
 }
 
-export default function GingerCat3D({
+function GingerCat3DScene({
   pose = 'idle',
   size = 120,
   onTap,
@@ -382,4 +383,9 @@ export default function GingerCat3D({
       ))}
     </button>
   )
+}
+
+export default function GingerCat3D(props) {
+  if (GINGER_3D_PARKED) return <GingerPark {...props} />
+  return <GingerCat3DScene {...props} />
 }

@@ -5,6 +5,7 @@ import { getActiveArEngine, hasTrainedImageTargets } from '../config/ar.js'
 import { formatRegistryQuote } from '../data/cardRegistry.js'
 import useHuntProgress from '../hooks/useHuntProgress.js'
 import { CH1_VAULT } from '../hunt/ch1Quest.js'
+import { markHuntReached } from '../hunt/storage.js'
 import { fonts, theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
 import CaptionRail from './ui/CaptionRail'
@@ -36,6 +37,7 @@ export default function ScreenHunt({ onEnsureAudio }) {
   tryScanRef.current = hunt.tryScan
 
   useEffect(() => {
+    markHuntReached()
     return () => {
       trackerRef.current?.stop()
       trackerRef.current = null
@@ -136,7 +138,7 @@ export default function ScreenHunt({ onEnsureAudio }) {
           Chapter 1 — Everyday Comforts
         </p>
         <h2 className="ar-quest-title" style={{ margin: '8px 0 0', fontSize: 22 }}>
-          {state.vaultUnlocked ? card?.location : `Step ${card?.step || 1} of 10`}
+          {`Step ${card?.step || 1} of 10`}
         </h2>
       </header>
 
@@ -167,14 +169,6 @@ export default function ScreenHunt({ onEnsureAudio }) {
               live={cameraLive}
               onActivate={cameraReady ? startCamera : undefined}
             />
-            <p className="ar-quest-sub" style={{ margin: '12px 0 0', fontSize: 14 }}>
-              {card?.location}
-            </p>
-            {quote ? (
-              <p className="ar-quest-sub" style={{ margin: '8px 0 0', fontSize: 13, fontWeight: 500 }}>
-                {quote}
-              </p>
-            ) : null}
             {flashLetter ? (
               <p
                 className="ar-quest-title"
@@ -215,8 +209,8 @@ export default function ScreenHunt({ onEnsureAudio }) {
       </div>
 
       <div className="ar-hunt-companion-dock">
-        <div className="ar-companion-slot">
-          <GingerCat3D pose={pose} size={104} onTap={handleGingerTap} />
+        <div className="ar-companion-slot ar-companion-slot--parked">
+          <GingerCat3D pose={pose} size={56} onTap={handleGingerTap} />
         </div>
         <CaptionRail visible speaker="Ginger">
           {caption}

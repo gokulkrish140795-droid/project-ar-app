@@ -37,7 +37,12 @@ function stripSpeaker(line = '') {
   return cleaned.trim() || line
 }
 
-export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
+export default function Screen1Gateway({
+  onComplete,
+  onEnsureAudio,
+  canContinueHunt = false,
+  onContinueHunt,
+}) {
   const stageRef = useRef(null)
   const yesRef = useRef(null)
   const noRef = useRef(null)
@@ -330,6 +335,16 @@ export default function Screen1Gateway({ onComplete, onEnsureAudio }) {
             I ACCEPT THE WIZARDING QUEST
           </button>
           {!noPos && !accepted && trapButton()}
+          {canContinueHunt && !accepted && (
+            <button
+              type="button"
+              onClick={onContinueHunt}
+              className="ar-btn-3d ar-btn-3d--ghost"
+              style={{ width: '100%', padding: '12px 16px', fontSize: 13 }}
+            >
+              Continue hunt
+            </button>
+          )}
         </div>
       </div>
 
