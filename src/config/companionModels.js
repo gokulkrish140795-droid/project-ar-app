@@ -56,6 +56,11 @@ export const GINGER_MODEL = {
   demoUrl: null,
   targetHeight: 1.05,
   offsetY: -0.35,
+  /**
+   * Tripo rest pose faces −X. The Ginger camera sits on +Z looking inward,
+   * so +π/2 turns chest and face toward the viewer (idle, sit, search, cheer).
+   */
+  yaw: Math.PI / 2,
   /** Prefer exact Blender Action names from BLENDER_COMPANION_CHECKLIST.md */
   clipAliases: {
     idle: ['idle', 'survey', 'wait'],

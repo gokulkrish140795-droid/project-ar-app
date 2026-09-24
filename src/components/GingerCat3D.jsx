@@ -299,8 +299,9 @@ export default function GingerCat3D({
 
       if (companion?.isGltf) {
         applyRootStaging(companion.root, p, localT, t)
-        // Fox model faces +Z oddly — nudge yaw for cuteness
-        companion.model.rotation.y = p === 'walkIn' || p === 'leap' ? Math.PI : Math.PI * 0.15
+        // Applied after the mixer so Idle/Sit clips cannot yaw the chest away.
+        // GINGER_MODEL.yaw faces the camera; search glance stays on the root.
+        companion.model.rotation.y = GINGER_MODEL.yaw ?? 0
       } else if (companion?.root) {
         animateProceduralGinger(companion.root, p, localT, t)
       }
