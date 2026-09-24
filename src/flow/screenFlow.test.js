@@ -14,21 +14,21 @@ test('dev phase can preview a locked screen without becoming the production boot
     readInitialScreen({ isDev: true, search: '?phase=scavenger_hunt' }),
     'scavenger_hunt',
   )
-  assert.equal(readInitialScreen({ isDev: true, search: '?phase=prank' }), 'prank')
+  assert.equal(readInitialScreen({ isDev: true, search: '?phase=video_montage' }), 'video_montage')
+  assert.equal(readInitialScreen({ isDev: true, search: '?phase=prank' }), 'gateway')
 })
 
 test('back walks the locked flow even after continue jumps to the hunt', () => {
   assert.deepEqual(SCREEN_FLOW, [
     'gateway',
-    'prank',
     'video_montage',
     'uncle_hologram',
     'scavenger_hunt',
   ])
   assert.equal(previousScreen('scavenger_hunt'), 'uncle_hologram')
   assert.equal(previousScreen('uncle_hologram'), 'video_montage')
-  assert.equal(previousScreen('video_montage'), 'prank')
-  assert.equal(previousScreen('prank'), 'gateway')
+  assert.equal(previousScreen('video_montage'), 'gateway')
   assert.equal(previousScreen('gateway'), null)
+  assert.equal(previousScreen('prank'), null)
   assert.equal(previousScreen('letter'), null)
 })

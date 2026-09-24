@@ -3,7 +3,6 @@ import useCompanionDirector from '../hooks/useCompanionDirector'
 import audioEngine from '../utils/audioEngine'
 import CaptionRail from './ui/CaptionRail'
 import DeviceFrame from './ui/DeviceFrame'
-import GingerCat3D from './GingerCat3D'
 import MiniMeAvatar3D from './MiniMeAvatar3D'
 
 function randomTrapPosition(stage, button, avoid) {
@@ -129,7 +128,6 @@ export default function Screen1Gateway({
   }, [trapping, noPos])
 
   const miniPose = trapping ? 'peek' : companions.miniPose
-  const gingerPose = trapping ? 'leap' : companions.gingerPose
 
   const trapButton = (extraStyle = {}) => (
     <button
@@ -157,19 +155,6 @@ export default function Screen1Gateway({
       }}
     >
       No, thanks 😜
-      {trapping && extraStyle.position === 'absolute' && (
-        <span
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: -92,
-            transform: 'translateX(-50%)',
-            pointerEvents: 'none',
-          }}
-        >
-          <GingerCat3D pose="leap" size={88} heartsOnTap={false} />
-        </span>
-      )}
     </button>
   )
 
@@ -233,10 +218,7 @@ export default function Screen1Gateway({
               gap: 2,
             }}
           >
-            <MiniMeAvatar3D size={220} pose={miniPose} peek={trapping} talking={companions.lipTalking} />
-            <div style={{ marginLeft: -36, marginBottom: 8 }}>
-              <GingerCat3D pose={gingerPose} size={170} />
-            </div>
+            <MiniMeAvatar3D size={168} pose={miniPose} peek={trapping} talking={companions.lipTalking} />
           </div>
           {companions.yarnVisible && (
             <span

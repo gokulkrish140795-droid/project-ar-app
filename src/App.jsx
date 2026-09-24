@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import EnchantedCanvas3D from './components/EnchantedCanvas3D'
 import Screen1Gateway from './components/Screen1Gateway'
-import Screen2Prank from './components/Screen2Prank'
 import ScreenHunt from './components/ScreenHunt'
 import ScreenUncleHologram from './components/ScreenUncleHologram'
 import ScreenVideoMontage from './components/ScreenVideoMontage'
@@ -20,7 +19,6 @@ function readBootScreen() {
 
 const moodForScreen = {
   gateway: 'gateway',
-  prank: 'prank',
   video_montage: 'video',
   uncle_hologram: 'video',
   scavenger_hunt: 'hunt',
@@ -28,7 +26,7 @@ const moodForScreen = {
 
 /**
  * Master production state machine:
- * gateway → floo → prank → video_montage → uncle_hologram → scavenger_hunt
+ * gateway → floo → video_montage → uncle_hologram → scavenger_hunt
  */
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState(readBootScreen)
@@ -80,14 +78,9 @@ export default function App() {
 
     setFlooActive(true)
     window.setTimeout(() => {
-      goTo('prank')
+      goTo('video_montage')
       setFlooActive(false)
-    }, 1600)
-  }
-
-  const handleKiss = () => {
-    if (currentScreen !== 'prank') return
-    goTo('video_montage')
+    }, 900)
   }
 
   const handleContinueToHologram = () => {
@@ -106,7 +99,7 @@ export default function App() {
   }
 
   const mood = moodForScreen[currentScreen] || 'gateway'
-  const hideAtmosphere = currentScreen === 'uncle_hologram'
+  const hideAtmosphere = currentScreen !== 'gateway'
 
   return (
     <div
@@ -165,7 +158,7 @@ export default function App() {
           opacity: flooActive ? 0.25 : 1,
           filter: flooActive ? 'blur(3px) saturate(1.4)' : 'none',
           transition: 'opacity 0.45s ease, filter 0.45s ease',
-          transform: flooActive ? 'scale(1.04) rotateZ(1deg)' : 'none',
+          transform: 'none',
         }}
       >
         {currentScreen === 'gateway' && (
@@ -175,10 +168,6 @@ export default function App() {
             canContinueHunt={resumeHunt}
             onContinueHunt={handleResumeHunt}
           />
-        )}
-
-        {currentScreen === 'prank' && (
-          <Screen2Prank onEnsureAudio={ensureAudio} onKiss={handleKiss} />
         )}
 
         {currentScreen === 'video_montage' && (

@@ -1,11 +1,10 @@
 /**
- * Locked production order:
- * gateway → prank → video_montage → uncle_hologram → scavenger_hunt
+ * Production order after the prank was removed:
+ * gateway → video_montage → uncle_hologram → scavenger_hunt
  * Back always steps to the previous screen in this list.
  */
 export const SCREEN_FLOW = [
   'gateway',
-  'prank',
   'video_montage',
   'uncle_hologram',
   'scavenger_hunt',
