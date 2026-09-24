@@ -170,14 +170,14 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
           }}
         />
         <MiniMeAvatar3D
-          size={190}
+          size={156}
           pose="glass"
           onFaceTap={handleKiss}
           disabled={!frozen || kissed}
           ariaLabel="Tap Gokul-Mage's face to give a kiss"
         />
-        <div style={{ marginLeft: -18, marginBottom: 4 }}>
-          <GingerCat3D pose="glass" size={150} />
+        <div style={{ marginLeft: -12, marginBottom: 4 }}>
+          <GingerCat3D pose="glass" size={124} />
         </div>
       </div>
 
