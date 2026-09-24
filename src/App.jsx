@@ -124,6 +124,13 @@ export default function App() {
 
       {flooActive && <div className="ar-floo-veil ar-floo-ember-wipe" aria-hidden="true" />}
 
+      <div className="ar-phone-bezel" aria-hidden="true">
+        <span className="ar-phone-bezel__tick tl" />
+        <span className="ar-phone-bezel__tick tr" />
+        <span className="ar-phone-bezel__tick bl" />
+        <span className="ar-phone-bezel__tick br" />
+      </div>
+
       {canGoBack && (
         <button
           type="button"
@@ -140,20 +147,12 @@ export default function App() {
         onClick={toggleLumos}
         aria-pressed={lumosOn}
         aria-label={lumosOn ? 'Nox Audio' : 'Lumos Audio'}
-        className={lumosOn ? 'ar-btn-3d ar-btn-3d--gold' : 'ar-btn-3d ar-btn-3d--ghost'}
+        className={`${lumosOn ? 'ar-btn-3d ar-btn-3d--gold' : 'ar-btn-3d ar-btn-3d--ghost'} ar-nav-lumos`}
         style={{
-          position: 'fixed',
-          top: 18,
-          right: 18,
-          zIndex: 40,
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          padding: '8px 14px',
           color: lumosOn ? theme.velvet : theme.gold,
-          letterSpacing: 1.2,
-          fontSize: 11,
-          fontFamily: fonts.display,
         }}
       >
         {lumosOn ? 'Lumos Audio' : 'Nox Audio'}

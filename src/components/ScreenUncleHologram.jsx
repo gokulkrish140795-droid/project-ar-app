@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { UNCLE_WISH_POSTER, UNCLE_WISH_URL, UNCLE_WISH_YOUTUBE_ID } from '../config/media'
-import { fonts, theme } from '../theme'
+import { theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
 import CaptionRail from './ui/CaptionRail'
+import DeviceFrame from './ui/DeviceFrame'
 import GingerCat3D from './GingerCat3D'
 import NanoDustPlate from './NanoDustPlate'
 
@@ -96,17 +97,7 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
   }
 
   return (
-    <section
-      className="ar-letterbox"
-      style={{
-        position: 'relative',
-        zIndex: 2,
-        minHeight: '100vh',
-        overflow: 'hidden',
-        fontFamily: fonts.body,
-        color: theme.cream,
-      }}
-    >
+    <section className="ar-beat ar-letterbox">
       <video
         id="ar-uncle-cam"
         muted
@@ -138,29 +129,16 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
       )}
 
 
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '88px 16px 28px',
-          gap: 16,
-        }}
-      >
-        <header style={{ textAlign: 'center', animation: 'arTitleIn 0.6s ease both' }}>
+        <DeviceFrame compact className="ar-beat__mast" style={{ animation: 'arTitleIn 0.6s ease both' }}>
           <p className="ar-quest-kicker" style={{ margin: 0 }}>
             Patronus Projection
           </p>
           <h1 className="ar-quest-title" style={{ margin: '8px 0 0', fontSize: 22 }}>
             A wish from beyond the veil
           </h1>
-        </header>
+        </DeviceFrame>
 
-        <div className={`ar-summon-stage${dusting || summoned ? ' is-plate' : ''}`}>
+        <div className={`ar-summon-stage ar-beat__stage${dusting || summoned ? ' is-plate' : ''}`}>
           {dusting && <NanoDustPlate onDone={resolveDust} />}
 
           {summoned ? (
@@ -215,30 +193,11 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
                 onTap={summon}
                 heartsOnTap={false}
               />
-              <p
-                style={{
-                  margin: '8px 0 0',
-                  fontSize: 12,
-                  letterSpacing: 1,
-                  color: 'rgba(126, 240, 255, 0.85)',
-                  fontFamily: fonts.display,
-                }}
-              >
-                Tap Ginger to summon
-              </p>
             </div>
           ) : null}
         </div>
 
-        <div
-          style={{
-            width: 'min(400px, 100%)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-            alignItems: 'center',
-          }}
-        >
+        <div className="ar-beat__dock">
           <CaptionRail visible speaker="Ginger">
             {summoned
               ? 'There — hold steady. Let his words find you.'
@@ -251,7 +210,7 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
             <>
               <button
                 type="button"
-                className="ar-btn-3d ar-btn-3d--holo"
+                className="ar-btn-3d ar-btn-3d--gold"
                 onClick={summon}
                 style={{ width: '100%', padding: '13px 16px', fontSize: 14 }}
               >
@@ -279,7 +238,6 @@ export default function ScreenUncleHologram({ onContinue, onEnsureAudio }) {
             </button>
           )}
         </div>
-      </div>
     </section>
   )
 }

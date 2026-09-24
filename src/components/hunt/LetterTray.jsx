@@ -6,13 +6,7 @@ export default function LetterTray({ letters = [], label }) {
   return (
     <div
       aria-label={label || `Collected letters ${letters.join(' ') || 'none yet'}`}
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: 5,
-        marginTop: 12,
-      }}
+      className="ar-letter-tray"
     >
       {slots.map((letter, index) => (
         <span

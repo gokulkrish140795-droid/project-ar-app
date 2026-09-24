@@ -15,7 +15,7 @@ export const theme = {
   firefly: '#B8F26E',
   cream: '#F4F7FF',
   holo: '#7EF0FF',
-  hud: 'rgba(10, 18, 32, 0.72)',
+  hud: 'rgba(8, 14, 26, 0.78)',
   hudBorder: 'rgba(232, 197, 106, 0.55)',
 }
 

@@ -133,14 +133,14 @@ export default function ScreenHunt({ onEnsureAudio }) {
 
   return (
     <section className="ar-hunt-screen">
-      <header style={{ textAlign: 'center', width: 'min(420px, 100%)' }}>
+      <DeviceFrame compact className="ar-beat__mast">
         <p className="ar-quest-kicker" style={{ margin: 0 }}>
           Chapter 1 — Everyday Comforts
         </p>
         <h2 className="ar-quest-title" style={{ margin: '8px 0 0', fontSize: 22 }}>
           {`Step ${card?.step || 1} of 10`}
         </h2>
-      </header>
+      </DeviceFrame>
 
       <div className="ar-hunt-frame-swap">
       <DeviceFrame compact style={{ width: '100%', textAlign: 'center' }}>

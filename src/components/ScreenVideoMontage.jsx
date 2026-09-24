@@ -1,45 +1,32 @@
 import { MONTAGE_YOUTUBE_ID } from '../config/media'
 import { fonts, theme } from '../theme'
+import CaptionRail from './ui/CaptionRail'
 import DeviceFrame from './ui/DeviceFrame'
 
 const GOLD = theme.gold
 
 export default function ScreenVideoMontage({ onContinue }) {
   return (
-    <section
-      className="ar-letterbox"
-      style={{
-        position: 'relative',
-        zIndex: 2,
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '88px 20px 28px',
-        textAlign: 'center',
-        fontFamily: fonts.body,
-        gap: 18,
-      }}
-    >
-      <header style={{ animation: 'arTitleIn 0.55s ease both' }}>
+    <section className="ar-beat ar-letterbox">
+      <DeviceFrame compact className="ar-beat__mast" style={{ animation: 'arTitleIn 0.55s ease both' }}>
         <p className="ar-quest-kicker" style={{ margin: 0 }}>
           Memory Reel
         </p>
         <h2 className="ar-quest-title" style={{ margin: '8px 0 0', fontSize: 22 }}>
           A memory stirs in the Floo fire...
         </h2>
-      </header>
+      </DeviceFrame>
 
       <DeviceFrame
-        style={{ width: 'min(400px, 100%)', padding: 12 }}
-        className=""
+        className="ar-beat__stage"
+        style={{ width: 'min(400px, 100%)', padding: 12, alignItems: 'stretch' }}
       >
         <div
           style={{
             position: 'relative',
+            width: '100%',
             aspectRatio: '9 / 16',
-            maxHeight: '58vh',
+            maxHeight: '46vh',
             borderRadius: 10,
             overflow: 'hidden',
             border: `1px solid rgba(232, 197, 106, 0.4)`,
@@ -73,26 +60,28 @@ export default function ScreenVideoMontage({ onContinue }) {
               >
                 Intro Romantic Video Montage
               </p>
-              <p className="ar-quest-sub" style={{ margin: '14px auto 0', maxWidth: 260, fontSize: 14 }}>
-                Friends&apos; wishes, romantic moments, and warmth before the hologram.
-              </p>
             </div>
           )}
         </div>
       </DeviceFrame>
 
-      <button
-        type="button"
-        onClick={onContinue}
-        className="ar-btn-3d ar-btn-3d--gold"
-        style={{
-          width: 'min(400px, 100%)',
-          padding: '13px 20px',
-          fontSize: 14,
-        }}
-      >
-        Continue — a wish awaits
-      </button>
+      <div className="ar-beat__dock">
+        <CaptionRail visible speaker="Memory Reel">
+          Friends&apos; wishes, romantic moments, and warmth before the hologram.
+        </CaptionRail>
+        <button
+          type="button"
+          onClick={onContinue}
+          className="ar-btn-3d ar-btn-3d--gold"
+          style={{
+            width: '100%',
+            padding: '13px 20px',
+            fontSize: 14,
+          }}
+        >
+          Continue — a wish awaits
+        </button>
+      </div>
     </section>
   )
 }

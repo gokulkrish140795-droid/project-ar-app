@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import confetti from 'canvas-confetti'
 import { fonts, theme } from '../theme'
 import audioEngine from '../utils/audioEngine'
+import CaptionRail from './ui/CaptionRail'
 import DeviceFrame from './ui/DeviceFrame'
 import GingerCat3D from './GingerCat3D'
 import MiniMeAvatar3D from './MiniMeAvatar3D'
@@ -71,21 +72,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
   }
 
   return (
-    <section
-      style={{
-        position: 'relative',
-        zIndex: 2,
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '88px 16px 28px',
-        fontFamily: fonts.body,
-        color: PARCHMENT,
-        gap: 16,
-      }}
-    >
+    <section className="ar-beat">
       <style>
         {`
           @keyframes glassPress3d {
@@ -108,7 +95,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
         `}
       </style>
 
-      <DeviceFrame style={{ width: 'min(400px, 100%)', textAlign: 'center' }}>
+      <DeviceFrame compact className="ar-beat__mast">
         <p className="ar-quest-kicker" style={{ margin: 0 }}>
           Heart-Meter Calibration
         </p>
@@ -119,7 +106,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
             padding: 12,
             borderRadius: 12,
             border: `1px solid ${GOLD}`,
-            background: 'linear-gradient(180deg, rgba(40, 20, 50, 0.55), rgba(15, 10, 28, 0.75))',
+            background: 'rgba(8, 14, 26, 0.55)',
             animation: 'meterGlow3d 1.8s ease-in-out infinite',
           }}
         >
@@ -128,7 +115,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
               height: 14,
               borderRadius: 8,
               overflow: 'hidden',
-              background: 'rgba(244, 232, 193, 0.1)',
+                background: 'rgba(232, 240, 255, 0.08)',
               boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.45)',
             }}
           >
@@ -163,13 +150,9 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
       </DeviceFrame>
 
       <div
+        className="ar-beat__stage"
         style={{
-          position: 'relative',
-          width: 300,
-          height: 250,
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'center',
+          width: 320,
           animation: frozen ? 'glassPress3d 0.85s ease forwards' : 'none',
         }}
       >
@@ -181,7 +164,7 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
             borderRadius: 20,
             border: '1px solid rgba(232, 197, 106, 0.4)',
             background:
-              'linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.03) 38%, rgba(15,10,28,0.35) 100%)',
+              'linear-gradient(160deg, rgba(232,240,255,0.16) 0%, rgba(126,240,255,0.04) 38%, rgba(8,14,26,0.28) 100%)',
             boxShadow: 'inset 0 0 36px rgba(255,255,255,0.12), 0 20px 40px rgba(0,0,0,0.4)',
             pointerEvents: 'none',
           }}
@@ -198,26 +181,14 @@ export default function Screen2Prank({ onKiss, onEnsureAudio }) {
         </div>
       </div>
 
-      {frozen && (
-        <DeviceFrame
-          style={{
-            width: 'min(400px, 100%)',
-            background:
-              'linear-gradient(180deg, rgba(255, 140, 170, 0.92) 0%, rgba(255, 107, 138, 0.95) 100%)',
-            color: '#3B1020',
-            border: '1px solid rgba(255, 229, 163, 0.45)',
-            animation: 'popupIn3d 0.45s ease',
-            textAlign: 'center',
-          }}
-        >
-          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, fontWeight: 600 }}>
-            OH NO! SWEETNESS OVERLOAD! The Wellington wind must have blown away our connection!
-            But wait... my heart-meters show this phone is being held by a girl with TWO university
-            degrees! Your brilliant brain and breathtaking beauty have completely melted my little
-            birthday servers! Quick, tap my face to give me a kiss and fix the system!
-          </p>
-        </DeviceFrame>
-      )}
+      <div className="ar-beat__dock">
+        <CaptionRail visible={frozen} speaker="Heart-Meter" className="ar-caption-rail--alert">
+          OH NO! SWEETNESS OVERLOAD! The Wellington wind must have blown away our connection! But
+          wait... my heart-meters show this phone is being held by a girl with TWO university
+          degrees! Your brilliant brain and breathtaking beauty have completely melted my little
+          birthday servers! Quick, tap my face to give me a kiss and fix the system!
+        </CaptionRail>
+      </div>
     </section>
   )
 }
