@@ -209,8 +209,8 @@ export default function ScreenHunt({ onEnsureAudio }) {
       </div>
 
       <div className="ar-hunt-companion-dock">
-        <div className="ar-companion-slot ar-companion-slot--parked">
-          <GingerCat3D pose={pose} size={56} onTap={handleGingerTap} />
+        <div className="ar-companion-slot">
+          <GingerCat3D pose={pose} size={104} onTap={handleGingerTap} />
         </div>
         <CaptionRail visible speaker="Ginger">
           {caption}
