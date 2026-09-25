@@ -1,0 +1,40 @@
+{
+  "lock_date": "2026-09-25",
+  "lock_name": "Corrected Flow Lock",
+  "notes": "Partial locations lock for corrections vs older Grok pack. Full card_locations.json should be merged to match these fields when imported.",
+  "corrections": {
+    "23": {
+      "hide_place": "Behind her late uncle's photo frame",
+      "hide_only": true,
+      "hunt_image": "Different printed AR target — not the uncle photo",
+      "triggers_uncle_walkout": false,
+      "bypass": "uncle"
+    },
+    "uncle_beat": {
+      "after_card": 23,
+      "before_card": 24,
+      "player_facing": "Aim at the pooja tall boy",
+      "tech_target": "Discreet high-contrast AR marker affixed to pooja tall boy (not uncle framed photo; bare wood unreliable)",
+      "bypass": "poojatallboy"
+    },
+    "29": {
+      "hide_place": "In / on the car boot (Toyota RAV4 2024)",
+      "previous_typo": "On the back of the car key chain",
+      "bypass": "car boot",
+      "riddle_boot_wording": "kept — now matches place"
+    }
+  },
+  "finale": {
+    "type": "finish_quest_then_wedding_ring_rescan",
+    "protocol_0510_typing": false,
+    "steps": [
+      "Open under-stairs gift",
+      "Tap Finish Quest",
+      "Letter: one more grand gift — scan the physical wedding ring again",
+      "Rescan physical wedding ring",
+      "Ring rises",
+      "Caption: Look up",
+      "Gokul is the gift"
+    ]
+  }
+}
