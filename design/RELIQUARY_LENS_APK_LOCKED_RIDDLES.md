@@ -2,15 +2,17 @@
 
 **THIS IS THE ANDROID APK VERSION (Unity on Samsung Tab S7).**  
 The old browser/web game and PR #18 are frozen.  
-**Corrected Flow Lock — 25 Sep 2026.** This file is the locked riddle source for the APK.
+**Corrected Flow Lock v2 — 25 Sep 2026.** This file is the locked riddle source for the APK.
 
 **Rules:** Do not invent new riddle words or love lines. Ginger companion is removed from the game. Where Ginger appeared in draft Mini-Me / warmer lines, the only change is **Ginger → Gokul**. Cards 15, 18, 26 keep core lines locked (no rhyme polish). Vault 20 password stays **GOLDJEWELRYPOUCH**.
 
 **Place / flow corrections (do not invent new poetry):**
-- Card **23** = hide behind late uncle framed photo only — hunt image is different; **does not** trigger uncle walk-out.
-- Uncle walk-out = aim at **pooja tall boy** (discreet AR marker on furniture; not the uncle photo).
-- Card **29** place = **car boot** (key chain was a typo). Riddle boot wording kept — now matches place.
+- Card **23** = hide behind late uncle framed photo only — hunt image is different; **does not** trigger Guardian Angel.
+- **Guardian Angel** = early open-world AR ring find (vibe + edge blink); room **hologram** (not montage). **No** pooja tall-boy aim trigger.
+- **Friends** = early open-world AR ring → snowglobe / montage **video**.
+- Card **29** place = **car boot** (key chain was a typo). Riddle boot wording kept — matches place.
 - Finale = **Finish Quest** → rescan physical wedding ring → Look up. **No Protocol 0510 typing.**
+- Wake fog = **finger wipe**. See `RELIQUARY_LENS_APK_FEATURES.md` for B/WOW.
 
 Chapter passwords: **MICROWAVECUPBOARD** · **GOLDJEWELRYPOUCH** · **UNDERSTAIRS**  
 Finale: Finish Quest + physical wedding ring rescan (not 0510 keypad).
@@ -334,15 +336,15 @@ Source: locked CH2 drafts; Ginger→Gokul only where noted.
 > from the earth as a blessing. Look just behind —  
 > The next letter waits where the blue water shined.
 
-## Card 23 — Behind her late uncle's photo frame (HIDE ONLY — no uncle AR)
+## Card 23 — Behind her late uncle's photo frame (HIDE ONLY — no Guardian Angel)
 **Letters:** D - J  
 **Love line:** A timeless love that watches over us, warm, protective, and eternally bright...  
 **Bypass:** uncle  
 **Warmer:** The portrait we treat with extra care. Peek **behind** the frame for the hunt card — do not treat the framed photo as an AR trigger.
 
-**Place lock:** Physical hide = behind her late uncle's framed photo on the pooja area.  
+**Place lock:** Physical hide = behind her late uncle's framed photo.  
 **Hunt card image:** Completely different printed AR target (not the uncle photo).  
-**Uncle walk-out:** **Does not** fire on this card. See **Uncle beat — Pooja tall boy** below.
+**Guardian Angel:** **Does not** fire on this card. Angel is an early open-world AR ring find (see below).
 
 **Mini-Me:** Softly now. A love that still watches over us is holding the next piece.
 
@@ -352,13 +354,22 @@ Source: locked CH2 drafts; Ginger→Gokul only where noted.
 > Gently look behind where that portrait is placed —  
 > A blessing is hiding in that sacred space.
 
-## Uncle beat — Pooja tall boy (after card 23; before card 24)
-**Trigger (player-facing):** Aim the Lens at the **pooja tall boy**.  
-**Trigger (tech):** Discreet high-contrast printed AR marker (or distinctive flat print already on the tall boy) affixed to the tall boy face/shelf edge. **Not** the uncle framed photo. Bare furniture wood alone is unreliable for ARCore.  
-**Effect:** Soft golden mist → ghostly full-body uncle walks out (Google Flow video); drag-able / spatial as built.  
-**Captions:** Mixed Tamil + English.  
-**Bypass (rehearsal / help):** `poojatallboy`  
-**Note:** Card 23 remains a normal letter/seal step only.
+## Early open-world finds (before Chapter 1 hunt) — not card steps
+
+### Friends AR ring
+**Player:** Walk with Lens; rising vibration + edge blink toward a hidden point she cannot see.  
+**On lock:** Friends AR ring appears → snowglobe / friends **montage video**.  
+**After:** Leave / move / close / reopen.  
+**Tech:** World anchor under the hood (tiny hidden print or setup pose) — not bare furniture tracking.  
+**Bypass (help):** `friendsring`
+
+### Guardian Angel AR ring
+**Player:** Same hot/cold find technique (second hidden point).  
+**On lock:** Guardian Angel AR ring → **hologram** builds (dust WOW), wishes (mixed Tamil + English), then **stays** in the room as a presence — **not** a montage video UI.  
+**After:** Leave / move / close / reopen.  
+**Name:** Guardian Angel (not “uncle ghost”).  
+**Tech:** Same world-anchor rule as Friends. **No** pooja tall-boy aim required.  
+**Bypass (help):** `guardianangel`
 
 ## Card 24 — Lower shelf of laundry/storage sliding door cabinet
 **Letters:** E - W  

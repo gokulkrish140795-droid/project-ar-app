@@ -2,36 +2,35 @@
 
 **Thala (Grok Bot) is offline ~5 days. Do not wait. Build with Cursor + Google AI Studio + Google Flow.**
 
-**Corrected Flow Lock (25 Sep 2026)** is in this `/design/` folder. Prefer these files over older Grok pack copies that still mention Protocol 0510 typing or card 29 on the key chain.
+**Corrected Flow Lock v2 (25 Sep 2026)** — open-world early finds + Guardian Angel + B/WOW features. Prefer `/design/` over older Grok zip copies.
 
 ## What to open (in order)
 
-1. **This file** (you are here).
-2. **`RELIQUARY_LENS_APK_MASTER_PACK.md`** — what the game is (read once).
-3. **`RELIQUARY_LENS_APK_AI_HANDOFF.md`** — day-by-day plan + Unity setup + paste prompts.
-4. **`RELIQUARY_LENS_APK_DECISIONS.md`** — **15 questions — answers LOCKED.**
+1. **This file**
+2. **`RELIQUARY_LENS_APK_MASTER_PACK.md`** — design truth
+3. **`RELIQUARY_LENS_APK_FEATURES.md`** — B Good (low risk) + WOW
+4. **`RELIQUARY_LENS_APK_AI_HANDOFF.md`** — day-by-day build
+5. **`RELIQUARY_LENS_APK_DECISIONS.md`** — answers LOCKED
+6. **`RELIQUARY_LENS_APK_FLOW.md`** · **`RELIQUARY_LENS_APK_LOCKED_RIDDLES.md`**
 
-Also: locked riddles, flow chart (`RELIQUARY_LENS_APK_FLOW.md`), `design-data/` (card 29 place lock).
+## Locked corrections (v2)
 
-## Hard corrections vs older Grok draft
+- Opening: scan real wedding ring → **finger wipe** fog → name → first AR gold ring (leave/move OK)
+- Early open world: find **Friends** ring + **Guardian Angel** ring via hidden points + rising vibe + edge blink
+- Friends = snowglobe / montage **video**; Guardian Angel = room **hologram** (not a montage)
+- **No** pooja tall-boy aim trigger
+- Card 23 = hide behind uncle photo only; Card 29 = **car boot**
+- Finale = Finish Quest → rescan physical wedding ring → Look up (**no 0510 typing, no PIN, no candle**)
 
-- Card **23** = hide behind uncle photo only — **no** uncle walk-out from card 23.
-- Uncle walk-out = aim at **pooja tall boy** (discreet AR marker on it).
-- Card **29** = **car boot** (key chain was a typo).
-- Finale = **Finish Quest** → rescan **physical wedding ring** → **Look up** (no 0510 typing).
-- No rehearsal PIN; Gokul around her. No candle. Montages attach later.
+## Today
 
-## Today (Day 0 → Day 1)
-
-- Skim the master pack + locked decisions.
-- Follow AI handoff **Day 1**: install Unity 6 LTS, create URP project, GitHub `/unity` or branch `apk/unity`, GameCI, sideload empty APK to Tab S7.
+Skim master + features + decisions → Day 1 Unity in AI handoff.
 
 ## Do not
 
-- Do not build the old browser/web game or PR #18.
-- Do not invent riddles or Protocol codes.
-- Do not hire a developer.
-- Do not wait for Thala.
-- Do not build Protocol 0510 keypad / typing UI.
+- Build old browser/web game or PR #18
+- Invent riddles / vault words
+- Build Protocol 0510 keypad
+- Wait for Thala
 
-**Birthday target:** ~5 Oct 2026 · Samsung Tab S7 / S7+ · offline · final gift is Gokul (**Look up**).
+**Birthday ~5 Oct 2026 · Tab S7 / S7+ · offline · final gift is Gokul (Look up).**
