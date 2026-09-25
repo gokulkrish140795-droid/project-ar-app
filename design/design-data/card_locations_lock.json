@@ -1,0 +1,60 @@
+{
+  "lock_date": "2026-09-25",
+  "lock_name": "Corrected Flow Lock v2",
+  "notes": "Partial locations/flow lock. Merge into full card_locations.json when imported.",
+  "opening": {
+    "fog_clear": "finger_wipe",
+    "home_ring": "place_or_leave_after_wipe"
+  },
+  "early_open_world": {
+    "friends": {
+      "find": "hidden_world_anchor",
+      "ux": "rising_vibration_plus_edge_blink",
+      "reveals": "friends_AR_ring",
+      "content": "snowglobe_friends_montage_video",
+      "ring_agency": ["leave", "move", "close", "reopen"],
+      "bypass": "friendsring"
+    },
+    "guardian_angel": {
+      "find": "hidden_world_anchor",
+      "ux": "rising_vibration_plus_edge_blink",
+      "reveals": "guardian_angel_AR_ring",
+      "content": "room_hologram_wishes_then_stays",
+      "not": "montage_video_ui",
+      "name": "Guardian Angel",
+      "ring_agency": ["leave", "move", "close", "reopen"],
+      "bypass": "guardianangel",
+      "pooja_tall_boy_aim": false
+    }
+  },
+  "corrections": {
+    "23": {
+      "hide_place": "Behind her late uncle's photo frame",
+      "hide_only": true,
+      "hunt_image": "Different printed AR target — not the uncle photo",
+      "triggers_guardian_angel": false,
+      "bypass": "uncle"
+    },
+    "29": {
+      "hide_place": "In / on the car boot (Toyota RAV4 2024)",
+      "previous_typo": "On the back of the car key chain",
+      "bypass": "car boot",
+      "riddle_boot_wording": "kept — matches place"
+    }
+  },
+  "finale": {
+    "type": "finish_quest_then_wedding_ring_rescan",
+    "protocol_0510_typing": false,
+    "rehearsal_pin": false,
+    "candle": false,
+    "steps": [
+      "Open under-stairs gift",
+      "Tap Finish Quest",
+      "Letter: one more grand gift — scan the physical wedding ring again",
+      "Rescan physical wedding ring",
+      "Ring rises",
+      "Caption: Look up",
+      "Gokul is the gift"
+    ]
+  }
+}
